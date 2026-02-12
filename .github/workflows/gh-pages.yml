@@ -25,6 +25,15 @@ jobs:
           VITE_BASE: "/Phool-shop/"
         run: npm run build
 
+      - name: Enable GitHub Pages
+        run: |
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GH_PAGES_DEPLOY_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/pages" \
+            -d '{"source":{"branch":"gh-pages","path":"/"}}' \
+            || echo "Pages may already be enabled"
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
