@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ["Playfair Display", "serif"],
-        body: ["Inter", "sans-serif"],
+        display: ["Baby Gemoy", "Mochi Boom", "Mochiy Pop One", "Baloo 2", "Playfair Display", "serif"],
+        body: ["Baby Gemoy", "Mochi Boom", "Mochiy Pop One", "Baloo 2", "Inter", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

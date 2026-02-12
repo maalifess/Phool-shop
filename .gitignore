@@ -1,3 +1,18 @@
+node_modules/
+dist/
+build/
+.env
+.env.local
+/.DS_Store
+/.idea/
+*.log
+/*.key
+.cache/
+coverage/
+.turbo/
+*.local
+public/preview/
+package-lock.json
 # Logs
 logs
 *.log

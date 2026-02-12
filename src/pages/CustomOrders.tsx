@@ -8,12 +8,35 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sparkles, CheckCircle2 } from "lucide-react";
+import { send } from "@emailjs/browser";
 
 const CustomOrders = () => {
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    const fd = new FormData(form);
+    const payload = {
+      name: String(fd.get("name") || ""),
+      email: String(fd.get("email") || ""),
+      phone: String(fd.get("phone") || ""),
+      description: String(fd.get("description") || ""),
+      colors: String(fd.get("colors") || ""),
+      timeline: String(fd.get("timeline") || ""),
+    };
+
+    // Send email via EmailJS — replace env vars with your EmailJS IDs
+    const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || "YOUR_SERVICE_ID";
+    const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || "YOUR_TEMPLATE_ID";
+    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || "YOUR_PUBLIC_KEY";
+
+    try {
+      await send(serviceId, templateId, payload, publicKey);
+    } catch (err) {
+      console.error("Email send failed:", err);
+    }
+
     setSubmitted(true);
   };
 
@@ -78,15 +101,16 @@ const CustomOrders = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Phone (optional)</Label>
-                    <Input id="phone" placeholder="(555) 123-4567" />
+                    <Label htmlFor="phone">Phone or WhatsApp (optional)</Label>
+                    <Input id="phone" name="phone" placeholder="03XX-XXX-XXXX (WhatsApp preferred)" />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="description">What would you like made?</Label>
                     <Textarea
                       id="description"
-                      placeholder="Describe the item you have in mind — type, size, any inspiration images..."
+                      name="description"
+                      placeholder="Describe the item: type (toy, blanket), size, special requests, and any inspiration links"
                       rows={4}
                       required
                     />
@@ -94,24 +118,10 @@ const CustomOrders = () => {
 
                   <div className="space-y-2">
                     <Label htmlFor="colors">Preferred Colors</Label>
-                    <Input id="colors" placeholder="e.g., pastel pink, sage green, cream" />
+                    <Input id="colors" name="colors" placeholder="e.g., pastel pink, sage green, cream (optional)" />
                   </div>
 
                   <div className="grid gap-5 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label>Budget Range</Label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select range" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="under-25">Under $25</SelectItem>
-                          <SelectItem value="25-50">$25 – $50</SelectItem>
-                          <SelectItem value="50-100">$50 – $100</SelectItem>
-                          <SelectItem value="100+">$100+</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
                     <div className="space-y-2">
                       <Label>Timeline</Label>
                       <Select>
@@ -125,6 +135,10 @@ const CustomOrders = () => {
                           <SelectItem value="specific">Specific date (mention below)</SelectItem>
                         </SelectContent>
                       </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="timeline">Preferred pickup/delivery note (optional)</Label>
+                      <Input id="timeline" name="timeline" placeholder="e.g., Ready by 10 Mar, or Pickup only" />
                     </div>
                   </div>
 

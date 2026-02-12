@@ -2,18 +2,20 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useCart } from "@/lib/cart";
 
 const navLinks = [
   { to: "/", label: "Home" },
   { to: "/catalog", label: "Catalog" },
   { to: "/custom-orders", label: "Custom Orders" },
   { to: "/fundraisers", label: "Fundraisers" },
-  { to: "/order", label: "Order" },
+  { to: "/tokri", label: "Tokri" },
 ];
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+  const { totalItems } = useCart();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl">
@@ -32,7 +34,14 @@ const Navbar = () => {
                 location.pathname === link.to ? "bg-accent text-accent-foreground" : "text-muted-foreground"
               }`}
             >
-              {link.label}
+              <span className="inline-flex items-center gap-2">
+                {link.label}
+                {link.to === "/tokri" && totalItems > 0 && (
+                  <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary/20 px-2 text-xs font-medium text-primary">
+                    {totalItems}
+                  </span>
+                )}
+              </span>
             </Link>
           ))}
         </nav>
@@ -62,7 +71,14 @@ const Navbar = () => {
                   location.pathname === link.to ? "bg-accent text-accent-foreground" : "text-muted-foreground"
                 }`}
               >
-                {link.label}
+                <span className="inline-flex items-center gap-2">
+                  {link.label}
+                  {link.to === "/tokri" && totalItems > 0 && (
+                    <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary/20 px-2 text-xs font-medium text-primary">
+                      {totalItems}
+                    </span>
+                  )}
+                </span>
               </Link>
             ))}
           </div>

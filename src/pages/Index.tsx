@@ -33,15 +33,23 @@ const Index = () => {
       {/* Hero */}
       <section className="relative overflow-hidden bg-secondary py-24 md:py-36">
         <div className="container relative z-10">
+          <div className="mx-auto max-w-3xl text-center">
+            <div className="mb-6">
+              <div className="mx-auto mb-4 inline-block text-center">
+                <div className="text-5xl md:text-7xl" style={{ fontFamily: '"Great Vibes", cursive' }}>
+                  <span className="">Phool </span><span className="text-primary">Shop</span>
+                </div>
+              </div>
+            </div>
+          </div>
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="mx-auto max-w-3xl text-center"
+            className="mx-auto max-w-3xl text-center relative z-20"
           >
-            <h1 className="font-display text-5xl font-bold leading-tight tracking-tight text-foreground md:text-7xl">
-              Handcrafted with{" "}
-              <span className="text-primary">Love</span>
+            <h1 className="font-display text-4xl font-bold leading-tight tracking-tight text-foreground md:text-5xl">
+              Handcrafted with Love
             </h1>
             <p className="mt-6 text-lg leading-relaxed text-muted-foreground md:text-xl">
               Beautiful crochet creations made by hand, one stitch at a time.
@@ -60,6 +68,12 @@ const Index = () => {
               </Button>
             </div>
           </motion.div>
+        </div>
+        {/* Background slideshow */}
+        <div className="hero-slideshow">
+          <div className="hero-slide hero-slide--one" />
+          <div className="hero-slide hero-slide--two" />
+          <div className="hero-slide hero-slide--three" />
         </div>
         {/* Decorative gradient orb */}
         <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-primary/20 blur-3xl" />
@@ -107,7 +121,7 @@ const Index = () => {
                     <h3 className="mt-5 font-display text-lg font-semibold text-foreground">
                       {product.name}
                     </h3>
-                    <p className="mt-1 text-primary font-medium">${product.price}</p>
+                    <p className="mt-1 text-primary font-medium">PKR {product.price}</p>
                   </CardContent>
                 </Card>
               </motion.div>

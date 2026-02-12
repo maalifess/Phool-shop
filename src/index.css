@@ -1,4 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Baby+Gemoy&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Baloo+2:wght@400;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -45,8 +48,9 @@
     --sidebar-border: 0 30% 90%;
     --sidebar-ring: 0 76% 82%;
 
-    --font-display: 'Playfair Display', serif;
-    --font-body: 'Inter', sans-serif;
+    /* Primary site font: Baby Gemoy if available, then Mochi Boom, then Mochiy Pop One */
+    --font-display: 'Baby Gemoy', 'Mochi Boom', 'Mochiy Pop One', 'Baloo 2', 'Inter', sans-serif;
+    --font-body: 'Baby Gemoy', 'Mochi Boom', 'Mochiy Pop One', 'Baloo 2', 'Inter', sans-serif;
   }
 
   .dark {
@@ -79,6 +83,25 @@
     --sidebar-ring: 0 76% 82%;
   }
 }
+
+@layer components {
+  .hero-slideshow { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
+  .hero-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1s ease-in-out; }
+  .hero-slide--one { background: linear-gradient(120deg, rgba(255,210,220,0.9), rgba(255,230,240,0.9)); animation: slideFade 12s infinite; }
+  .hero-slide--two { background: linear-gradient(120deg, rgba(255,200,215,0.9), rgba(255,225,235,0.9)); animation: slideFade 12s infinite 4s; }
+  .hero-slide--three { background: linear-gradient(120deg, rgba(255,220,230,0.9), rgba(255,240,245,0.9)); animation: slideFade 12s infinite 8s; }
+
+  @keyframes slideFade {
+    0% { opacity: 0; }
+    8% { opacity: 1; }
+    33% { opacity: 1; }
+    41% { opacity: 0; }
+    100% { opacity: 0; }
+  }
+}
+
+/* Landing page bubbly font (except Phool Shop which uses Great Vibes) */
+.landing-bubbly { font-family: 'Baloo 2', var(--font-body); }
 
 @layer base {
   * {

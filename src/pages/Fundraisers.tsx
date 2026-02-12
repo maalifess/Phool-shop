@@ -3,33 +3,9 @@ import Layout from "@/components/Layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Heart, Target } from "lucide-react";
-
-const mockFundraisers = [
-  {
-    id: 1,
-    title: "Crochet for Kids",
-    description: "Handmade blankets and stuffed animals for children in shelters. Every purchase goes directly to creating warm, cozy items for kids in need.",
-    goal: "$500",
-    active: true,
-    image: "🧶",
-  },
-  {
-    id: 2,
-    title: "Community Craft Workshop",
-    description: "Help us fund free crochet workshops for the community. Learn to crochet and take home your own handmade creation.",
-    goal: "$300",
-    active: true,
-    image: "🎨",
-  },
-  {
-    id: 3,
-    title: "Holiday Gift Drive",
-    description: "Last year we delivered 200+ handmade gifts. This campaign helped bring smiles to families during the holiday season.",
-    goal: "$750 (reached!)",
-    active: false,
-    image: "🎁",
-  },
-];
+import { Link } from "react-router-dom";
+import { loadFundraisers } from "@/lib/fundraisers";
+import { loadProducts } from "@/lib/products";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -40,6 +16,9 @@ const fadeUp = {
 };
 
 const Fundraisers = () => {
+  const fundraisers = loadFundraisers();
+  const products = loadProducts();
+
   return (
     <Layout>
       <section className="py-16 md:py-24">
@@ -62,7 +41,7 @@ const Fundraisers = () => {
             animate="visible"
             className="mt-14 space-y-6"
           >
-            {mockFundraisers.map((f, i) => (
+            {fundraisers.map((f, i) => (
               <motion.div key={f.id} variants={fadeUp} custom={i}>
                 <Card className={`border-border/40 ${!f.active ? "opacity-70" : ""}`}>
                   <CardContent className="flex gap-6 p-6">
@@ -84,9 +63,14 @@ const Fundraisers = () => {
                           <Target className="h-4 w-4" /> Goal: {f.goal}
                         </span>
                         {f.active && (
-                          <Button size="sm" className="rounded-full">
-                            Participate
-                          </Button>
+                          <div className="flex items-center gap-2">
+                            {f.productId && (
+                              <Button asChild size="sm" className="rounded-full">
+                                <Link to={`/product/${f.productId}`}>Buy for fundraiser</Link>
+                              </Button>
+                            )}
+                            <Button size="sm" className="rounded-full">Participate</Button>
+                          </div>
                         )}
                       </div>
                     </div>

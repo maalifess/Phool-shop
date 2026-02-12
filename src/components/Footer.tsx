@@ -43,7 +43,12 @@ const Footer = () => {
         </div>
 
         <div className="mt-10 flex items-center justify-center gap-1 border-t border-border/40 pt-6 text-xs text-muted-foreground">
-          Made with <Heart className="h-3 w-3 fill-primary text-primary" /> by Phool Shop
+                <div className="flex items-center gap-3">
+                  <div>Made with <Heart className="h-3 w-3 fill-primary text-primary" /> by Phool Shop</div>
+                  <div>
+                    <a href="/admin-login" className="rounded-md bg-transparent px-3 py-1 text-sm text-muted-foreground underline">Admin login</a>
+                  </div>
+                </div>
         </div>
       </div>
     </footer>
