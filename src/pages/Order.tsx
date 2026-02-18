@@ -103,7 +103,7 @@ const Order = () => {
             </motion.div>
             <motion.h2 initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.15 }} className="mt-6 font-display text-3xl font-bold text-foreground">Order Placed!</motion.h2>
             <motion.p initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.25 }} className="mt-4 text-muted-foreground">
-              Thank you! We'll confirm your order via email. Payment can be made via JazzCash or bank transfer.
+              Thank you! Please send a proof of payment screenshot to WhatsApp on 0333-XXXXXXX.
             </motion.p>
 
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="mt-6 flex justify-center gap-2 text-2xl">

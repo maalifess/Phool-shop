@@ -22,6 +22,10 @@ const GOOGLE_SHEETS_API_URL = import.meta.env.VITE_GOOGLE_SHEETS_URL || 'https:/
 
 export const addOrderToGoogleSheet = async (orderData: OrderData): Promise<boolean> => {
   try {
+    console.log('🚀 Starting Google Sheets submission...');
+    console.log('📋 Order data:', orderData);
+    console.log('🔗 API URL:', GOOGLE_SHEETS_API_URL);
+    
     const timestamp = new Date().toISOString();
     const rowData = {
       timestamp,
@@ -39,32 +43,44 @@ export const addOrderToGoogleSheet = async (orderData: OrderData): Promise<boole
       customTimeline: orderData.customDetails?.timeline || '',
     };
 
+    console.log('📤 Row data prepared:', rowData);
+
     // For now, we'll store in localStorage as a fallback
     // In production, you'll need to set up Google Apps Script
     const existingOrders = JSON.parse(localStorage.getItem('phool_orders_backup') || '[]');
     existingOrders.push(rowData);
     localStorage.setItem('phool_orders_backup', JSON.stringify(existingOrders));
+    console.log('💾 Data saved to localStorage as backup');
 
     // Try to send to Google Sheets if script URL is configured
     if (GOOGLE_SHEETS_API_URL !== 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec') {
-      const response = await fetch(GOOGLE_SHEETS_API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(rowData),
-      });
+      console.log('🌐 Sending to Google Sheets...');
+      try {
+        const response = await fetch(GOOGLE_SHEETS_API_URL, {
+          method: 'POST',
+          mode: 'no-cors', // Handle CORS issues
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(rowData),
+        });
 
-      if (!response.ok) {
-        console.warn('Google Sheets submission failed, data saved locally');
+        console.log('📡 Request sent (no-cors mode)');
+        // With no-cors, we can't read the response, but assume success if no error
+        console.log('✅ Google Sheets request completed (response unreadable due to CORS)');
+      } catch (fetchError) {
+        console.warn('❌ Google Sheets fetch failed:', fetchError);
+        console.warn('📊 Data saved locally instead');
         return false;
       }
+    } else {
+      console.log('⚠️ Google Sheets URL not configured, using localStorage only');
     }
 
-    console.log('Order data saved successfully');
+    console.log('🎉 Order data saved successfully');
     return true;
   } catch (error) {
-    console.error('Error adding order to Google Sheet:', error);
+    console.error('💥 Error adding order to Google Sheet:', error);
     // Fallback to localStorage
     const existingOrders = JSON.parse(localStorage.getItem('phool_orders_backup') || '[]');
     existingOrders.push({

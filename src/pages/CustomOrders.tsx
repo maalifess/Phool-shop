@@ -84,7 +84,7 @@ const CustomOrders = () => {
           >
             <CheckCircle2 className="mx-auto h-16 w-16 text-primary" />
             <h2 className="mt-6 font-display text-3xl font-bold text-foreground">Request Submitted!</h2>
-            <p className="mt-4 text-muted-foreground">We'll get back to you within 2–3 business days.</p>
+            <p className="mt-4 text-muted-foreground">We'll get back to you within 2–3 business days. Please send a proof of payment screenshot to WhatsApp on 0333-XXXXXXX.</p>
             <Button className="mt-8 rounded-full px-8" onClick={() => setSubmitted(false)}>
               Submit Another Request
             </Button>
