@@ -10,6 +10,7 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle2, ShoppingBag } from "lucide-react";
 import { send } from "@emailjs/browser";
+import { addOrderToGoogleSheet } from "@/services/googleSheets";
 
 const Order = () => {
   const [submitted, setSubmitted] = useState(false);
@@ -35,7 +36,8 @@ const Order = () => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     const fd = new FormData(form);
-    const payload = {
+    
+    const orderData = {
       name: String(fd.get("name") || ""),
       email: String(fd.get("email") || ""),
       phone: String(fd.get("phone") || ""),
@@ -43,17 +45,49 @@ const Order = () => {
       address: String(fd.get("address") || ""),
       products: String(fd.get("products") || ""),
       notes: String(fd.get("notes") || ""),
+      paymentMethod: paymentMethod || "",
+      orderType: 'regular' as const,
     };
 
-    // Send email via EmailJS — replace env vars with your EmailJS IDs
+    // Enhanced email payload with complete order details
+    const emailPayload = {
+      ...orderData,
+      order_summary: incomingItems 
+        ? incomingItems.map(item => `${item.quantity}x ${item.name} - PKR ${item.price}${item.customText ? ` (Message: ${item.customText})` : ''}`).join('\n')
+        : orderData.products,
+      total_amount: incomingItems 
+        ? incomingItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+        : 'N/A',
+      timestamp: new Date().toLocaleString(),
+      payment_details: paymentMethod === "jazzcash" 
+        ? "JazzCash: 0321-000-0000 (Phool Shop)"
+        : paymentMethod === "bank"
+        ? "Bank: Example Bank, IBAN: PK00EXAM00000000000000 (Phool Shop)"
+        : "Not selected",
+    };
+
+    // Send email via EmailJS
     const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || "YOUR_SERVICE_ID";
     const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || "YOUR_TEMPLATE_ID";
     const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || "YOUR_PUBLIC_KEY";
 
     try {
-      await send(serviceId, templateId, payload, publicKey);
+      await send(serviceId, templateId, emailPayload, publicKey);
+      console.log("Order email sent successfully");
     } catch (err) {
       console.error("Order email send failed:", err);
+    }
+
+    // Add order to Google Sheets
+    try {
+      const sheetSuccess = await addOrderToGoogleSheet(orderData);
+      if (sheetSuccess) {
+        console.log("Order added to Google Sheets successfully");
+      } else {
+        console.log("Order saved to local storage (Google Sheets not configured)");
+      }
+    } catch (err) {
+      console.error("Google Sheets integration failed:", err);
     }
 
     setSubmitted(true);

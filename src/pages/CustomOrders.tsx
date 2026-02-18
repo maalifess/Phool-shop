@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sparkles, CheckCircle2 } from "lucide-react";
 import { send } from "@emailjs/browser";
+import { addOrderToGoogleSheet } from "@/services/googleSheets";
 
 const CustomOrders = () => {
   const [submitted, setSubmitted] = useState(false);
@@ -17,24 +18,56 @@ const CustomOrders = () => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     const fd = new FormData(form);
-    const payload = {
+    
+    const orderData = {
       name: String(fd.get("name") || ""),
       email: String(fd.get("email") || ""),
       phone: String(fd.get("phone") || ""),
-      description: String(fd.get("description") || ""),
-      colors: String(fd.get("colors") || ""),
-      timeline: String(fd.get("timeline") || ""),
+      products: "Custom Order Request",
+      quantity: "1",
+      notes: String(fd.get("timeline") || ""),
+      paymentMethod: "To be discussed",
+      orderType: 'custom' as const,
+      customDetails: {
+        description: String(fd.get("description") || ""),
+        colors: String(fd.get("colors") || ""),
+        timeline: String(fd.get("timeline") || ""),
+      },
     };
 
-    // Send email via EmailJS — replace env vars with your EmailJS IDs
+    // Enhanced email payload for custom orders
+    const emailPayload = {
+      ...orderData,
+      ...orderData.customDetails,
+      order_summary: `Custom Order: ${orderData.customDetails.description}`,
+      total_amount: 'To be quoted',
+      timestamp: new Date().toLocaleString(),
+      payment_details: "To be discussed with customer",
+      custom_request: true,
+    };
+
+    // Send email via EmailJS
     const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || "YOUR_SERVICE_ID";
     const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || "YOUR_TEMPLATE_ID";
     const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || "YOUR_PUBLIC_KEY";
 
     try {
-      await send(serviceId, templateId, payload, publicKey);
+      await send(serviceId, templateId, emailPayload, publicKey);
+      console.log("Custom order email sent successfully");
     } catch (err) {
       console.error("Email send failed:", err);
+    }
+
+    // Add custom order to Google Sheets
+    try {
+      const sheetSuccess = await addOrderToGoogleSheet(orderData);
+      if (sheetSuccess) {
+        console.log("Custom order added to Google Sheets successfully");
+      } else {
+        console.log("Custom order saved to local storage (Google Sheets not configured)");
+      }
+    } catch (err) {
+      console.error("Google Sheets integration failed:", err);
     }
 
     setSubmitted(true);
