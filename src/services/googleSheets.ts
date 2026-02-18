@@ -11,6 +11,7 @@ interface OrderData {
   notes?: string;
   paymentMethod?: string;
   orderType: 'regular' | 'custom';
+  status?: 'Under Process' | 'Dispatched' | 'Completed' | 'Cancelled';
   customDetails?: {
     description?: string;
     colors?: string;
@@ -38,6 +39,7 @@ export const addOrderToGoogleSheet = async (orderData: OrderData): Promise<boole
       quantity: orderData.quantity,
       paymentMethod: orderData.paymentMethod || '',
       notes: orderData.notes || '',
+      status: orderData.status || 'Under Process',
       customDescription: orderData.customDetails?.description || '',
       customColors: orderData.customDetails?.colors || '',
       customTimeline: orderData.customDetails?.timeline || '',
@@ -86,6 +88,7 @@ export const addOrderToGoogleSheet = async (orderData: OrderData): Promise<boole
     existingOrders.push({
       ...orderData,
       timestamp: new Date().toISOString(),
+      status: orderData.status || 'Under Process',
       error: 'Failed to sync to Google Sheets'
     });
     localStorage.setItem('phool_orders_backup', JSON.stringify(existingOrders));

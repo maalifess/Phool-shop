@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Layout from "@/components/Layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ShoppingBag } from "lucide-react";
-import { loadProducts } from "@/lib/products";
+import { loadProducts } from "@/lib/supabaseProducts";
+import type { Product } from "@/lib/supabaseProducts";
 
 const categories = ["All", "Cards", "Amigurumi", "Blankets", "Accessories", "Garlands"];
 
@@ -20,9 +21,24 @@ const fadeUp = {
 const Catalog = () => {
   const [activeCategory, setActiveCategory] = useState("All");
   const [sort, setSort] = useState("default");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const all = loadProducts();
-  const filtered = activeCategory === "All" ? all : all.filter((p) => p.category === activeCategory);
+  const isImageUrl = (v?: string) => {
+    if (!v || v.trim() === "") return false;
+    return v.startsWith("data:image/") || v.startsWith("http://") || v.startsWith("https://");
+  };
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      const data = await loadProducts();
+      setProducts(data);
+      setLoading(false);
+    })();
+  }, []);
+
+  const filtered = activeCategory === "All" ? products : products.filter((p) => p.category === activeCategory);
   const displayed = (() => {
     const copy = [...filtered];
     if (sort === "price-asc") return copy.sort((a, b) => a.price - b.price);
@@ -73,34 +89,50 @@ const Catalog = () => {
             animate="visible"
             className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
           >
-            {displayed.map((product, i) => (
-              <motion.div key={product.id} variants={fadeUp} custom={i}>
-                <Card className="group h-full border-border/40 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-                  <CardContent className="flex h-full flex-col p-6 text-center">
-                    <div className="mx-auto flex h-32 w-32 items-center justify-center rounded-2xl bg-accent text-5xl transition-transform duration-300 group-hover:scale-110">
-                      {product.images?.[0]}
-                    </div>
-                    <h3 className="mt-4 font-display text-base font-semibold text-foreground">{product.name}</h3>
-                      <p className="mt-1 text-sm text-muted-foreground">{product.category}</p>
-                      {/* removed average hearts per user request */}
-                    <p className="mt-2 text-lg font-medium text-primary">PKR {product.price}</p>
-                    <div className="mt-auto pt-4">
-                      {product.inStock ? (
-                        <Button asChild size="sm" className="w-full rounded-full">
-                          <Link to={`/product/${product.id}`}>
-                            <ShoppingBag className="mr-2 h-4 w-4" /> View
-                          </Link>
-                        </Button>
-                      ) : (
-                        <Button size="sm" disabled className="w-full rounded-full">
-                          Out of Stock
-                        </Button>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
+            {displayed.map((product, i) => {
+              const images = typeof product.images === 'string' ? JSON.parse(product.images || '[]') : product.images;
+              return (
+                <motion.div key={product.id} variants={fadeUp} custom={i}>
+                  <Card className="group h-full border-border/40 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                    <CardContent className="flex h-full flex-col p-6 text-center">
+                      <div className="relative mx-auto aspect-square w-full overflow-hidden rounded-2xl border border-border/40">
+                        {isImageUrl(images.find(v => v.trim() !== "")) ? (
+                          <img src={images.find(v => v.trim() !== "")} alt={product.name} className="absolute inset-0 h-full w-full object-cover" />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center bg-accent text-sm text-muted-foreground">
+                            No image
+                          </div>
+                        )}
+
+                        <div className="absolute inset-0 translate-y-full bg-pink-500/20 transition-transform duration-300 ease-out group-hover:translate-y-0" />
+
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                          {product.in_stock ? (
+                            <Button asChild size="sm" className="rounded-full">
+                              <Link to={`/product/${product.id}`}>
+                                <ShoppingBag className="mr-2 h-4 w-4" /> View
+                              </Link>
+                            </Button>
+                          ) : (
+                            <Button size="sm" disabled className="rounded-full">
+                              Out of Stock
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="mt-4 flex items-end justify-between gap-3 text-left">
+                        <div className="min-w-0">
+                          <div className="font-display text-sm font-semibold text-foreground line-clamp-1">{product.name}</div>
+                          <div className="mt-0.5 text-xs text-muted-foreground line-clamp-1">{product.category}</div>
+                        </div>
+                        <div className="shrink-0 text-lg font-medium text-primary">PKR {product.price}</div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
           </motion.div>
         </div>
       </section>

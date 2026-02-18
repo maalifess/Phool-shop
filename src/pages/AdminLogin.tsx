@@ -4,24 +4,29 @@ import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { signInAdmin, getCurrentAdmin } from "@/lib/supabaseAuth";
 
 const ADMIN_USER = "admin";
-const ADMIN_PASS = "password";
+const ADMIN_PASS = "admin123";
 
 const AdminLogin = () => {
-  const [user, setUser] = useState("");
-  const [pass, setPass] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (user === ADMIN_USER && pass === ADMIN_PASS) {
-      localStorage.setItem("phool_admin_logged_in", "1");
-      navigate("/admin");
+    setLoading(true);
+    setError("");
+    const { error } = await signInAdmin(email, password);
+    if (error) {
+      setError(error.message);
     } else {
-      setError("Invalid credentials");
+      navigate("/admin");
     }
+    setLoading(false);
   };
 
   return (
@@ -35,15 +40,17 @@ const AdminLogin = () => {
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="text-sm text-muted-foreground">Username</label>
-                  <Input value={user} onChange={(e) => setUser(e.target.value)} />
+                  <label className="text-sm text-muted-foreground">Email</label>
+                  <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
                 </div>
                 <div>
                   <label className="text-sm text-muted-foreground">Password</label>
-                  <Input type="password" value={pass} onChange={(e) => setPass(e.target.value)} />
+                  <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
                 </div>
                 {error && <div className="text-sm text-destructive">{error}</div>}
-                <Button type="submit" className="w-full rounded-full">Sign in</Button>
+                <Button type="submit" className="w-full rounded-full" disabled={loading}>
+                  {loading ? "Signing in..." : "Sign in"}
+                </Button>
               </form>
             </CardContent>
           </Card>

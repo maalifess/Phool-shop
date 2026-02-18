@@ -3,7 +3,8 @@ import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
-import { loadProducts } from "@/lib/products";
+import { loadProducts } from "@/lib/supabaseProducts";
+import type { Product } from "@/lib/supabaseProducts";
 import { useCart } from "@/lib/cart";
 import { ArrowLeft } from "lucide-react";
 import { loadReviews, saveReview, Review } from "@/lib/reviews";
@@ -11,7 +12,8 @@ import { loadReviews, saveReview, Review } from "@/lib/reviews";
 const ProductDetails = () => {
   const { id } = useParams();
   const pid = Number(id);
-  const product = loadProducts().find((p) => p.id === pid);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
   const { addItem } = useCart();
   const [index, setIndex] = useState(0);
   const [added, setAdded] = useState(false);
@@ -24,6 +26,21 @@ const ProductDetails = () => {
   const [reviewText, setReviewText] = useState("");
   const [reviewAnim, setReviewAnim] = useState(false);
 
+  const isImageUrl = (v?: string) => {
+    if (!v) return false;
+    return v.startsWith("data:image/") || v.startsWith("http://") || v.startsWith("https://");
+  };
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      const products = await loadProducts();
+      const found = products.find((p) => p.id === pid) || null;
+      setProduct(found);
+      setLoading(false);
+    })();
+  }, [pid]);
+
   if (!product) {
     return (
       <Layout>
@@ -33,7 +50,8 @@ const ProductDetails = () => {
   }
 
   const handleAdd = () => {
-    addItem({ id: product.id, name: product.name, price: product.price, image: product.images?.[0], customText: product.isCustom ? customText : undefined }, 1);
+    const images = typeof product.images === 'string' ? JSON.parse(product.images || '[]') : product.images;
+    addItem({ id: product.id, name: product.name, price: product.price, image: images[0], customText: product.is_custom ? customText : undefined }, 1);
     setAdded(true);
     setShowAddAnim(true);
     setTimeout(() => setShowAddAnim(false), 900);
@@ -69,12 +87,13 @@ const ProductDetails = () => {
 
   // auto slideshow
   useEffect(() => {
-    if (!auto) return;
+    if (!auto || !product) return;
+    const images = typeof product.images === 'string' ? JSON.parse(product.images || '[]') : product.images;
     const t = setInterval(() => {
-      setIndex((i) => (i + 1) % product.images.length);
+      setIndex((i) => (i + 1) % images.length);
     }, 3500);
     return () => clearInterval(t);
-  }, [product.id, product.images.length, auto]);
+  }, [product, auto]);
 
   return (
     <Layout>
@@ -99,7 +118,15 @@ const ProductDetails = () => {
               >
                 <div className="relative flex h-72 items-center justify-center text-6xl">
                   <motion.div key={index} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                    {product.images[index]}
+                    {(() => {
+                      const images = typeof product.images === 'string' ? JSON.parse(product.images || '[]') : product.images;
+                      const img = images[index];
+                      return isImageUrl(img) ? (
+                        <img src={img} alt={product.name} className="h-72 w-full rounded-xl object-cover" />
+                      ) : (
+                        img
+                      );
+                    })()}
                   </motion.div>
 
                   {showAddAnim && (
@@ -110,16 +137,23 @@ const ProductDetails = () => {
                 </div>
 
                 <div className="mt-4 flex gap-2">
-                  {product.images.map((img, i) => (
-                    <button
-                      key={i}
-                      onClick={() => { setIndex(i); setAuto(false); }}
-                      className={`rounded-md px-3 py-2 text-2xl ${i === index ? "ring-2 ring-primary" : "bg-muted/10"}`}
-                      aria-label={`Show image ${i + 1}`}
-                    >
-                      {img}
-                    </button>
-                  ))}
+                  {(() => {
+                    const images = typeof product.images === 'string' ? JSON.parse(product.images || '[]') : product.images;
+                    return images.map((img, i) => (
+                      <button
+                        key={i}
+                        onClick={() => { setIndex(i); setAuto(false); }}
+                        className={`rounded-md px-3 py-2 text-2xl ${i === index ? "ring-2 ring-primary" : "bg-muted/10"}`}
+                        aria-label={`Show image ${i + 1}`}
+                      >
+                        {isImageUrl(img) ? (
+                          <img src={img} alt={product.name} className="h-10 w-10 rounded object-cover" />
+                        ) : (
+                          img
+                        )}
+                      </button>
+                    ));
+                  })()}
                 </div>
               </motion.div>
             </div>
@@ -133,15 +167,15 @@ const ProductDetails = () => {
 
                 <div className="mt-6 flex gap-3">
                   <div className="flex-1">
-                    {product.isCustom && (
+                    {product.is_custom && (
                       <div className="mb-4">
                         <label className="text-sm font-medium">Text for card</label>
                         <textarea value={customText} onChange={(e) => setCustomText(e.target.value)} className="mt-2 w-full rounded-md border p-2" rows={3} />
                         <div className="mt-1 text-sm text-muted-foreground">{customText.length}/{customLimit} chars</div>
                       </div>
                     )}
-                    <Button size="lg" className="rounded-full w-full" onClick={handleAdd} disabled={product.isCustom && (customText.trim().length === 0 || customText.length > customLimit)}>
-                      {added ? "Added" : product.isCustom ? "Add Card to Tokri" : "Add to Tokri"}
+                    <Button size="lg" className="rounded-full w-full" onClick={handleAdd} disabled={product.is_custom && (customText.trim().length === 0 || customText.length > customLimit)}>
+                      {added ? "Added" : product.is_custom ? "Add Card to Tokri" : "Add to Tokri"}
                     </Button>
                   </div>
                   <Button asChild variant="outline" size="lg" className="rounded-full">
