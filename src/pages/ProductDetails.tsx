@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import Layout from "@/components/Layout";
@@ -25,40 +25,26 @@ const ProductDetails = () => {
   const [rating, setRating] = useState<number | null>(null);
   const [reviewText, setReviewText] = useState("");
   const [reviewAnim, setReviewAnim] = useState(false);
+  const [productsList, setProductsList] = useState<Product[]>([]);
 
   const isImageUrl = (v?: string) => {
     if (!v) return false;
     return v.startsWith("data:image/") || v.startsWith("http://") || v.startsWith("https://");
   };
 
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      const products = await loadProducts();
-      const found = products.find((p) => p.id === pid) || null;
-      setProduct(found);
-      setLoading(false);
-    })();
-  }, [pid]);
+  // Load products once and memoize lookup
+  const allProducts = useMemo(() => {
+    const arr = [];
+    for (const prod of productsList) {
+      const images = typeof prod.images === 'string' ? JSON.parse(prod.images || '[]') : prod.images;
+      arr.push({ ...prod, images });
+    }
+    return arr;
+  }, [productsList]);
 
-  if (!product) {
-    return (
-      <Layout>
-        <div className="py-24 text-center">Product not found.</div>
-      </Layout>
-    );
-  }
+  const foundProduct = useMemo(() => allProducts.find((p) => p.id === pid) || null, [allProducts, pid]);
 
-  const handleAdd = () => {
-    const images = typeof product.images === 'string' ? JSON.parse(product.images || '[]') : product.images;
-    addItem({ id: product.id, name: product.name, price: product.price, image: images[0], customText: product.is_custom ? customText : undefined }, 1);
-    setAdded(true);
-    setShowAddAnim(true);
-    setTimeout(() => setShowAddAnim(false), 900);
-    setTimeout(() => setAdded(false), 1400);
-  };
-
-  // load custom message limit
+  // Load custom message limit
   useEffect(() => {
     try {
       const raw = localStorage.getItem("phool_custom_message_limit");
@@ -66,10 +52,42 @@ const ProductDetails = () => {
     } catch (e) { }
   }, []);
 
-  // load reviews for this product
+  // Load products once
   useEffect(() => {
-    setReviews(loadReviews(product.id));
-  }, [product.id]);
+    (async () => {
+      setLoading(true);
+      const data = await loadProducts();
+      setProductsList(data);
+      setLoading(false);
+    })();
+  }, []);
+
+  // Load reviews for this product
+  useEffect(() => {
+    if (!foundProduct) return;
+    setReviews(loadReviews(foundProduct.id));
+  }, [foundProduct?.id]);
+
+  // Auto slideshow
+  useEffect(() => {
+    if (!auto || !foundProduct) return;
+    const images = typeof foundProduct.images === 'string' ? JSON.parse(foundProduct.images || '[]') : foundProduct.images;
+    const t = setInterval(() => {
+      setIndex((i) => (i + 1) % images.length);
+    }, 3500);
+    return () => clearInterval(t);
+  }, [foundProduct, auto]);
+
+  const handleAdd = () => {
+    addItem({ id: foundProduct.id, name: foundProduct.name, price: foundProduct.price, image: (() => {
+      const images = typeof foundProduct.images === 'string' ? JSON.parse(foundProduct.images || '[]') : foundProduct.images;
+      return images[0];
+    })(), customText: foundProduct.is_custom ? customText : undefined }, 1);
+    setAdded(true);
+    setShowAddAnim(true);
+    setTimeout(() => setShowAddAnim(false), 900);
+    setTimeout(() => setAdded(false), 1400);
+  };
 
   const avgRating = reviews.length ? Math.round((reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) * 10) / 10 : 0;
 
@@ -77,23 +95,21 @@ const ProductDetails = () => {
     e.preventDefault();
     if (!rating) return;
     const text = reviewText.trim().slice(0, 150);
-    saveReview({ productId: product.id, rating, text });
-    setReviews(loadReviews(product.id));
+    saveReview({ productId: foundProduct.id, rating, text });
+    setReviews(loadReviews(foundProduct.id));
     setRating(null);
     setReviewText("");
     setReviewAnim(true);
     setTimeout(() => setReviewAnim(false), 1200);
   };
 
-  // auto slideshow
-  useEffect(() => {
-    if (!auto || !product) return;
-    const images = typeof product.images === 'string' ? JSON.parse(product.images || '[]') : product.images;
-    const t = setInterval(() => {
-      setIndex((i) => (i + 1) % images.length);
-    }, 3500);
-    return () => clearInterval(t);
-  }, [product, auto]);
+  if (!foundProduct) {
+    return (
+      <Layout>
+        <div className="py-24 text-center">Product not found.</div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -119,10 +135,10 @@ const ProductDetails = () => {
                 <div className="relative flex h-72 items-center justify-center text-6xl">
                   <motion.div key={index} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                     {(() => {
-                      const images = typeof product.images === 'string' ? JSON.parse(product.images || '[]') : product.images;
+                      const images = typeof foundProduct.images === 'string' ? JSON.parse(foundProduct.images || '[]') : foundProduct.images;
                       const img = images[index];
                       return isImageUrl(img) ? (
-                        <img src={img} alt={product.name} className="h-72 w-full rounded-xl object-cover" />
+                        <img src={img} alt={foundProduct.name} className="h-72 w-full rounded-xl object-cover" />
                       ) : (
                         img
                       );
@@ -138,7 +154,7 @@ const ProductDetails = () => {
 
                 <div className="mt-4 flex gap-2">
                   {(() => {
-                    const images = typeof product.images === 'string' ? JSON.parse(product.images || '[]') : product.images;
+                    const images = typeof foundProduct.images === 'string' ? JSON.parse(foundProduct.images || '[]') : foundProduct.images;
                     return images.map((img, i) => (
                       <button
                         key={i}
@@ -147,7 +163,7 @@ const ProductDetails = () => {
                         aria-label={`Show image ${i + 1}`}
                       >
                         {isImageUrl(img) ? (
-                          <img src={img} alt={product.name} className="h-10 w-10 rounded object-cover" />
+                          <img src={img} alt={foundProduct.name} className="h-10 w-10 rounded object-cover" />
                         ) : (
                           img
                         )}
@@ -161,21 +177,21 @@ const ProductDetails = () => {
             {/* Details */}
             <div>
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, delay: 0.05 }}>
-                <h1 className="font-display text-3xl font-bold text-foreground">{product.name}</h1>
-                <p className="mt-2 text-lg font-medium text-primary">PKR {product.price}</p>
-                <p className="mt-4 text-muted-foreground">{product.description}</p>
+                <h1 className="font-display text-3xl font-bold text-foreground">{foundProduct.name}</h1>
+                <p className="mt-2 text-lg font-medium text-primary">PKR {foundProduct.price}</p>
+                <p className="mt-4 text-muted-foreground">{foundProduct.description}</p>
 
                 <div className="mt-6 flex gap-3">
                   <div className="flex-1">
-                    {product.is_custom && (
+                    {foundProduct.is_custom && (
                       <div className="mb-4">
                         <label className="text-sm font-medium">Text for card</label>
                         <textarea value={customText} onChange={(e) => setCustomText(e.target.value)} className="mt-2 w-full rounded-md border p-2" rows={3} />
                         <div className="mt-1 text-sm text-muted-foreground">{customText.length}/{customLimit} chars</div>
                       </div>
                     )}
-                    <Button size="lg" className="rounded-full w-full" onClick={handleAdd} disabled={product.is_custom && (customText.trim().length === 0 || customText.length > customLimit)}>
-                      {added ? "Added" : product.is_custom ? "Add Card to Tokri" : "Add to Tokri"}
+                    <Button size="lg" className="rounded-full w-full" onClick={handleAdd} disabled={foundProduct.is_custom && (customText.trim().length === 0 || customText.length > customLimit)}>
+                      {added ? "Added" : foundProduct.is_custom ? "Add Card to Tokri" : "Add to Tokri"}
                     </Button>
                   </div>
                   <Button asChild variant="outline" size="lg" className="rounded-full">
