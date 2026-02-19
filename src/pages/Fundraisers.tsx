@@ -64,7 +64,7 @@ const Fundraisers = () => {
                   <CardContent className="flex gap-6 p-6">
                     <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-accent text-3xl overflow-hidden">
                       {f.image ? (
-                        <img src={f.image} alt={f.title} className="h-full w-full object-cover" />
+                        <img src={f.image} alt={f.title} className="h-full w-full object-cover" loading="lazy" />
                       ) : (
                         "🎗️"
                       )}

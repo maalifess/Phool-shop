@@ -228,6 +228,7 @@ const ProductDetails = () => {
                           src={img} 
                           alt={foundProduct.name} 
                           className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                          loading="lazy"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-8xl">
@@ -268,7 +269,7 @@ const ProductDetails = () => {
                           aria-label={`Show image ${i + 1}`}
                         >
                           {isImageUrl(img) ? (
-                            <img src={img} alt={foundProduct.name} className="w-16 h-16 object-cover" />
+                            <img src={img} alt={foundProduct.name} className="w-16 h-16 object-cover" loading="lazy" />
                           ) : (
                             <div className="w-16 h-16 flex items-center justify-center text-2xl bg-gray-100">
                               {img}

@@ -128,7 +128,7 @@ const Catalog = () => {
                       {(() => {
                         const firstImage = product.images.find((v) => (v || "").trim() !== "") || "";
                         return isImageUrl(firstImage) ? (
-                          <img src={firstImage} alt={product.name} className="absolute inset-0 h-full w-full object-cover" />
+                          <img src={firstImage} alt={product.name} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
                         ) : (
                         <div className="absolute inset-0 flex items-center justify-center bg-accent text-sm text-muted-foreground">
                           No image

@@ -38,7 +38,7 @@ const Tokri = () => {
                 <div key={`${it.id}-${it.customText ?? ""}`} className="flex items-center gap-4 rounded-lg border border-border/40 p-4">
                   <div className="flex h-16 w-16 items-center justify-center rounded-md bg-accent text-3xl">
                     {isImageUrl(it.image) ? (
-                      <img src={it.image} alt={it.name} className="h-full w-full rounded-md object-cover" />
+                      <img src={it.image} alt={it.name} className="h-full w-full rounded-md object-cover" loading="lazy" />
                     ) : (
                       it.image
                     )}

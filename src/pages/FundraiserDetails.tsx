@@ -66,6 +66,7 @@ const FundraiserDetails = () => {
                     src={fundraiser.image} 
                     alt={fundraiser.title} 
                     className="h-full w-full object-cover"
+                    loading="lazy"
                   />
                 </div>
               )}
