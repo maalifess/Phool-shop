@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -8,14 +8,37 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle2, ShoppingBag } from "lucide-react";
+import { CheckCircle2, ShoppingBag, Gift, Tag, Copy, Check } from "lucide-react";
 import { send } from "@emailjs/browser";
 import { addOrderToGoogleSheet } from "@/services/googleSheets";
 
+const PROMO_CODES: Record<string, { discount: number; type: "percent" | "fixed"; label: string }> = {
+  "PHOOL10": { discount: 10, type: "percent", label: "10% off" },
+  "PHOOL20": { discount: 20, type: "percent", label: "20% off" },
+  "SAVE100": { discount: 100, type: "fixed", label: "PKR 100 off" },
+  "WELCOME": { discount: 15, type: "percent", label: "15% off (Welcome)" },
+};
+
+const GIFT_WRAP_PRICE = 50;
+
+const generateOrderId = () => {
+  const prefix = "PS";
+  const ts = Date.now().toString(36).toUpperCase();
+  const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
+  return `${prefix}-${ts}-${rand}`;
+};
+
 const Order = () => {
   const [submitted, setSubmitted] = useState(false);
+  const [orderId, setOrderId] = useState("");
+  const [orderIdCopied, setOrderIdCopied] = useState(false);
   const location = useLocation();
   const [paymentMethod, setPaymentMethod] = useState<string | undefined>(undefined);
+  const [promoInput, setPromoInput] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState<string | null>(null);
+  const [promoError, setPromoError] = useState("");
+  const [giftWrap, setGiftWrap] = useState(false);
+  const [giftMessage, setGiftMessage] = useState("");
 
   // If arriving from Tokri checkout, location.state.items will contain the cart items
   const stateItems = (location.state as any)?.items as { id: number; name: string; price: number; quantity: number; customText?: string }[] | undefined;
@@ -32,10 +55,46 @@ const Order = () => {
     ? incomingItems.map((it) => `${it.quantity}x ${it.name} (PKR ${it.price})${it.customText ? ` — Message: ${it.customText}` : ""}`).join("\n")
     : undefined;
 
+  // Promo code logic
+  const subtotal = incomingItems ? incomingItems.reduce((sum, item) => sum + (item.price * item.quantity), 0) : 0;
+  const promoData = appliedPromo ? PROMO_CODES[appliedPromo] : null;
+  const promoDiscount = promoData
+    ? promoData.type === "percent" ? Math.round(subtotal * promoData.discount / 100) : promoData.discount
+    : 0;
+  const giftWrapCost = giftWrap ? GIFT_WRAP_PRICE : 0;
+  const totalAmount = Math.max(0, subtotal - promoDiscount + giftWrapCost);
+
+  const applyPromo = () => {
+    const code = promoInput.trim().toUpperCase();
+    if (!code) return;
+    if (PROMO_CODES[code]) {
+      setAppliedPromo(code);
+      setPromoError("");
+    } else {
+      setPromoError("Invalid promo code");
+      setAppliedPromo(null);
+    }
+  };
+
+  const removePromo = () => {
+    setAppliedPromo(null);
+    setPromoInput("");
+    setPromoError("");
+  };
+
+  const copyOrderId = async () => {
+    try {
+      await navigator.clipboard.writeText(orderId);
+      setOrderIdCopied(true);
+      setTimeout(() => setOrderIdCopied(false), 2000);
+    } catch {}
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     const fd = new FormData(form);
+    const newOrderId = generateOrderId();
     
     const orderData = {
       name: String(fd.get("name") || ""),
@@ -44,20 +103,20 @@ const Order = () => {
       quantity: String(fd.get("quantity") || ""),
       address: String(fd.get("address") || ""),
       products: String(fd.get("products") || ""),
-      notes: String(fd.get("notes") || ""),
+      notes: String(fd.get("notes") || "") + (giftWrap ? `\n[GIFT WRAP] Message: ${giftMessage || "No message"}` : "") + (appliedPromo ? `\n[PROMO: ${appliedPromo} — ${promoData?.label}]` : ""),
       paymentMethod: paymentMethod || "",
       orderType: 'regular' as const,
     };
 
-    // Enhanced email payload with complete order details
     const emailPayload = {
       ...orderData,
+      order_id: newOrderId,
       order_summary: incomingItems 
         ? incomingItems.map(item => `${item.quantity}x ${item.name} - PKR ${item.price}${item.customText ? ` (Message: ${item.customText})` : ''}`).join('\n')
         : orderData.products,
-      total_amount: incomingItems 
-        ? incomingItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-        : 'N/A',
+      total_amount: totalAmount,
+      discount: promoDiscount > 0 ? `PKR ${promoDiscount} (${appliedPromo})` : 'None',
+      gift_wrap: giftWrap ? `Yes — ${giftMessage || "No message"}` : 'No',
       timestamp: new Date().toLocaleString(),
       payment_details: paymentMethod === "jazzcash" 
         ? "JazzCash: 0321-000-0000 (Phool Shop)"
@@ -66,30 +125,45 @@ const Order = () => {
         : "Not selected",
     };
 
-    // Send email via EmailJS
     const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || "YOUR_SERVICE_ID";
     const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || "YOUR_TEMPLATE_ID";
     const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || "YOUR_PUBLIC_KEY";
 
     try {
       await send(serviceId, templateId, emailPayload, publicKey);
-      console.log("Order email sent successfully");
     } catch (err) {
       console.error("Order email send failed:", err);
     }
 
-    // Add order to Google Sheets
     try {
       const sheetSuccess = await addOrderToGoogleSheet(orderData);
-      if (sheetSuccess) {
-        console.log("Order added to Google Sheets successfully");
-      } else {
+      if (!sheetSuccess) {
         console.log("Order saved to local storage (Google Sheets not configured)");
       }
     } catch (err) {
       console.error("Google Sheets integration failed:", err);
     }
 
+    // Save order to localStorage for tracking
+    try {
+      const prev = JSON.parse(localStorage.getItem("phool_orders") || "[]");
+      prev.push({
+        id: newOrderId,
+        items: incomingItems || [],
+        subtotal,
+        discount: promoDiscount,
+        giftWrap,
+        giftWrapCost,
+        total: totalAmount,
+        promo: appliedPromo,
+        date: new Date().toISOString(),
+        status: "pending",
+        name: orderData.name,
+      });
+      localStorage.setItem("phool_orders", JSON.stringify(prev));
+    } catch {}
+
+    setOrderId(newOrderId);
     setSubmitted(true);
   };
 
@@ -102,6 +176,20 @@ const Order = () => {
               <CheckCircle2 className="mx-auto h-20 w-20 text-primary" />
             </motion.div>
             <motion.h2 initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.15 }} className="mt-6 font-display text-3xl font-bold text-foreground">Order Placed!</motion.h2>
+            
+            {orderId && (
+              <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="mt-4 rounded-xl border border-border/40 bg-accent/50 p-4">
+                <p className="text-sm text-muted-foreground mb-1">Your Order ID</p>
+                <div className="flex items-center justify-center gap-2">
+                  <span className="font-mono text-lg font-bold text-foreground">{orderId}</span>
+                  <button onClick={copyOrderId} className="rounded-md p-1 hover:bg-muted transition-colors" title="Copy order ID">
+                    {orderIdCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4 text-muted-foreground" />}
+                  </button>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">Save this ID to track your order</p>
+              </motion.div>
+            )}
+
             <motion.p initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.25 }} className="mt-4 text-muted-foreground">
               Thank you! Please send a proof of payment screenshot to WhatsApp on 0333-XXXXXXX.
             </motion.p>
@@ -112,9 +200,14 @@ const Order = () => {
               <motion.span initial={{ y: -8, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.45 }}>💐</motion.span>
             </motion.div>
 
-            <Button className="mt-8 rounded-full px-8" onClick={() => setSubmitted(false)}>
-              Place Another Order
-            </Button>
+            <div className="mt-8 flex flex-col items-center gap-3">
+              <Button className="rounded-full px-8" onClick={() => setSubmitted(false)}>
+                Place Another Order
+              </Button>
+              <Button asChild variant="outline" className="rounded-full px-8">
+                <Link to="/order-tracking">Track Your Orders</Link>
+              </Button>
+            </div>
           </motion.div>
         </section>
       </Layout>
@@ -234,8 +327,73 @@ const Order = () => {
                     )}
                   </div>
 
+                  {/* Promo Code */}
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2"><Tag className="h-4 w-4 text-primary" /> Promo Code</Label>
+                    {appliedPromo ? (
+                      <div className="flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 p-3 text-sm">
+                        <Check className="h-4 w-4 text-green-600" />
+                        <span className="font-medium text-green-700">{appliedPromo}</span>
+                        <span className="text-green-600">— {promoData?.label}</span>
+                        <button type="button" onClick={removePromo} className="ml-auto text-red-500 hover:text-red-700 text-xs font-medium">Remove</button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Enter promo code"
+                          value={promoInput}
+                          onChange={(e) => { setPromoInput(e.target.value); setPromoError(""); }}
+                        />
+                        <Button type="button" variant="outline" onClick={applyPromo} className="shrink-0">Apply</Button>
+                      </div>
+                    )}
+                    {promoError && <p className="text-sm text-red-500">{promoError}</p>}
+                  </div>
+
+                  {/* Gift Wrapping */}
+                  <div className="space-y-3 rounded-lg border border-border/40 p-4">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={giftWrap}
+                        onChange={(e) => setGiftWrap(e.target.checked)}
+                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                      />
+                      <Gift className="h-5 w-5 text-primary" />
+                      <span className="font-medium text-foreground">Add Gift Wrapping</span>
+                      <span className="ml-auto text-sm text-muted-foreground">+ PKR {GIFT_WRAP_PRICE}</span>
+                    </label>
+                    {giftWrap && (
+                      <div className="space-y-2 pl-7">
+                        <Label htmlFor="giftMsg">Gift Message (optional)</Label>
+                        <Textarea
+                          id="giftMsg"
+                          value={giftMessage}
+                          onChange={(e) => setGiftMessage(e.target.value)}
+                          rows={2}
+                          placeholder="Write a message for the recipient..."
+                          maxLength={200}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Order Summary */}
+                  {incomingItems && incomingItems.length > 0 && (
+                    <div className="rounded-lg border border-border/40 bg-accent/30 p-4 space-y-2 text-sm">
+                      <div className="font-semibold text-foreground">Order Summary</div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>PKR {subtotal}</span></div>
+                      {promoDiscount > 0 && <div className="flex justify-between text-green-600"><span>Discount ({appliedPromo})</span><span>- PKR {promoDiscount}</span></div>}
+                      {giftWrap && <div className="flex justify-between"><span className="text-muted-foreground">Gift Wrapping</span><span>PKR {GIFT_WRAP_PRICE}</span></div>}
+                      <div className="flex justify-between"><span className="text-muted-foreground">Delivery</span><span className="text-green-600 font-medium">Free</span></div>
+                      <div className="border-t border-border/40 pt-2 flex justify-between font-bold text-foreground text-base">
+                        <span>Total</span><span className="text-primary">PKR {totalAmount}</span>
+                      </div>
+                    </div>
+                  )}
+
                     <div className="rounded-lg border border-border/60 bg-accent/50 p-4 text-sm text-muted-foreground">
-                    💡 <strong>Payment:</strong> Send screenshot of proof of payment to email or phone below. We'll contact you to confirm and arrange delivery. There are no delivery charges — delivery is free.
+                    <strong>Payment:</strong> Send screenshot of proof of payment to email or phone below. We'll contact you to confirm and arrange delivery. There are no delivery charges — delivery is free.
                     <div className="mt-3 space-y-1 text-sm">
                       <div>Email: <strong>{import.meta.env.VITE_SHOP_CONTACT_EMAIL || 'orders@example.com'}</strong></div>
                       <div>Phone/WhatsApp: <strong>{import.meta.env.VITE_SHOP_CONTACT_PHONE || '0321-000-0000'}</strong></div>
