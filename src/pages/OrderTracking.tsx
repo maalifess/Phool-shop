@@ -1,56 +1,34 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import Layout from "@/components/Layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Package, Clock, CheckCircle2, Copy, Check } from "lucide-react";
-
-interface StoredOrder {
-  id: string;
-  items: { id: number; name: string; price: number; quantity: number; customText?: string }[];
-  subtotal: number;
-  discount: number;
-  giftWrap: boolean;
-  giftWrapCost: number;
-  total: number;
-  promo: string | null;
-  date: string;
-  status: string;
-  name: string;
-}
+import { Search, Package, Clock, CheckCircle2, Copy, Check, Loader2 } from "lucide-react";
+import { searchOrderById, type OrderRecord } from "@/lib/supabaseOrders";
 
 const statusSteps = [
-  { key: "pending", label: "Order Placed", icon: Package },
-  { key: "confirmed", label: "Confirmed", icon: CheckCircle2 },
-  { key: "shipped", label: "Dispatched", icon: Package },
-  { key: "delivered", label: "Delivered", icon: CheckCircle2 },
+  { key: "Under Process", label: "Order Placed", icon: Package },
+  { key: "Confirmed", label: "Confirmed", icon: CheckCircle2 },
+  { key: "Dispatched", label: "Dispatched", icon: Package },
+  { key: "Completed", label: "Delivered", icon: CheckCircle2 },
 ];
 
 const OrderTracking = () => {
-  const [orders, setOrders] = useState<StoredOrder[]>([]);
   const [searchId, setSearchId] = useState("");
-  const [filteredOrders, setFilteredOrders] = useState<StoredOrder[]>([]);
+  const [results, setResults] = useState<OrderRecord[]>([]);
+  const [searched, setSearched] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
 
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem("phool_orders");
-      if (raw) {
-        const parsed = JSON.parse(raw) as StoredOrder[];
-        setOrders(parsed.reverse());
-        setFilteredOrders(parsed);
-      }
-    } catch {}
-  }, []);
-
-  const handleSearch = () => {
-    const q = searchId.trim().toUpperCase();
-    if (!q) {
-      setFilteredOrders(orders);
-      return;
-    }
-    setFilteredOrders(orders.filter((o) => o.id.toUpperCase().includes(q)));
+  const handleSearch = async () => {
+    const q = searchId.trim();
+    if (!q) return;
+    setLoading(true);
+    const data = await searchOrderById(q);
+    setResults(data);
+    setSearched(true);
+    setLoading(false);
   };
 
   const copyId = async (id: string) => {
@@ -92,27 +70,45 @@ const OrderTracking = () => {
                   value={searchId}
                   onChange={(e) => setSearchId(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                  placeholder="Search by Order ID..."
+                  placeholder="Enter your Order ID (e.g. PS-M3K7X2-AB2C)"
                   className="pl-10 rounded-full"
                 />
               </div>
-              <Button onClick={handleSearch} className="rounded-full">Search</Button>
+              <Button onClick={handleSearch} className="rounded-full" disabled={loading}>
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Search"}
+              </Button>
             </div>
           </div>
 
-          {/* Orders list */}
+          {/* Results */}
           <div className="mt-10 space-y-6">
-            {filteredOrders.length === 0 ? (
+            {loading && (
+              <div className="text-center py-16 text-muted-foreground">
+                <Loader2 className="mx-auto h-8 w-8 animate-spin mb-4" />
+                <p>Searching...</p>
+              </div>
+            )}
+
+            {!loading && searched && results.length === 0 && (
               <div className="text-center py-16 text-muted-foreground">
                 <Clock className="mx-auto h-12 w-12 mb-4 opacity-50" />
-                <p className="text-lg">{orders.length === 0 ? "No orders yet." : "No orders match your search."}</p>
+                <p className="text-lg">No orders found for that ID.</p>
               </div>
-            ) : (
-              filteredOrders.map((order) => {
+            )}
+
+            {!loading && !searched && (
+              <div className="text-center py-16 text-muted-foreground">
+                <Package className="mx-auto h-12 w-12 mb-4 opacity-50" />
+                <p className="text-lg">Enter your Order ID above to track your order.</p>
+              </div>
+            )}
+
+            {!loading && results.map((order) => {
                 const statusIdx = getStatusIndex(order.status);
+                const items = (order.items || []) as { id: number; name: string; price: number; quantity: number }[];
                 return (
                   <motion.div
-                    key={order.id}
+                    key={order.order_id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                   >
@@ -121,22 +117,22 @@ const OrderTracking = () => {
                         <div className="flex items-start justify-between gap-4 flex-wrap">
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className="font-mono text-sm font-bold text-foreground">{order.id}</span>
-                              <button onClick={() => copyId(order.id)} className="rounded p-1 hover:bg-muted transition-colors">
-                                {copied === order.id ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5 text-muted-foreground" />}
+                              <span className="font-mono text-sm font-bold text-foreground">{order.order_id}</span>
+                              <button onClick={() => copyId(order.order_id)} className="rounded p-1 hover:bg-muted transition-colors">
+                                {copied === order.order_id ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5 text-muted-foreground" />}
                               </button>
                             </div>
                             <p className="mt-1 text-sm text-muted-foreground">
-                              {new Date(order.date).toLocaleDateString()} at {new Date(order.date).toLocaleTimeString()}
+                              {new Date(order.created_at || "").toLocaleDateString()} at {new Date(order.created_at || "").toLocaleTimeString()}
                             </p>
                             {order.name && <p className="text-sm text-muted-foreground">Placed by: {order.name}</p>}
                           </div>
                           <div className="text-right">
                             <span className="text-lg font-bold text-primary">PKR {order.total}</span>
-                            {order.discount > 0 && (
+                            {Number(order.discount) > 0 && (
                               <p className="text-xs text-green-600">Saved PKR {order.discount}</p>
                             )}
-                            {order.giftWrap && (
+                            {order.gift_wrap && (
                               <p className="text-xs text-muted-foreground flex items-center justify-end gap-1">
                                 <span>Gift wrapped</span>
                               </p>
@@ -145,9 +141,9 @@ const OrderTracking = () => {
                         </div>
 
                         {/* Items */}
-                        {order.items.length > 0 && (
+                        {items.length > 0 && (
                           <div className="mt-4 space-y-1">
-                            {order.items.map((item, i) => (
+                            {items.map((item, i) => (
                               <div key={i} className="flex justify-between text-sm">
                                 <span className="text-muted-foreground">{item.quantity}x {item.name}</span>
                                 <span>PKR {item.price * item.quantity}</span>
@@ -170,9 +166,6 @@ const OrderTracking = () => {
                                   <span className={`mt-2 text-xs font-medium ${active ? "text-primary" : "text-muted-foreground"}`}>
                                     {step.label}
                                   </span>
-                                  {i < statusSteps.length - 1 && (
-                                    <div className={`absolute h-0.5 ${active ? "bg-primary" : "bg-muted"}`} />
-                                  )}
                                 </div>
                               );
                             })}
@@ -183,12 +176,18 @@ const OrderTracking = () => {
                             ))}
                           </div>
                         </div>
+
+                        {order.status === "Cancelled" && (
+                          <div className="mt-4 rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700 text-center font-medium">
+                            This order has been cancelled.
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                   </motion.div>
                 );
               })
-            )}
+            }
           </div>
         </div>
       </section>

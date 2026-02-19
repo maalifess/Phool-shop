@@ -10,7 +10,7 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle2, ShoppingBag, Gift, Tag, Copy, Check } from "lucide-react";
 import { send } from "@emailjs/browser";
-import { addOrderToGoogleSheet } from "@/services/googleSheets";
+import { createOrder } from "@/lib/supabaseOrders";
 
 const PROMO_CODES: Record<string, { discount: number; type: "percent" | "fixed"; label: string }> = {
   "PHOOL10": { discount: 10, type: "percent", label: "10% off" },
@@ -135,33 +135,35 @@ const Order = () => {
       console.error("Order email send failed:", err);
     }
 
+    // Save order to Supabase
     try {
-      const sheetSuccess = await addOrderToGoogleSheet(orderData);
-      if (!sheetSuccess) {
-        console.log("Order saved to local storage (Google Sheets not configured)");
-      }
-    } catch (err) {
-      console.error("Google Sheets integration failed:", err);
-    }
-
-    // Save order to localStorage for tracking
-    try {
-      const prev = JSON.parse(localStorage.getItem("phool_orders") || "[]");
-      prev.push({
-        id: newOrderId,
+      await createOrder({
+        order_id: newOrderId,
+        name: orderData.name,
+        email: orderData.email,
+        phone: orderData.phone,
+        address: orderData.address || "",
+        products: orderData.products,
+        quantity: orderData.quantity,
+        payment_method: orderData.paymentMethod || "",
+        notes: String(fd.get("notes") || ""),
+        order_type: orderData.orderType,
+        status: "Under Process",
         items: incomingItems || [],
         subtotal,
         discount: promoDiscount,
-        giftWrap,
-        giftWrapCost,
         total: totalAmount,
-        promo: appliedPromo,
-        date: new Date().toISOString(),
-        status: "pending",
-        name: orderData.name,
+        promo_code: appliedPromo,
+        gift_wrap: giftWrap,
+        gift_wrap_cost: giftWrapCost,
+        gift_message: giftMessage,
+        custom_description: "",
+        custom_colors: "",
+        custom_timeline: "",
       });
-      localStorage.setItem("phool_orders", JSON.stringify(prev));
-    } catch {}
+    } catch (err) {
+      console.error("Supabase order save failed:", err);
+    }
 
     setOrderId(newOrderId);
     setSubmitted(true);

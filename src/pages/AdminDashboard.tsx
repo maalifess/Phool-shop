@@ -12,39 +12,12 @@ import { loadProducts as loadSupabaseProducts, createProduct, updateProduct as u
 import { loadCards, createCard, updateCard as updateCardSupabase, deleteCard } from "@/lib/supabaseCards";
 import { loadFundraisers as loadSupabaseFundraisers, createFundraiser, updateFundraiser as updateFundraiserSupabase, deleteFundraiser } from "@/lib/supabaseFundraisers";
 import { loadReviews, updateReview, deleteReview } from "@/lib/supabaseReviews";
+import { loadAllOrders, updateOrderStatus as updateOrderStatusSupabase, deleteOrderByOrderId, type OrderRecord } from "@/lib/supabaseOrders";
 import type { Card as SupabaseCard, Fundraiser as SupabaseFundraiser, Review } from "@/lib/supabaseTypes";
 
 type AdminSection = "add_products" | "add_cards" | "add_fundraiser" | "order_management" | "review_management";
 
 type OrderStatus = "Under Process" | "Dispatched" | "Completed" | "Cancelled";
-
-type StoredOrder = {
-  id?: string;
-  timestamp: string;
-  orderType?: string;
-  name?: string;
-  email?: string;
-  phone?: string;
-  address?: string;
-  products?: string;
-  quantity?: string;
-  paymentMethod?: string;
-  notes?: string;
-  status?: OrderStatus;
-  customDescription?: string;
-  customColors?: string;
-  customTimeline?: string;
-  error?: string;
-  // Fields from phool_orders (order tracking system)
-  items?: { id: number; name: string; price: number; quantity: number; customText?: string }[];
-  subtotal?: number;
-  discount?: number;
-  giftWrap?: boolean;
-  giftWrapCost?: number;
-  total?: number;
-  promo?: string | null;
-  date?: string;
-};
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -66,7 +39,7 @@ const AdminDashboard = () => {
   const [newFundProductId, setNewFundProductId] = useState<number | "">("");
   const [newFundImage, setNewFundImage] = useState("");
   const [section, setSection] = useState<AdminSection>("add_products");
-  const [orders, setOrders] = useState<StoredOrder[]>([]);
+  const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [sortKey, setSortKey] = useState<"timestamp" | "status">("timestamp");
   const [sortDirection, setSortDirection] = useState<"desc" | "asc">("desc");
 
@@ -91,44 +64,9 @@ const AdminDashboard = () => {
 
       setSection("add_products");
 
-      // Load orders from both storage keys and merge
-      const merged: StoredOrder[] = [];
-      try {
-        const trackingRaw = localStorage.getItem("phool_orders");
-        if (trackingRaw) {
-          const trackingOrders = JSON.parse(trackingRaw) as any[];
-          for (const o of trackingOrders) {
-            merged.push({
-              id: o.id || undefined,
-              timestamp: o.date || new Date().toISOString(),
-              name: o.name || "",
-              products: o.items ? o.items.map((it: any) => `${it.quantity}x ${it.name} (PKR ${it.price})`).join(", ") : "",
-              status: o.status === "pending" ? "Under Process" : (o.status || "Under Process"),
-              items: o.items,
-              subtotal: o.subtotal,
-              discount: o.discount,
-              giftWrap: o.giftWrap,
-              giftWrapCost: o.giftWrapCost,
-              total: o.total,
-              promo: o.promo,
-              date: o.date,
-              orderType: "regular",
-            });
-          }
-        }
-      } catch {}
-      try {
-        const backupRaw = localStorage.getItem("phool_orders_backup");
-        if (backupRaw) {
-          const backupOrders = JSON.parse(backupRaw) as StoredOrder[];
-          for (const o of backupOrders) {
-            // Avoid duplicates by checking if this order already exists
-            const exists = merged.some((m) => m.timestamp === o.timestamp && m.name === o.name);
-            if (!exists) merged.push(o);
-          }
-        }
-      } catch {}
-      setOrders(merged);
+      // Load orders from Supabase
+      const supabaseOrders = await loadAllOrders();
+      setOrders(supabaseOrders);
     })();
   }, [navigate]);
 
@@ -294,61 +232,20 @@ const AdminDashboard = () => {
   const customOrderBadgeClass = "bg-violet-500/15 text-violet-700 border-violet-500/30";
   const regularOrderBadgeClass = "bg-emerald-500/15 text-emerald-700 border-emerald-500/30";
 
-  const makeOrderKey = useCallback((o: StoredOrder) => {
-    return `${o.timestamp ?? ""}-${o.email ?? ""}-${o.phone ?? ""}-${o.products ?? ""}`;
+  const updateOrderStatus = useCallback(async (orderId: string, status: OrderStatus) => {
+    const ok = await updateOrderStatusSupabase(orderId, status);
+    if (ok) {
+      setOrders((prev) => prev.map((o) => o.order_id === orderId ? { ...o, status } : o));
+    }
   }, []);
 
-  const persistOrders = (nextOrders: StoredOrder[]) => {
-    try {
-      // Sync back to phool_orders (tracking system) for orders that have IDs
-      const trackingOrders = nextOrders.filter((o) => o.id).map((o) => ({
-        id: o.id,
-        items: o.items || [],
-        subtotal: o.subtotal || 0,
-        discount: o.discount || 0,
-        giftWrap: o.giftWrap || false,
-        giftWrapCost: o.giftWrapCost || 0,
-        total: o.total || 0,
-        promo: o.promo || null,
-        date: o.date || o.timestamp,
-        status: o.status === "Under Process" ? "pending" : o.status === "Dispatched" ? "shipped" : o.status === "Completed" ? "delivered" : o.status === "Cancelled" ? "cancelled" : "pending",
-        name: o.name || "",
-      }));
-      localStorage.setItem("phool_orders", JSON.stringify(trackingOrders));
-
-      // Also persist the old-format backup
-      const oldFormatOrders = nextOrders.filter((o) => !o.id);
-      if (oldFormatOrders.length > 0) {
-        localStorage.setItem("phool_orders_backup", JSON.stringify(oldFormatOrders));
-      }
-    } catch (e) {
-      // ignore
-    }
-  };
-
-  const updateOrderStatus = useCallback((orderKey: string, status: OrderStatus) => {
-    setOrders((prev) => {
-      const next = prev.map((o) => {
-        const key = makeOrderKey(o);
-        if (key !== orderKey) return o;
-        return { ...o, status };
-      });
-      persistOrders(next);
-      return next;
-    });
-  }, [makeOrderKey]);
-
-  const deleteOrder = useCallback((orderKey: string) => {
+  const deleteOrder = useCallback(async (orderId: string) => {
     if (!confirm("Delete this order? This action cannot be undone.")) return;
-    setOrders((prev) => {
-      const next = prev.filter((o) => {
-        const key = makeOrderKey(o);
-        return key !== orderKey;
-      });
-      persistOrders(next);
-      return next;
-    });
-  }, [makeOrderKey]);
+    const ok = await deleteOrderByOrderId(orderId);
+    if (ok) {
+      setOrders((prev) => prev.filter((o) => o.order_id !== orderId));
+    }
+  }, []);
 
   const orderCountByStatus = useMemo(() => {
     const init: Record<OrderStatus, number> = {
@@ -370,15 +267,15 @@ const AdminDashboard = () => {
     const sorted = [...orders];
     if (sortKey === "timestamp") {
       sorted.sort((a, b) => {
-        const ta = new Date(a.timestamp || 0).getTime();
-        const tb = new Date(b.timestamp || 0).getTime();
+        const ta = new Date(a.created_at || 0).getTime();
+        const tb = new Date(b.created_at || 0).getTime();
         return sortDirection === "desc" ? tb - ta : ta - tb;
       });
     } else if (sortKey === "status") {
       const statusOrder: Record<OrderStatus, number> = { "Under Process": 0, Dispatched: 1, Completed: 2, Cancelled: 3 };
       sorted.sort((a, b) => {
-        const sa = statusOrder[a.status || "Under Process"];
-        const sb = statusOrder[b.status || "Under Process"];
+        const sa = statusOrder[(a.status || "Under Process") as OrderStatus];
+        const sb = statusOrder[(b.status || "Under Process") as OrderStatus];
         return sortDirection === "desc" ? sb - sa : sa - sb;
       });
     }
@@ -401,25 +298,17 @@ const AdminDashboard = () => {
     return names;
   }, [fundraisers, products]);
 
-  const orderIndexMap = useMemo(() => {
-    const m = new Map<string, number>();
-    for (let i = 0; i < orders.length; i++) {
-      m.set(makeOrderKey(orders[i]), i);
-    }
-    return m;
-  }, [orders, makeOrderKey]);
-
-  const fundraiserOrderKeySet = useMemo(() => {
+  const fundraiserOrderIdSet = useMemo(() => {
     const set = new Set<string>();
     if (fundraiserProductNameSet.size === 0) return set;
     for (const o of orders) {
       if (!o.products) continue;
       const productNames = o.products.split(",").map((s) => s.trim().toLowerCase());
       const isFundraiser = productNames.some((n) => fundraiserProductNameSet.has(n));
-      if (isFundraiser) set.add(makeOrderKey(o));
+      if (isFundraiser) set.add(o.order_id);
     }
     return set;
-  }, [orders, fundraiserProductNameSet, makeOrderKey]);
+  }, [orders, fundraiserProductNameSet]);
 
   return (
     <Layout>
@@ -964,36 +853,33 @@ const AdminDashboard = () => {
                       <CardContent>
                         <div className="space-y-3">
                           {displayOrders.map((o) => {
-                            const key = makeOrderKey(o);
-                            const isFundraiser = fundraiserOrderKeySet.has(key);
+                            const isFundraiser = fundraiserOrderIdSet.has(o.order_id);
                             return (
-                              <div key={key} className="rounded border border-border/40 p-3">
+                              <div key={o.order_id} className="rounded border border-border/40 p-3">
                                 <div className="flex items-center justify-between flex-wrap gap-2">
                                   <div>
-                                    {o.id && (
-                                      <div className="font-mono text-xs font-bold text-primary mb-1">{o.id}</div>
-                                    )}
+                                    <div className="font-mono text-xs font-bold text-primary mb-1">{o.order_id}</div>
                                     <div className="font-medium">{o.name}</div>
                                     <div className="text-sm text-muted-foreground">
-                                      {o.email ? `${o.email} • ` : ""}{o.phone ? `${o.phone} • ` : ""}{new Date(o.timestamp || o.date || 0).toLocaleString()}
+                                      {o.email ? `${o.email} • ` : ""}{o.phone ? `${o.phone} • ` : ""}{new Date(o.created_at || 0).toLocaleString()}
                                     </div>
                                     <div className="mt-1 flex items-center gap-2 flex-wrap">
-                                      <Badge className={o.orderType === "custom" ? customOrderBadgeClass : regularOrderBadgeClass}>
-                                        {o.orderType === "custom" ? "Custom" : "Regular"}
+                                      <Badge className={o.order_type === "custom" ? customOrderBadgeClass : regularOrderBadgeClass}>
+                                        {o.order_type === "custom" ? "Custom" : "Regular"}
                                       </Badge>
                                       {isFundraiser && (
                                         <Badge className="bg-orange-500/15 text-orange-700 border-orange-500/30">
                                           Fundraiser
                                         </Badge>
                                       )}
-                                      {o.giftWrap && (
+                                      {o.gift_wrap && (
                                         <Badge className="bg-pink-500/15 text-pink-700 border-pink-500/30">
                                           Gift Wrapped
                                         </Badge>
                                       )}
-                                      {o.promo && (
+                                      {o.promo_code && (
                                         <Badge className="bg-violet-500/15 text-violet-700 border-violet-500/30">
-                                          Promo: {o.promo}
+                                          Promo: {o.promo_code}
                                         </Badge>
                                       )}
                                       {typeof o.total === "number" && (
@@ -1002,7 +888,7 @@ const AdminDashboard = () => {
                                     </div>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    <Select value={o.status || "Under Process"} onValueChange={(v) => updateOrderStatus(key, v as OrderStatus)}>
+                                    <Select value={o.status || "Under Process"} onValueChange={(v) => updateOrderStatus(o.order_id, v as OrderStatus)}>
                                       <SelectTrigger className="w-32">
                                         <SelectValue />
                                       </SelectTrigger>
@@ -1013,15 +899,15 @@ const AdminDashboard = () => {
                                         <SelectItem value="Cancelled">Cancelled</SelectItem>
                                       </SelectContent>
                                     </Select>
-                                    <Button variant="destructive" onClick={() => deleteOrder(key)}>Delete</Button>
+                                    <Button variant="destructive" onClick={() => deleteOrder(o.order_id)}>Delete</Button>
                                   </div>
                                 </div>
                                 <div className="mt-2 text-sm space-y-0.5">
                                   <div><span className="font-medium">Products:</span> {o.products}</div>
                                   {o.address && <div><span className="font-medium">Address:</span> {o.address}</div>}
                                   {o.notes && <div><span className="font-medium">Notes:</span> {o.notes}</div>}
-                                  {o.customDescription && <div><span className="font-medium">Custom:</span> {o.customDescription}</div>}
-                                  {typeof o.discount === "number" && o.discount > 0 && (
+                                  {o.custom_description && <div><span className="font-medium">Custom:</span> {o.custom_description}</div>}
+                                  {typeof o.discount === "number" && Number(o.discount) > 0 && (
                                     <div className="text-green-600"><span className="font-medium">Discount:</span> PKR {o.discount}</div>
                                   )}
                                 </div>
