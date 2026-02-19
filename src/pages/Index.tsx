@@ -150,7 +150,7 @@ const Index = () => {
                     }
                     const img = imgArray.find((v) => v && v.trim() !== "") || "";
                     return isImageUrl(img) ? (
-                      <img src={img} alt={activeFeatured?.name ?? ""} className="absolute inset-0 h-full w-full object-cover" />
+                      <img src={img} alt={activeFeatured?.name ?? ""} className="absolute inset-0 h-full w-full object-cover" fetchPriority="high" />
                     ) : (
                       <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background/30 to-accent/30" />
                     );
@@ -249,7 +249,7 @@ const Index = () => {
                         }
                         const img = imgArray.find((v) => v && v.trim() !== "") || "";
                         return isImageUrl(img) ? (
-                          <img src={img} alt={activeFeatured?.name ?? ""} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+                          <img src={img} alt={activeFeatured?.name ?? ""} className="absolute inset-0 h-full w-full object-cover" fetchPriority="high" />
                         ) : (
                           <div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">
                             No image
