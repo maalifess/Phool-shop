@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ShoppingBag } from "lucide-react";
 import { loadProducts } from "@/lib/supabaseProducts";
+import { loadCards } from "@/lib/supabaseCards";
 import type { Product } from "@/lib/supabaseProducts";
+import type { Card as SupabaseCard } from "@/lib/supabaseTypes";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -20,6 +22,7 @@ const Catalog = () => {
   const [activeCategory, setActiveCategory] = useState("All");
   const [sort, setSort] = useState("default");
   const [products, setProducts] = useState<Product[]>([]);
+  const [cards, setCards] = useState<SupabaseCard[]>([]);
   const [loading, setLoading] = useState(true);
 
   const isImageUrl = (v?: string) => {
@@ -33,23 +36,32 @@ const Catalog = () => {
       const parts = p.category.split(',').map(s => s.trim()).filter(Boolean);
       parts.forEach(c => cats.add(c));
     }
+    for (const c of cards) {
+      cats.add(c.category);
+    }
     return ["All", ...Array.from(cats)];
-  }, [products]);
+  }, [products, cards]);
 
   const allProducts = useMemo(() => {
     const arr = [];
     for (const p of products) {
-      const images = typeof p.images === 'string' ? JSON.parse(p.images || '[]') : p.images;
-      arr.push({ ...p, images });
+      arr.push(p);
+    }
+    for (const c of cards) {
+      arr.push({ ...c, images: c.images });
     }
     return arr;
-  }, [products]);
+  }, [products, cards]);
 
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const data = await loadProducts();
-      setProducts(data);
+      const [productsData, cardsData] = await Promise.all([
+        loadProducts(),
+        loadCards()
+      ]);
+      setProducts(productsData);
+      setCards(cardsData);
       setLoading(false);
     })();
   }, []);
@@ -113,13 +125,16 @@ const Catalog = () => {
                 <Card className="group h-full border-border/40 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
                   <CardContent className="flex h-full flex-col p-6 text-center">
                     <div className="relative mx-auto aspect-square w-full overflow-hidden rounded-2xl border border-border/40">
-                      {isImageUrl(product.images.find(v => v.trim() !== "")) ? (
-                        <img src={product.images.find(v => v.trim() !== "")} alt={product.name} className="absolute inset-0 h-full w-full object-cover" />
-                      ) : (
+                      {(() => {
+                        const firstImage = product.images.find((v) => (v || "").trim() !== "") || "";
+                        return isImageUrl(firstImage) ? (
+                          <img src={firstImage} alt={product.name} className="absolute inset-0 h-full w-full object-cover" />
+                        ) : (
                         <div className="absolute inset-0 flex items-center justify-center bg-accent text-sm text-muted-foreground">
                           No image
                         </div>
-                      )}
+                        );
+                      })()}
 
                       <div className="absolute inset-0 translate-y-full bg-pink-500/20 transition-transform duration-300 ease-out group-hover:translate-y-0" />
 

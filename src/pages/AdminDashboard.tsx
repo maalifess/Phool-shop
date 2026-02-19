@@ -7,11 +7,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { loadFundraisers, saveFundraisers, Fundraiser } from "@/lib/fundraisers";
 import { getCurrentAdmin } from "@/lib/supabaseAuth";
 import { loadProducts as loadSupabaseProducts, createProduct, updateProduct as updateSupabaseProduct, deleteProduct as deleteSupabaseProduct, uploadProductImage, type Product } from "@/lib/supabaseProducts";
+import { loadCards, createCard, updateCard as updateCardSupabase, deleteCard } from "@/lib/supabaseCards";
+import { loadFundraisers as loadSupabaseFundraisers, createFundraiser, updateFundraiser as updateFundraiserSupabase, deleteFundraiser } from "@/lib/supabaseFundraisers";
+import { loadReviews, updateReview, deleteReview } from "@/lib/supabaseReviews";
+import type { Card as SupabaseCard, Fundraiser as SupabaseFundraiser, Review } from "@/lib/supabaseTypes";
 
-type AdminSection = "add_products" | "add_cards" | "add_fundraiser" | "order_management";
+type AdminSection = "add_products" | "add_cards" | "add_fundraiser" | "order_management" | "review_management";
 
 type OrderStatus = "Under Process" | "Dispatched" | "Completed" | "Cancelled";
 
@@ -36,14 +39,49 @@ type StoredOrder = {
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
-  const [fundraisers, setFundraisers] = useState<Fundraiser[]>([]);
+  const [fundraisers, setFundraisers] = useState<SupabaseFundraiser[]>([]);
+  const [cards, setCards] = useState<SupabaseCard[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [customMessageLimit, setCustomMessageLimit] = useState(150);
   const [editing, setEditing] = useState<number | null>(null);
   const [newProductName, setNewProductName] = useState("");
+  const [newCardPrice, setNewCardPrice] = useState(200);
+  const [newCardDescription, setNewCardDescription] = useState("");
+  const [newCardImage, setNewCardImage] = useState("");
+  const [newFundTitle, setNewFundTitle] = useState("");
+  const [newFundDescription, setNewFundDescription] = useState("");
+  const [newFundGoalPkr, setNewFundGoalPkr] = useState<number>(0);
+  const [newFundStartDate, setNewFundStartDate] = useState("");
+  const [newFundEndDate, setNewFundEndDate] = useState("");
+  const [newFundProductId, setNewFundProductId] = useState<number | "">("");
+  const [newFundImage, setNewFundImage] = useState("");
   const [section, setSection] = useState<AdminSection>("add_products");
   const [orders, setOrders] = useState<StoredOrder[]>([]);
   const [sortKey, setSortKey] = useState<"timestamp" | "status">("timestamp");
   const [sortDirection, setSortDirection] = useState<"desc" | "asc">("desc");
+
+  useEffect(() => {
+    (async () => {
+      const admin = await getCurrentAdmin();
+      if (!admin) {
+        navigate("/admin-login");
+        return;
+      }
+
+      const [nextProducts, nextCards, nextSupabaseFundraisers, nextReviews] = await Promise.all([
+        loadSupabaseProducts(),
+        loadCards(),
+        loadSupabaseFundraisers(),
+        loadReviews(),
+      ]);
+      setProducts(nextProducts);
+      setCards(nextCards);
+      setFundraisers(nextSupabaseFundraisers);
+      setReviews(nextReviews);
+
+      setSection("add_products");
+    })();
+  }, [navigate]);
 
   const normalizeImages = (v: unknown): string[] => {
     if (Array.isArray(v)) return v.filter(Boolean).map(String);
@@ -60,40 +98,6 @@ const AdminDashboard = () => {
     }
     return [];
   };
-
-  useEffect(() => {
-    (async () => {
-      const admin = await getCurrentAdmin();
-      if (!admin) {
-        navigate("/admin-login");
-        return;
-      }
-      const products = await loadSupabaseProducts();
-      setProducts(products);
-      setFundraisers(loadFundraisers());
-      setSection("add_products");
-    })();
-  }, []);
-
-  useEffect(() => {
-    if (section !== "order_management") return;
-    try {
-      const raw = localStorage.getItem("phool_orders_backup");
-      const parsed = raw ? (JSON.parse(raw) as StoredOrder[]) : [];
-      setOrders(Array.isArray(parsed) ? [...parsed].reverse() : []);
-    } catch (e) {
-      setOrders([]);
-    }
-  }, [section]);
-
-  useEffect(() => {
-    const raw = localStorage.getItem("phool_custom_message_limit");
-    if (raw) setCustomMessageLimit(Number(raw) || 150);
-  }, []);
-
-  useEffect(() => {
-    try { localStorage.setItem("phool_custom_message_limit", String(customMessageLimit)); } catch (e) { }
-  }, [customMessageLimit]);
 
   const save = async (next: Product[]) => {
     setProducts(next);
@@ -132,21 +136,96 @@ const AdminDashboard = () => {
     }
   };
 
-  const saveFund = (next: Fundraiser[]) => {
-    setFundraisers(next);
-    saveFundraisers(next);
+  // Cards CRUD
+  const addCard = async () => {
+    const newCard: Omit<SupabaseCard, 'id' | 'created_at'> = {
+      name: newProductName || "Card",
+      price: newCardPrice,
+      category: "Cards",
+      images: newCardImage ? [newCardImage] : ["🪪"],
+      description: newCardDescription,
+      in_stock: true,
+      is_custom: true,
+    };
+    const created = await createCard(newCard);
+    if (created) {
+      setCards(prev => [...prev, created]);
+      setNewProductName("");
+      setNewCardPrice(200);
+      setNewCardDescription("");
+      setNewCardImage("");
+      setEditing(created.id);
+    }
   };
 
-  const addFund = () => {
-    const next: Fundraiser = {
-      id: Math.max(0, ...fundraisers.map((f) => f.id)) + 1,
-      title: "New Fundraiser",
-      description: "",
-      goal: "PKR 0",
+  const updateCard = async (id: number, patch: Partial<SupabaseCard>) => {
+    const updated = await updateCardSupabase(id, patch);
+    if (updated) {
+      setCards(prev => prev.map(c => c.id === id ? updated : c));
+    }
+  };
+
+  const removeCard = async (id: number) => {
+    const ok = await deleteCard(id);
+    if (ok) {
+      setCards(prev => prev.filter(c => c.id !== id));
+    }
+  };
+
+  // Fundraisers CRUD (Supabase)
+  const addFund = async () => {
+    const goalPkr = Number(newFundGoalPkr) || 0;
+    const newFundraiser: Omit<SupabaseFundraiser, 'id' | 'created_at'> = {
+      title: newFundTitle || "New Fundraiser",
+      description: newFundDescription || "",
+      goal: `PKR ${goalPkr}`,
+      goal_pkr: goalPkr,
+      start_date: newFundStartDate || undefined,
+      end_date: newFundEndDate || undefined,
+      product_id: typeof newFundProductId === "number" ? newFundProductId : undefined,
+      image: newFundImage || undefined,
       active: true,
     };
-    const list = [...fundraisers, next];
-    saveFund(list);
+    const created = await createFundraiser(newFundraiser);
+    if (created) {
+      setFundraisers(prev => [...prev, created]);
+      setNewFundTitle("");
+      setNewFundDescription("");
+      setNewFundGoalPkr(0);
+      setNewFundStartDate("");
+      setNewFundEndDate("");
+      setNewFundProductId("");
+      setNewFundImage("");
+      setEditing(created.id);
+    }
+  };
+
+  const updateFundraiser = async (id: number, patch: Partial<SupabaseFundraiser>) => {
+    const updated = await updateFundraiserSupabase(id, patch);
+    if (updated) {
+      setFundraisers(prev => prev.map(f => f.id === id ? updated : f));
+    }
+  };
+
+  const removeFundraiser = async (id: number) => {
+    const ok = await deleteFundraiser(id);
+    if (ok) {
+      setFundraisers(prev => prev.filter(f => f.id !== id));
+    }
+  };
+
+  // Reviews CRUD
+  const deleteReviewAdmin = async (id: number) => {
+    const ok = await deleteReview(id);
+    if (ok) {
+      setReviews(prev => prev.filter(r => r.id !== id));
+    }
+  };
+
+  // Refresh reviews function
+  const refreshReviews = async () => {
+    const nextReviews = await loadReviews();
+    setReviews(nextReviews);
   };
 
   const statusBadgeClass = (status: OrderStatus) => {
@@ -246,8 +325,8 @@ const AdminDashboard = () => {
   const fundraiserProductNameSet = useMemo(() => {
     const names = new Set<string>();
     for (const f of fundraisers) {
-      if (!f.productId) continue;
-      const p = products.find((pp) => pp.id === f.productId);
+      if (!f.product_id) continue;
+      const p = products.find((pp) => pp.id === f.product_id);
       if (!p) continue;
       names.add(p.name.toLowerCase());
     }
@@ -290,6 +369,9 @@ const AdminDashboard = () => {
             <Button variant={sectionButtonVariant("add_fundraiser")} onClick={() => setSection("add_fundraiser")}>
               Add Fundraiser
             </Button>
+            <Button variant={sectionButtonVariant("review_management")} onClick={() => setSection("review_management")}>
+              Review Management
+            </Button>
             <Button variant={sectionButtonVariant("order_management")} onClick={() => setSection("order_management")}>
               Order Management
             </Button>
@@ -312,7 +394,7 @@ const AdminDashboard = () => {
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-3">
-                          {products.filter((p) => !p.is_custom).map((p) => (
+                          {products.map((p) => (
                             <div key={p.id} className="rounded border border-border/40 p-3">
                               <div className="flex items-center justify-between">
                                 <div>
@@ -327,10 +409,36 @@ const AdminDashboard = () => {
 
                               {editing === p.id && (
                                 <div className="mt-3 space-y-2">
-                                  <Input value={p.name} onChange={(e) => updateProduct(p.id, { name: e.target.value })} />
-                                  <Input type="number" value={String(p.price)} onChange={(e) => updateProduct(p.id, { price: Number(e.target.value) })} />
-                                  <Input value={p.category} onChange={(e) => updateProduct(p.id, { category: e.target.value })} />
-                                  <Input value={normalizeImages(p.images).join(",")} onChange={(e) => updateProduct(p.id, { images: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })} />
+                                  <Input
+                                    defaultValue={p.name}
+                                    onBlur={(e) => {
+                                      const v = e.target.value;
+                                      if (v !== p.name) updateProduct(p.id, { name: v });
+                                    }}
+                                  />
+                                  <Input
+                                    type="number"
+                                    defaultValue={String(p.price)}
+                                    onBlur={(e) => {
+                                      const v = Number(e.target.value);
+                                      if (!Number.isNaN(v) && v !== p.price) updateProduct(p.id, { price: v });
+                                    }}
+                                  />
+                                  <Input
+                                    defaultValue={p.category}
+                                    onBlur={(e) => {
+                                      const v = e.target.value;
+                                      if (v !== p.category) updateProduct(p.id, { category: v });
+                                    }}
+                                  />
+                                  <Input
+                                    defaultValue={normalizeImages(p.images).join(",")}
+                                    onBlur={(e) => {
+                                      const next = e.target.value.split(",").map((s) => s.trim()).filter(Boolean);
+                                      const prevNorm = normalizeImages(p.images);
+                                      if (e.target.value !== prevNorm.join(",")) updateProduct(p.id, { images: next });
+                                    }}
+                                  />
                                   <div className="mt-2">
                                     <label className="text-sm">Upload images</label>
                                     <input
@@ -355,7 +463,13 @@ const AdminDashboard = () => {
                                       }}
                                     />
                                   </div>
-                                  <Textarea value={p.description} onChange={(e) => updateProduct(p.id, { description: e.target.value })} />
+                                  <Textarea
+                                    defaultValue={p.description}
+                                    onBlur={(e) => {
+                                      const v = e.target.value;
+                                      if (v !== p.description) updateProduct(p.id, { description: v });
+                                    }}
+                                  />
                                   <div className="flex items-center gap-4">
                                     <div className="flex items-center gap-2">
                                       <label className="text-sm">In stock</label>
@@ -374,27 +488,46 @@ const AdminDashboard = () => {
                   return (
                     <Card className="border-border/40">
                       <CardHeader>
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex flex-col gap-4">
                           <CardTitle className="font-display">Add Cards</CardTitle>
-                          <div className="flex items-center gap-2">
-                            <Input placeholder="New custom name" value={newProductName} onChange={(e) => setNewProductName(e.target.value)} />
-                            <Button onClick={() => {
-                              const next: Product = {
-                                id: Math.max(0, ...products.map((p) => p.id)) + 1,
-                                name: newProductName || "Card",
-                                price: 200,
-                                category: "Cards",
-                                images: ["🪪"],
-                                description: "",
-                                in_stock: true,
-                                is_custom: true,
-                              };
-                              const list = [...products, next];
-                              save(list);
-                              setNewProductName("");
-                              setEditing(next.id);
-                            }}>Add</Button>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <Input placeholder="Card name" value={newProductName} onChange={(e) => setNewProductName(e.target.value)} />
+                            <Input type="number" placeholder="Price" value={newCardPrice} onChange={(e) => setNewCardPrice(Number(e.target.value) || 0)} />
                           </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <Input placeholder="Image URL (optional)" value={newCardImage} onChange={(e) => setNewCardImage(e.target.value)} />
+                            <Button onClick={addCard}>Add Card</Button>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <label className="text-sm font-medium">Or upload image:</label>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const toDataURL = (file: File) => new Promise<string>((res, rej) => {
+                                    const reader = new FileReader();
+                                    reader.onload = () => res(String(reader.result));
+                                    reader.onerror = rej;
+                                    reader.readAsDataURL(file);
+                                  });
+                                  try {
+                                    const dataUrl = await toDataURL(file);
+                                    setNewCardImage(dataUrl);
+                                  } catch (err) {
+                                    console.error('Error reading file:', err);
+                                  }
+                                }
+                              }}
+                            />
+                          </div>
+                          <Textarea 
+                            placeholder="Card description (optional)" 
+                            value={newCardDescription} 
+                            onChange={(e) => setNewCardDescription(e.target.value)} 
+                            rows={2}
+                          />
                         </div>
                       </CardHeader>
                       <CardContent>
@@ -404,24 +537,44 @@ const AdminDashboard = () => {
                         </div>
 
                         <div className="mt-4 space-y-3">
-                          {products.filter((p) => p.is_custom).map((p) => (
-                            <div key={p.id} className="rounded border border-border/40 p-3">
+                          {cards.map((c) => (
+                            <div key={c.id} className="rounded border border-border/40 p-3">
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <div className="font-medium">{p.name}</div>
-                                  <div className="text-sm text-muted-foreground">ID: {p.id} • {p.category}</div>
+                                  <div className="font-medium">{c.name}</div>
+                                  <div className="text-sm text-muted-foreground">ID: {c.id} • {c.category}</div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <Button variant="outline" onClick={() => setEditing(editing === p.id ? null : p.id)}>Edit</Button>
-                                  <Button variant="destructive" onClick={() => removeProduct(p.id)}>Delete</Button>
+                                  <Button variant="outline" onClick={() => setEditing(editing === c.id ? null : c.id)}>Edit</Button>
+                                  <Button variant="destructive" onClick={() => removeCard(c.id)}>Delete</Button>
                                 </div>
                               </div>
 
-                              {editing === p.id && (
+                              {editing === c.id && (
                                 <div className="mt-3 space-y-2">
-                                  <Input value={p.name} onChange={(e) => updateProduct(p.id, { name: e.target.value })} />
-                                  <Input type="number" value={String(p.price)} onChange={(e) => updateProduct(p.id, { price: Number(e.target.value) })} />
-                                  <Input value={normalizeImages(p.images).join(",")} onChange={(e) => updateProduct(p.id, { images: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })} />
+                                  <Input
+                                    defaultValue={c.name}
+                                    onBlur={(e) => {
+                                      const v = e.target.value;
+                                      if (v !== c.name) updateCard(c.id, { name: v });
+                                    }}
+                                  />
+                                  <Input
+                                    type="number"
+                                    defaultValue={String(c.price)}
+                                    onBlur={(e) => {
+                                      const v = Number(e.target.value);
+                                      if (!Number.isNaN(v) && v !== c.price) updateCard(c.id, { price: v });
+                                    }}
+                                  />
+                                  <Input
+                                    defaultValue={normalizeImages(c.images).join(",")}
+                                    onBlur={(e) => {
+                                      const next = e.target.value.split(",").map((s) => s.trim()).filter(Boolean);
+                                      const prevNorm = normalizeImages(c.images);
+                                      if (e.target.value !== prevNorm.join(",")) updateCard(c.id, { images: next });
+                                    }}
+                                  />
                                   <div className="mt-2">
                                     <label className="text-sm">Upload images</label>
                                     <input
@@ -441,15 +594,19 @@ const AdminDashboard = () => {
                                         for (let i = 0; i < files.length; i++) {
                                           try { arr.push(await toDataURL(files[i])); } catch (err) { console.error(err); }
                                         }
-                                        const existing = normalizeImages(p.images);
-                                        updateProduct(p.id, { images: [...existing, ...arr] });
+                                        const existing = normalizeImages(c.images);
+                                        updateCard(c.id, { images: [...existing, ...arr] });
                                       }}
                                     />
                                   </div>
                                   <div className="flex items-center gap-4">
                                     <div className="flex items-center gap-2">
                                       <label className="text-sm">In stock</label>
-                                      <input type="checkbox" checked={p.in_stock} onChange={(e) => updateProduct(p.id, { in_stock: e.target.checked })} />
+                                      <input
+                                        type="checkbox"
+                                        defaultChecked={c.in_stock}
+                                        onChange={(e) => updateCard(c.id, { in_stock: e.target.checked })}
+                                      />
                                     </div>
                                   </div>
                                 </div>
@@ -464,9 +621,105 @@ const AdminDashboard = () => {
                   return (
                     <Card className="border-border/40">
                       <CardHeader>
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col gap-4">
                           <CardTitle className="font-display">Add Fundraiser</CardTitle>
-                          <Button onClick={addFund}>Add Fundraiser</Button>
+
+                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <div>
+                              <label className="text-sm font-medium">Fundraiser Name</label>
+                              <Input
+                                placeholder="Fundraiser name"
+                                value={newFundTitle}
+                                onChange={(e) => setNewFundTitle(e.target.value)}
+                              />
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium">Goal (PKR)</label>
+                              <Input
+                                type="number"
+                                placeholder="Goal (PKR)"
+                                value={String(newFundGoalPkr)}
+                                onChange={(e) => setNewFundGoalPkr(Number(e.target.value) || 0)}
+                              />
+                            </div>
+                          </div>
+
+                          <Textarea
+                            placeholder="Fundraiser description"
+                            value={newFundDescription}
+                            onChange={(e) => setNewFundDescription(e.target.value)}
+                            rows={2}
+                          />
+
+                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <div>
+                              <label className="text-sm font-medium">Start Date</label>
+                              <Input
+                                type="date"
+                                value={newFundStartDate}
+                                onChange={(e) => setNewFundStartDate(e.target.value)}
+                              />
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium">End Date</label>
+                              <Input
+                                type="date"
+                                value={newFundEndDate}
+                                onChange={(e) => setNewFundEndDate(e.target.value)}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <div>
+                              <label className="text-sm font-medium">Image URL (optional)</label>
+                              <Input
+                                placeholder="Image URL (optional)"
+                                value={newFundImage}
+                                onChange={(e) => setNewFundImage(e.target.value)}
+                              />
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium">Or upload image</label>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={async (e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    const toDataURL = (file: File) => new Promise<string>((res, rej) => {
+                                      const reader = new FileReader();
+                                      reader.onload = () => res(String(reader.result));
+                                      reader.onerror = rej;
+                                      reader.readAsDataURL(file);
+                                    });
+                                    try {
+                                      const dataUrl = await toDataURL(file);
+                                      setNewFundImage(dataUrl);
+                                    } catch (err) {
+                                      console.error('Error reading file:', err);
+                                    }
+                                  }
+                                }}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <select
+                              className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                              value={newFundProductId === "" ? "" : String(newFundProductId)}
+                              onChange={(e) => setNewFundProductId(e.target.value ? Number(e.target.value) : "")}
+                            >
+                              <option value="">No linked product</option>
+                              {products.map((p) => (
+                                <option key={p.id} value={p.id}>
+                                  {p.name}
+                                </option>
+                              ))}
+                            </select>
+                            <Button onClick={addFund}>Add Fundraiser</Button>
+                          </div>
                         </div>
                       </CardHeader>
                       <CardContent>
@@ -476,31 +729,136 @@ const AdminDashboard = () => {
                               <div className="flex items-center justify-between">
                                 <div>
                                   <div className="font-medium">{f.title}</div>
-                                  <div className="text-sm text-muted-foreground">Goal: {f.goal}</div>
+                                  <div className="text-sm text-muted-foreground">
+                                    Goal: {typeof f.goal_pkr === "number" ? `PKR ${f.goal_pkr}` : f.goal}
+                                    {f.start_date && (
+                                      <span> • {new Date(f.start_date).toLocaleDateString()}</span>
+                                    )}
+                                    {f.end_date && (
+                                      <span> - {new Date(f.end_date).toLocaleDateString()}</span>
+                                    )}
+                                  </div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <Button onClick={() => {
-                                    const next = fundraisers.map((ff) => ff.id === f.id ? { ...ff, active: !ff.active } : ff);
-                                    saveFund(next);
-                                  }}>{f.active ? 'Disable' : 'Enable'}</Button>
-                                  <Button variant="destructive" onClick={() => saveFund(fundraisers.filter((ff) => ff.id !== f.id))}>Delete</Button>
+                                  <Button variant="outline" onClick={() => setEditing(editing === f.id ? null : f.id)}>Edit</Button>
+                                  <Button variant="destructive" onClick={() => removeFundraiser(f.id)}>Delete</Button>
                                 </div>
                               </div>
 
-                              <div className="mt-2 space-y-2">
-                                <Input value={f.title} onChange={(e) => saveFund(fundraisers.map((ff) => ff.id === f.id ? { ...ff, title: e.target.value } : ff))} />
-                                <Input value={f.goal} onChange={(e) => saveFund(fundraisers.map((ff) => ff.id === f.id ? { ...ff, goal: e.target.value } : ff))} />
-                                <Textarea value={f.description} onChange={(e) => saveFund(fundraisers.map((ff) => ff.id === f.id ? { ...ff, description: e.target.value } : ff))} />
+                              {editing === f.id && (
+                                <div className="mt-3 space-y-2">
+                                  <Input
+                                    defaultValue={f.title}
+                                    onBlur={(e) => {
+                                      const v = e.target.value;
+                                      if (v !== f.title) updateFundraiser(f.id, { title: v });
+                                    }}
+                                  />
+                                  <Textarea
+                                    defaultValue={f.description}
+                                    onBlur={(e) => {
+                                      const v = e.target.value;
+                                      if (v !== f.description) updateFundraiser(f.id, { description: v });
+                                    }}
+                                  />
+                                  <Input
+                                    type="number"
+                                    defaultValue={String(typeof f.goal_pkr === "number" ? f.goal_pkr : 0)}
+                                    onBlur={(e) => {
+                                      const n = Number(e.target.value) || 0;
+                                      if (n !== (typeof f.goal_pkr === "number" ? f.goal_pkr : 0)) {
+                                        updateFundraiser(f.id, { goal_pkr: n, goal: `PKR ${n}` });
+                                      }
+                                    }}
+                                  />
+                                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                                    <Input
+                                      type="date"
+                                      defaultValue={f.start_date || ""}
+                                      onBlur={(e) => {
+                                        const v = e.target.value;
+                                        if (v !== (f.start_date || "")) updateFundraiser(f.id, { start_date: v || null });
+                                      }}
+                                    />
+                                    <Input
+                                      type="date"
+                                      defaultValue={f.end_date || ""}
+                                      onBlur={(e) => {
+                                        const v = e.target.value;
+                                        if (v !== (f.end_date || "")) updateFundraiser(f.id, { end_date: v || null });
+                                      }}
+                                    />
+                                  </div>
+                                  <select
+                                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                                    defaultValue={typeof f.product_id === "number" ? String(f.product_id) : ""}
+                                    onChange={(e) => {
+                                      const v = e.target.value ? Number(e.target.value) : null;
+                                      updateFundraiser(f.id, { product_id: v });
+                                    }}
+                                  >
+                                    <option value="">No linked product</option>
+                                    {products.map((p) => (
+                                      <option key={p.id} value={p.id}>
+                                        {p.name}
+                                      </option>
+                                    ))}
+                                  </select>
+                                  <div className="flex items-center gap-2">
+                                    <label className="text-sm">Active</label>
+                                    <input
+                                      type="checkbox"
+                                      defaultChecked={f.active}
+                                      onChange={(e) => updateFundraiser(f.id, { active: e.target.checked })}
+                                    />
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                case "review_management":
+                  return (
+                    <Card className="border-border/40">
+                      <CardHeader>
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                          <CardTitle className="font-display">Review Management</CardTitle>
+                          <Button variant="outline" onClick={refreshReviews}>
+                            Refresh
+                          </Button>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {reviews.map((review) => (
+                            <div key={review.id} className="rounded border border-border/40 p-3">
+                              <div className="flex items-center justify-between">
                                 <div>
-                                  <label className="text-sm">Link to product id (optional)</label>
-                                  <Input value={String(f.productId ?? '')} onChange={(e) => {
-                                    const val = e.target.value ? Number(e.target.value) : undefined;
-                                    saveFund(fundraisers.map((ff) => ff.id === f.id ? { ...ff, productId: val } : ff));
-                                  }} />
+                                  <div className="font-medium">{review.name}</div>
+                                  <div className="text-sm text-muted-foreground">
+                                    Product ID: {review.product_id} • Rating: {review.rating}/5
+                                  </div>
+                                  <div className="mt-1 text-sm">{review.comment}</div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Badge className="bg-emerald-500/15 text-emerald-700 border-emerald-500/30">
+                                    Published
+                                  </Badge>
+                                  <Button variant="destructive" onClick={() => deleteReviewAdmin(review.id)}>
+                                    Delete
+                                  </Button>
                                 </div>
                               </div>
                             </div>
                           ))}
+                          {reviews.length === 0 && (
+                            <div className="text-center text-muted-foreground py-8">
+                              No reviews yet
+                            </div>
+                          )}
                         </div>
                       </CardContent>
                     </Card>
@@ -509,16 +867,11 @@ const AdminDashboard = () => {
                   return (
                     <Card className="border-border/40">
                       <CardHeader>
-                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                          <div>
-                            <CardTitle className="font-display">Order Management</CardTitle>
-                            <div className="mt-1 text-sm text-muted-foreground">
-                              Total: {orders.length} • Under Process: {orderCountByStatus["Under Process"]} • Dispatched: {orderCountByStatus.Dispatched} • Completed: {orderCountByStatus.Completed} • Cancelled: {orderCountByStatus.Cancelled}
-                            </div>
-                          </div>
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                          <CardTitle className="font-display">Order Management</CardTitle>
                           <div className="flex items-center gap-2">
                             <Select value={sortKey} onValueChange={(v) => setSortKey(v as "timestamp" | "status")}>
-                              <SelectTrigger className="w-40">
+                              <SelectTrigger className="w-32">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -526,122 +879,72 @@ const AdminDashboard = () => {
                                 <SelectItem value="status">Status</SelectItem>
                               </SelectContent>
                             </Select>
-                            <Select value={sortDirection} onValueChange={(v) => setSortDirection(v as "asc" | "desc")}>
-                              <SelectTrigger className="w-32">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="desc">Newest first</SelectItem>
-                                <SelectItem value="asc">Oldest first</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <Button variant="outline" size="sm" onClick={resetSorting}>
-                              Reset
+                            <Button variant="outline" onClick={() => setSortDirection(sortDirection === "desc" ? "asc" : "desc")}>
+                              {sortDirection === "desc" ? "↓" : "↑"}
                             </Button>
+                            <Button variant="outline" onClick={resetSorting}>Reset</Button>
                           </div>
+                        </div>
+                        <div className="flex gap-4">
+                          {Object.entries(orderCountByStatus).map(([status, count]) => (
+                            <Badge key={status} className={statusBadgeClass(status as OrderStatus)}>
+                              {status}: {count}
+                            </Badge>
+                          ))}
                         </div>
                       </CardHeader>
                       <CardContent>
-                        {orders.length === 0 ? (
-                          <div className="rounded border border-border/40 p-6 text-sm text-muted-foreground">
-                            No orders found in local storage.
-                          </div>
-                        ) : (
-                          <div className="space-y-3">
-                            {displayOrders.map((o, idx) => {
-                              const key = makeOrderKey(o);
-                              const status = (o.status || "Under Process") as OrderStatus;
-                              const originalIndex = orderIndexMap.get(key) ?? -1;
-                              const orderNumber = originalIndex >= 0 ? orders.length - originalIndex : orders.length;
-                              const isFundraiser = fundraiserOrderKeySet.has(key);
-                              return (
-                                <div key={`${key}-${idx}`} className="rounded-lg border border-border/40 p-4">
-                                  <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                                    <div className="space-y-1">
-                                      <div className="flex flex-wrap items-center gap-2">
-                                        <span className="text-xs font-mono text-muted-foreground bg-muted/30 px-2 py-1 rounded">#{orderNumber}</span>
-                                        <div className="font-medium">{o.name || "(No name)"}</div>
-                                        <Badge variant="outline" className={statusBadgeClass(status)}>
-                                          {status}
+                        <div className="space-y-3">
+                          {displayOrders.map((o) => {
+                            const key = makeOrderKey(o);
+                            const isFundraiser = fundraiserOrderKeySet.has(key);
+                            return (
+                              <div key={key} className="rounded border border-border/40 p-3">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <div className="font-medium">{o.name}</div>
+                                    <div className="text-sm text-muted-foreground">
+                                      {o.email} • {o.phone} • {new Date(o.timestamp || 0).toLocaleString()}
+                                    </div>
+                                    <div className="mt-1 flex items-center gap-2">
+                                      <Badge className={o.orderType === "custom" ? customOrderBadgeClass : regularOrderBadgeClass}>
+                                        {o.orderType === "custom" ? "Custom" : "Regular"}
+                                      </Badge>
+                                      {isFundraiser && (
+                                        <Badge className="bg-orange-500/15 text-orange-700 border-orange-500/30">
+                                          Fundraiser
                                         </Badge>
-                                        {o.orderType && (
-                                          <Badge variant="outline" className={o.orderType === "custom" ? customOrderBadgeClass : regularOrderBadgeClass}>
-                                            {o.orderType === "custom" ? "Custom" : "Regular"}
-                                          </Badge>
-                                        )}
-                                        {isFundraiser && (
-                                          <Badge variant="outline" className="bg-orange-500/15 text-orange-700 border-orange-500/30">
-                                            Fundraiser
-                                          </Badge>
-                                        )}
-                                        {o.error && (
-                                          <Badge variant="destructive">Sync Error</Badge>
-                                        )}
-                                      </div>
-                                      <div className="text-sm text-muted-foreground">
-                                        {o.timestamp ? new Date(o.timestamp).toLocaleString() : ""}
-                                      </div>
-                                    </div>
-
-                                    <div className="w-full md:w-64">
-                                      <Select value={status} onValueChange={(v) => updateOrderStatus(key, v as OrderStatus)}>
-                                        <SelectTrigger>
-                                          <SelectValue placeholder="Select status" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          <SelectItem value="Under Process">Under Process</SelectItem>
-                                          <SelectItem value="Dispatched">Dispatched</SelectItem>
-                                          <SelectItem value="Completed">Completed</SelectItem>
-                                          <SelectItem value="Cancelled">Cancelled</SelectItem>
-                                        </SelectContent>
-                                      </Select>
+                                      )}
                                     </div>
                                   </div>
-
-                                  <div className="mt-3 grid gap-3 md:grid-cols-2">
-                                    <div className="rounded border border-border/40 p-3">
-                                      <div className="text-xs font-medium text-muted-foreground">Customer Info</div>
-                                      <div className="mt-1 text-sm">
-                                        <div><span className="font-medium">Email:</span> {o.email || ""}</div>
-                                        <div><span className="font-medium">Phone:</span> {o.phone || ""}</div>
-                                      </div>
-                                    </div>
-
-                                    <div className="rounded border border-border/40 p-3">
-                                      <div className="text-xs font-medium text-muted-foreground">Order Details</div>
-                                      <div className="mt-1 text-sm">
-                                        <div><span className="font-medium">Address:</span> {o.address || ""}</div>
-                                        <div><span className="font-medium">Products:</span> {o.products || ""}{o.quantity ? ` (Qty: ${o.quantity})` : ""}</div>
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  {(o.notes || o.customDescription || o.customColors || o.customTimeline) && (
-                                    <div className="mt-3 rounded border border-border/40 p-3">
-                                      <div className="text-xs font-medium text-muted-foreground">Additional Notes</div>
-                                      <div className="mt-1 text-sm space-y-1">
-                                        {o.notes && <div>{o.notes}</div>}
-                                        {o.customDescription && <div><span className="font-medium">Custom:</span> {o.customDescription}</div>}
-                                        {o.customColors && <div><span className="font-medium">Colors:</span> {o.customColors}</div>}
-                                        {o.customTimeline && <div><span className="font-medium">Timeline:</span> {o.customTimeline}</div>}
-                                      </div>
-                                    </div>
-                                  )}
-                                  <div className="mt-3 flex justify-end">
-                                    <Button variant="destructive" size="sm" onClick={() => deleteOrder(key)}>
-                                      Delete
-                                    </Button>
+                                  <div className="flex items-center gap-2">
+                                    <Select value={o.status || "Under Process"} onValueChange={(v) => updateOrderStatus(key, v as OrderStatus)}>
+                                      <SelectTrigger className="w-32">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="Under Process">Under Process</SelectItem>
+                                        <SelectItem value="Dispatched">Dispatched</SelectItem>
+                                        <SelectItem value="Completed">Completed</SelectItem>
+                                        <SelectItem value="Cancelled">Cancelled</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                    <Button variant="destructive" onClick={() => deleteOrder(key)}>Delete</Button>
                                   </div>
                                 </div>
-                              );
-                            })}
-                          </div>
-                        )}
+                                <div className="mt-2 text-sm">
+                                  <div>Products: {o.products}</div>
+                                  <div>Address: {o.address}</div>
+                                  <div>Notes: {o.notes}</div>
+                                  {o.customDescription && <div>Custom: {o.customDescription}</div>}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </CardContent>
                     </Card>
                   );
-                default:
-                  return null;
               }
             })()}
           </div>

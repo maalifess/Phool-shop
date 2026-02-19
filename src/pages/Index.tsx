@@ -1,22 +1,15 @@
 import { Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Sparkles, Heart, Star } from "lucide-react";
 import Layout from "@/components/Layout";
-
-const featuredProducts = [
-  { id: 1, name: "Rose Bouquet Amigurumi", price: 35, image: "🌹" },
-  { id: 2, name: "Sunflower Blanket", price: 85, image: "🌻" },
-  { id: 3, name: "Lavender Bear", price: 28, image: "🧸" },
-  { id: 4, name: "Daisy Chain Garland", price: 22, image: "🌼" },
-];
-
-const testimonials = [
-  { name: "Sarah M.", text: "The quality is incredible! My daughter loves her amigurumi bunny.", rating: 5 },
-  { name: "Emily R.", text: "Beautiful custom blanket — exactly what I envisioned. Highly recommend!", rating: 5 },
-  { name: "Jessica L.", text: "Perfect gifts for baby showers. Everyone always asks where I got them.", rating: 5 },
-];
+import { loadProducts } from "@/lib/supabaseProducts";
+import { loadCards } from "@/lib/supabaseCards";
+import type { Product } from "@/lib/supabaseProducts";
+import type { Card as SupabaseCard, Review } from "@/lib/supabaseTypes";
+import { loadApprovedReviews } from "@/lib/supabaseReviews";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -28,6 +21,58 @@ const fadeUp = {
 };
 
 const Index = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [cards, setCards] = useState<SupabaseCard[]>([]);
+  const [featuredIndex, setFeaturedIndex] = useState(0);
+  const [featuredLoading, setFeaturedLoading] = useState(true);
+
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
+
+  const isImageUrl = (v?: string) => {
+    if (!v) return false;
+    const s = v.trim();
+    if (!s) return false;
+    return s.startsWith("data:image/") || s.startsWith("http://") || s.startsWith("https://");
+  };
+
+  const featuredItems = useMemo(() => {
+    const arr: Array<(Product | SupabaseCard) & { kind: "product" | "card" }> = [];
+    for (const p of products) arr.push({ ...p, kind: "product" });
+    for (const c of cards) arr.push({ ...c, kind: "card" });
+    return arr;
+  }, [products, cards]);
+
+  const activeFeatured = featuredItems.length ? featuredItems[featuredIndex % featuredItems.length] : null;
+
+  useEffect(() => {
+    (async () => {
+      setFeaturedLoading(true);
+      const [p, c] = await Promise.all([loadProducts(), loadCards()]);
+      setProducts(p);
+      setCards(c);
+      setFeaturedLoading(false);
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (featuredLoading) return;
+    if (featuredItems.length <= 1) return;
+    const t = window.setInterval(() => {
+      setFeaturedIndex((i) => (i + 1) % featuredItems.length);
+    }, 2600);
+    return () => window.clearInterval(t);
+  }, [featuredLoading, featuredItems.length]);
+
+  useEffect(() => {
+    (async () => {
+      setReviewsLoading(true);
+      const next = await loadApprovedReviews();
+      setReviews(next);
+      setReviewsLoading(false);
+    })();
+  }, []);
+
   return (
     <Layout>
       {/* Hero */}
@@ -109,23 +154,86 @@ const Index = () => {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-50px" }}
-            className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
+            className="mt-14"
           >
-            {featuredProducts.map((product, i) => (
-              <motion.div key={product.id} variants={fadeUp} custom={i + 2}>
-                <Card className="group cursor-pointer border-border/40 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-                  <CardContent className="p-6 text-center">
-                    <div className="mx-auto flex h-28 w-28 items-center justify-center rounded-2xl bg-accent text-5xl transition-transform duration-300 group-hover:scale-110">
-                      {product.image}
+            {featuredLoading ? (
+              <div className="text-center text-muted-foreground">Loading featured creations...</div>
+            ) : featuredItems.length === 0 ? (
+              <div className="text-center text-muted-foreground">No products available yet.</div>
+            ) : (
+              <div className="mx-auto max-w-4xl">
+                <div className="relative overflow-hidden rounded-3xl border border-border/40 bg-background">
+                  <motion.div
+                    key={`${activeFeatured?.kind ?? ""}-${activeFeatured?.id ?? ""}`}
+                    initial={{ opacity: 0, x: 40 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -40 }}
+                    transition={{ duration: 0.45, ease: "easeOut" }}
+                    className="grid gap-8 p-8 md:grid-cols-2 md:p-10"
+                  >
+                    <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-accent">
+                      {(() => {
+                        const img = (activeFeatured?.images || []).find((v) => (v || "").trim() !== "") || "";
+                        return isImageUrl(img) ? (
+                          <img src={img} alt={activeFeatured?.name ?? ""} className="absolute inset-0 h-full w-full object-cover" />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">
+                            No image
+                          </div>
+                        );
+                      })()}
                     </div>
-                    <h3 className="mt-5 font-display text-lg font-semibold text-foreground">
-                      {product.name}
-                    </h3>
-                    <p className="mt-1 text-primary font-medium">PKR {product.price}</p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
+
+                    <div className="flex flex-col justify-center">
+                      <div className="text-xs font-medium text-muted-foreground">
+                        {activeFeatured?.kind === "card" ? "Card" : "Product"}
+                      </div>
+                      <h3 className="mt-2 font-display text-3xl font-bold leading-tight text-foreground">
+                        {activeFeatured?.name}
+                      </h3>
+                      <div className="mt-4 text-2xl font-semibold text-primary">PKR {activeFeatured?.price}</div>
+                      <p className="mt-4 line-clamp-3 text-muted-foreground">
+                        {activeFeatured?.description || ""}
+                      </p>
+
+                      <div className="mt-8 flex flex-wrap gap-3">
+                        <Button asChild className="rounded-full px-7">
+                          <Link to={`/product/${activeFeatured?.id}`}>View</Link>
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="rounded-full"
+                          onClick={() => setFeaturedIndex((i) => (i - 1 + featuredItems.length) % featuredItems.length)}
+                        >
+                          Prev
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="rounded-full"
+                          onClick={() => setFeaturedIndex((i) => (i + 1) % featuredItems.length)}
+                        >
+                          Next
+                        </Button>
+                      </div>
+
+                      <div className="mt-6 flex items-center gap-2">
+                        {featuredItems.slice(0, Math.min(8, featuredItems.length)).map((it, idx) => (
+                          <button
+                            key={`${it.kind}-${it.id}`}
+                            type="button"
+                            aria-label={`Go to item ${idx + 1}`}
+                            onClick={() => setFeaturedIndex(idx)}
+                            className={`h-2.5 w-2.5 rounded-full transition-colors ${idx === (featuredIndex % featuredItems.length) ? "bg-primary" : "bg-muted"}`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </motion.div>
+                </div>
+              </div>
+            )}
           </motion.div>
 
           <div className="mt-10 text-center">
@@ -185,23 +293,29 @@ const Index = () => {
             viewport={{ once: true, margin: "-50px" }}
             className="mt-14 grid gap-6 md:grid-cols-3"
           >
-            {testimonials.map((t, i) => (
-              <motion.div key={i} variants={fadeUp} custom={i + 1}>
-                <Card className="h-full border-border/40">
-                  <CardContent className="flex h-full flex-col p-6">
-                    <div className="flex gap-0.5">
-                      {Array.from({ length: t.rating }).map((_, j) => (
-                        <Star key={j} className="h-4 w-4 fill-primary text-primary" />
-                      ))}
-                    </div>
-                    <p className="mt-4 flex-1 text-sm leading-relaxed text-muted-foreground">
-                      "{t.text}"
-                    </p>
-                    <p className="mt-4 text-sm font-semibold text-foreground">— {t.name}</p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
+            {reviewsLoading ? (
+              <div className="col-span-full text-center text-muted-foreground">Loading customer reviews...</div>
+            ) : reviews.length === 0 ? (
+              <div className="col-span-full text-center text-muted-foreground">No reviews yet.</div>
+            ) : (
+              reviews.slice(0, 6).map((r, i) => (
+                <motion.div key={r.id} variants={fadeUp} custom={i + 1}>
+                  <Card className="h-full border-border/40">
+                    <CardContent className="flex h-full flex-col p-6">
+                      <div className="flex gap-0.5">
+                        {Array.from({ length: Math.max(1, Math.min(5, r.rating)) }).map((_, j) => (
+                          <Star key={j} className="h-4 w-4 fill-primary text-primary" />
+                        ))}
+                      </div>
+                      <p className="mt-4 flex-1 text-sm leading-relaxed text-muted-foreground">
+                        "{r.comment}"
+                      </p>
+                      <p className="mt-4 text-sm font-semibold text-foreground">— {r.name}</p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))
+            )}
           </motion.div>
         </div>
       </section>

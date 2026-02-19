@@ -20,8 +20,8 @@ const Navbar = () => {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl">
       <div className="container flex h-16 items-center justify-between">
-        <Link to="/" className="font-display text-2xl font-semibold tracking-tight text-foreground">
-          Phool Shop
+        <Link to="/" className="font-display text-2xl font-semibold tracking-tight text-foreground hover:scale-110 transition-transform duration-300 inline-block">
+           Phool Shop
         </Link>
 
         {/* Desktop nav */}

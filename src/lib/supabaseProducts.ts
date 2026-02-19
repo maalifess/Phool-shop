@@ -12,18 +12,89 @@ export type Product = {
   created_at?: string;
 };
 
+type CacheEntry<T> = {
+  ts: number;
+  data: T;
+};
+
+const PRODUCTS_TTL_MS = 60_000;
+let productsCache: CacheEntry<Product[]> | null = null;
+let productsInFlight: Promise<Product[]> | null = null;
+
 /** Fetch all products from Supabase (public read) */
 export async function loadProducts(): Promise<Product[]> {
+  const now = Date.now();
+  if (productsCache && now - productsCache.ts < PRODUCTS_TTL_MS) return productsCache.data;
+  if (productsInFlight) return productsInFlight;
+
+  productsInFlight = (async () => {
+    const { data, error } = await supabase
+      .from('Products')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Failed to load products from Supabase', error);
+      return productsCache?.data ?? [];
+    }
+
+    const next = (data || []).map((p: any) => {
+      const images = typeof p.images === 'string' ? (() => {
+        try { return JSON.parse(p.images || '[]'); } catch { return []; }
+      })() : p.images;
+      return { ...p, images } as Product;
+    });
+
+    productsCache = { ts: Date.now(), data: next };
+    return next;
+  })();
+
+  try {
+    return await productsInFlight;
+  } finally {
+    productsInFlight = null;
+  }
+}
+
+/** Fetch a single product by id from Supabase (public read) */
+export async function loadProductById(id: number): Promise<Product | null> {
+  if (!Number.isFinite(id)) return null;
+
+  // Try cache first
+  if (productsCache) {
+    const cached = productsCache.data.find((p) => p.id === id);
+    if (cached) return cached;
+  }
+
   const { data, error } = await supabase
     .from('Products')
     .select('*')
-    .order('created_at', { ascending: false });
+    .eq('id', id)
+    .maybeSingle();
 
   if (error) {
-    console.error('Failed to load products from Supabase', error);
-    return [];
+    console.error('Failed to load product from Supabase', error);
+    return null;
   }
-  return data || [];
+
+  if (!data) return null;
+
+  const images = typeof (data as any).images === 'string' ? (() => {
+    try { return JSON.parse((data as any).images || '[]'); } catch { return []; }
+  })() : (data as any).images;
+  const normalized = { ...(data as any), images } as Product;
+
+  // Merge into cache
+  if (productsCache) {
+    const idx = productsCache.data.findIndex((p) => p.id === id);
+    if (idx >= 0) {
+      const next = [...productsCache.data];
+      next[idx] = normalized;
+      productsCache = { ts: productsCache.ts, data: next };
+    }
+  }
+
+  return normalized;
 }
 
 /** Create a new product (admin only) */

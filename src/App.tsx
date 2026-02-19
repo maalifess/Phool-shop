@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Catalog from "./pages/Catalog";
 import CustomOrders from "./pages/CustomOrders";
 import Fundraisers from "./pages/Fundraisers";
+import FundraiserDetails from "./pages/FundraiserDetails";
 import Order from "./pages/Order";
 import NotFound from "./pages/NotFound";
 import ProductDetails from "./pages/ProductDetails";
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/product/:id" element={<ProductDetails />} />
             <Route path="/custom-orders" element={<CustomOrders />} />
             <Route path="/fundraisers" element={<Fundraisers />} />
+            <Route path="/fundraiser/:id" element={<FundraiserDetails />} />
             <Route path="/admin-login" element={<AdminLogin />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/tokri" element={<Tokri />} />
