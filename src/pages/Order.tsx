@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle2, ShoppingBag, Gift, Tag, Copy, Check } from "lucide-react";
 import { send } from "@emailjs/browser";
 import { createOrder } from "@/lib/supabaseOrders";
+import { addOrderToGoogleSheet } from "@/services/googleSheets";
 
 const PROMO_CODES: Record<string, { discount: number; type: "percent" | "fixed"; label: string }> = {
   "PHOOL10": { discount: 10, type: "percent", label: "10% off" },
@@ -115,27 +116,37 @@ const Order = () => {
         ? incomingItems.map(item => `${item.quantity}x ${item.name} - PKR ${item.price}${item.customText ? ` (Message: ${item.customText})` : ''}`).join('\n')
         : orderData.products,
       total_amount: totalAmount,
+      subtotal: subtotal,
       discount: promoDiscount > 0 ? `PKR ${promoDiscount} (${appliedPromo})` : 'None',
-      gift_wrap: giftWrap ? `Yes — ${giftMessage || "No message"}` : 'No',
-      timestamp: new Date().toLocaleString(),
+      discount_amount: promoDiscount,
+      promo_code: appliedPromo || 'None',
+      gift_wrap: giftWrap ? 'Yes' : 'No',
+      gift_wrap_cost: giftWrapCost,
+      gift_message: giftMessage || 'No message',
+      payment_method: paymentMethod || 'Not selected',
       payment_details: paymentMethod === "jazzcash" 
         ? "JazzCash: 0321-000-0000 (Phool Shop)"
         : paymentMethod === "bank"
         ? "Bank: Example Bank, IBAN: PK00EXAM00000000000000 (Phool Shop)"
         : "Not selected",
+      order_type: 'regular',
+      status: 'Under Process',
+      items_count: incomingItems ? incomingItems.length : 1,
+      timestamp: new Date().toLocaleString(),
+      delivery_note: 'Free delivery - We will contact you to arrange delivery details',
+      contact_email: import.meta.env.VITE_SHOP_CONTACT_EMAIL || 'orders@example.com',
+      contact_phone: import.meta.env.VITE_SHOP_CONTACT_PHONE || '0321-000-0000',
+      // Additional fields for comprehensive email
+      order_items: incomingItems ? JSON.stringify(incomingItems) : orderData.products,
+      customer_notes: String(fd.get("notes") || ""),
+      special_instructions: giftWrap ? `Gift wrap requested: ${giftMessage || 'No message'}` : 'No special instructions',
     };
 
     const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || "YOUR_SERVICE_ID";
     const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || "YOUR_TEMPLATE_ID";
     const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || "YOUR_PUBLIC_KEY";
 
-    try {
-      await send(serviceId, templateId, emailPayload, publicKey);
-    } catch (err) {
-      console.error("Order email send failed:", err);
-    }
-
-    // Save order to Supabase
+    // Save order to Supabase first so UI can progress even if EmailJS hangs/fails
     try {
       await createOrder({
         order_id: newOrderId,
@@ -165,8 +176,30 @@ const Order = () => {
       console.error("Supabase order save failed:", err);
     }
 
+    // Show success UI immediately
     setOrderId(newOrderId);
     setSubmitted(true);
+
+    // Send to Google Sheets in background (non-blocking)
+    addOrderToGoogleSheet({
+      name: orderData.name,
+      email: orderData.email,
+      phone: orderData.phone,
+      address: orderData.address || '',
+      products: orderData.products,
+      quantity: orderData.quantity,
+      notes: orderData.notes,
+      paymentMethod: orderData.paymentMethod || '',
+      orderType: 'regular',
+      status: 'Under Process',
+    }).catch((err) => {
+      console.error('Google Sheets integration failed:', err);
+    });
+
+    // Send email in background (do not block checkout)
+    send(serviceId, templateId, emailPayload, publicKey).catch((err) => {
+      console.error("Order email send failed:", err);
+    });
   };
 
   if (submitted) {

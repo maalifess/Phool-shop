@@ -39,10 +39,37 @@ const CustomOrders = () => {
     const emailPayload = {
       ...orderData,
       ...orderData.customDetails,
+      order_id: `CUSTOM-${Date.now()}`,
       order_summary: `Custom Order: ${orderData.customDetails.description}`,
       total_amount: 'To be quoted',
-      timestamp: new Date().toLocaleString(),
+      subtotal: 'To be quoted',
+      discount: 'None',
+      discount_amount: 0,
+      promo_code: 'None',
+      gift_wrap: 'No',
+      gift_wrap_cost: 0,
+      gift_message: 'Not applicable',
+      payment_method: 'To be discussed',
       payment_details: "To be discussed with customer",
+      order_type: 'custom',
+      status: 'Quote Request',
+      items_count: 1,
+      timestamp: new Date().toLocaleString(),
+      delivery_note: 'Delivery timeline to be discussed based on custom order requirements',
+      contact_email: import.meta.env.VITE_SHOP_CONTACT_EMAIL || 'orders@example.com',
+      contact_phone: import.meta.env.VITE_SHOP_CONTACT_PHONE || '0321-000-0000',
+      // Custom order specific fields
+      order_items: JSON.stringify([{
+        type: 'custom',
+        description: orderData.customDetails.description,
+        colors: orderData.customDetails.colors,
+        timeline: orderData.customDetails.timeline
+      }]),
+      customer_notes: String(fd.get("timeline") || ""),
+      special_instructions: `Custom order - ${orderData.customDetails.description}`,
+      custom_description: orderData.customDetails.description,
+      custom_colors: orderData.customDetails.colors,
+      custom_timeline: orderData.customDetails.timeline,
       custom_request: true,
     };
 
