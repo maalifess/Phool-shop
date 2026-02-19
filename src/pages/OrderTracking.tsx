@@ -23,7 +23,7 @@ interface StoredOrder {
 const statusSteps = [
   { key: "pending", label: "Order Placed", icon: Package },
   { key: "confirmed", label: "Confirmed", icon: CheckCircle2 },
-  { key: "shipped", label: "Shipped", icon: Package },
+  { key: "shipped", label: "Dispatched", icon: Package },
   { key: "delivered", label: "Delivered", icon: CheckCircle2 },
 ];
 

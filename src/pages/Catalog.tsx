@@ -28,9 +28,6 @@ const Catalog = () => {
   const [cards, setCards] = useState<SupabaseCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState(urlSearch);
-  const [stockFilter, setStockFilter] = useState<"all" | "in_stock" | "out_of_stock">("all");
-  const [minPrice, setMinPrice] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
 
   useEffect(() => {
     setSearchText(urlSearch);
@@ -98,26 +95,13 @@ const Catalog = () => {
       });
     }
 
-    // Stock filter
-    if (stockFilter === "in_stock") {
-      result = result.filter((p) => p.in_stock);
-    } else if (stockFilter === "out_of_stock") {
-      result = result.filter((p) => !p.in_stock);
-    }
-
-    // Price filter
-    const min = Number(minPrice);
-    const max = Number(maxPrice);
-    if (min > 0) result = result.filter((p) => p.price >= min);
-    if (max > 0) result = result.filter((p) => p.price <= max);
-
     // Sort
     if (sort === "price-asc") result.sort((a, b) => a.price - b.price);
     else if (sort === "price-desc") result.sort((a, b) => b.price - a.price);
     else if (sort === "name-asc") result.sort((a, b) => a.name.localeCompare(b.name));
 
     return result;
-  }, [allProducts, searchText, activeCategory, stockFilter, minPrice, maxPrice, sort]);
+  }, [allProducts, searchText, activeCategory, sort]);
 
   const clearSearch = () => {
     setSearchText("");
@@ -173,32 +157,8 @@ const Catalog = () => {
             ))}
           </div>
 
-          {/* Advanced filters */}
+          {/* Sort */}
           <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
-            <select value={stockFilter} onChange={(e) => setStockFilter(e.target.value as any)} className="rounded-md border bg-background px-3 py-2 text-sm">
-              <option value="all">All Stock</option>
-              <option value="in_stock">In Stock</option>
-              <option value="out_of_stock">Out of Stock</option>
-            </select>
-
-            <div className="flex items-center gap-1">
-              <input
-                type="number"
-                placeholder="Min PKR"
-                value={minPrice}
-                onChange={(e) => setMinPrice(e.target.value)}
-                className="h-9 w-24 rounded-md border bg-background px-2 text-sm outline-none focus:border-primary"
-              />
-              <span className="text-muted-foreground text-sm">-</span>
-              <input
-                type="number"
-                placeholder="Max PKR"
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(e.target.value)}
-                className="h-9 w-24 rounded-md border bg-background px-2 text-sm outline-none focus:border-primary"
-              />
-            </div>
-
             <select value={sort} onChange={(e) => setSort(e.target.value)} className="rounded-md border bg-background px-3 py-2 text-sm">
               <option value="default">Sort</option>
               <option value="price-asc">Price: Low to High</option>
@@ -214,7 +174,7 @@ const Catalog = () => {
 
           {/* Products grid */}
           <motion.div
-            key={`${activeCategory}-${searchText}-${stockFilter}`}
+            key={`${activeCategory}-${searchText}`}
             initial="hidden"
             animate="visible"
             className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
@@ -286,7 +246,7 @@ const Catalog = () => {
           {!loading && displayed.length === 0 && (
             <div className="mt-16 text-center text-muted-foreground">
               <p className="text-lg">No products match your filters.</p>
-              <Button variant="outline" className="mt-4 rounded-full" onClick={() => { setActiveCategory("All"); setSearchText(""); setStockFilter("all"); setMinPrice(""); setMaxPrice(""); }}>
+              <Button variant="outline" className="mt-4 rounded-full" onClick={() => { setActiveCategory("All"); setSearchText(""); }}>
                 Clear all filters
               </Button>
             </div>

@@ -1,8 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart";
+import { loadProducts } from "@/lib/supabaseProducts";
+import { loadCards } from "@/lib/supabaseCards";
+import type { Product } from "@/lib/supabaseProducts";
+import type { Card as SupabaseCard } from "@/lib/supabaseTypes";
 
 const navLinks = [
   { to: "/", label: "Home" },
@@ -12,13 +16,60 @@ const navLinks = [
   { to: "/tokri", label: "Tokri" },
 ];
 
+const isImageUrl = (v?: string) => {
+  if (!v || v.trim() === "") return false;
+  return v.startsWith("data:image/") || v.startsWith("http://") || v.startsWith("https://");
+};
+
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [allItems, setAllItems] = useState<(Product | SupabaseCard)[]>([]);
+  const [suggestions, setSuggestions] = useState<(Product | SupabaseCard)[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { totalItems } = useCart();
+
+  // Load products and cards once for search suggestions
+  useEffect(() => {
+    (async () => {
+      const [prods, crds] = await Promise.all([loadProducts(), loadCards()]);
+      setAllItems([...prods, ...crds]);
+    })();
+  }, []);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  // Update suggestions as user types
+  useEffect(() => {
+    const q = searchQuery.toLowerCase().trim();
+    if (q.length < 1) {
+      setSuggestions([]);
+      setShowDropdown(false);
+      return;
+    }
+    const matches = allItems
+      .filter((item) =>
+        item.name.toLowerCase().includes(q) ||
+        (item.description || "").toLowerCase().includes(q) ||
+        item.category.toLowerCase().includes(q)
+      )
+      .slice(0, 5);
+    setSuggestions(matches);
+    setShowDropdown(matches.length > 0);
+  }, [searchQuery, allItems]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,6 +79,60 @@ const Navbar = () => {
     setSearchQuery("");
     setSearchOpen(false);
     setMobileOpen(false);
+    setShowDropdown(false);
+  };
+
+  const goToProduct = (id: number) => {
+    navigate(`/product/${id}`);
+    setSearchQuery("");
+    setSearchOpen(false);
+    setMobileOpen(false);
+    setShowDropdown(false);
+  };
+
+  const getFirstImage = (item: Product | SupabaseCard) => {
+    const imgs = typeof item.images === "string"
+      ? (() => { try { return JSON.parse(item.images || "[]"); } catch { return []; } })()
+      : item.images || [];
+    return imgs.find((v: string) => isImageUrl(v)) || "";
+  };
+
+  const SearchDropdown = () => {
+    if (!showDropdown || suggestions.length === 0) return null;
+    return (
+      <div className="absolute top-full left-0 right-0 mt-1 rounded-xl border border-border/60 bg-background/98 shadow-xl backdrop-blur-xl z-[60] overflow-hidden">
+        {suggestions.map((item) => {
+          const img = getFirstImage(item);
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => goToProduct(item.id)}
+              className="flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-accent/50 transition-colors"
+            >
+              <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-muted">
+                {img ? (
+                  <img src={img} alt={item.name} className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">N/A</div>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-medium text-foreground truncate">{item.name}</div>
+                <div className="text-xs text-muted-foreground">{item.category} • PKR {item.price}</div>
+              </div>
+            </button>
+          );
+        })}
+        <button
+          type="button"
+          onClick={handleSearch}
+          className="flex w-full items-center justify-center gap-2 border-t border-border/40 px-3 py-2 text-xs font-medium text-primary hover:bg-accent/30 transition-colors"
+        >
+          <Search className="h-3 w-3" /> View all results for "{searchQuery}"
+        </button>
+      </div>
+    );
   };
 
   return (
@@ -60,21 +165,24 @@ const Navbar = () => {
 
           {/* Desktop search */}
           {searchOpen ? (
-            <form onSubmit={handleSearch} className="ml-2 flex items-center gap-1">
-              <input
-                autoFocus
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search products..."
-                className="h-9 w-40 rounded-full border border-border/60 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary/30"
-              />
-              <Button type="submit" variant="ghost" size="icon" className="h-9 w-9 rounded-full">
-                <Search className="h-4 w-4" />
-              </Button>
-              <Button type="button" variant="ghost" size="icon" className="h-9 w-9 rounded-full" onClick={() => { setSearchOpen(false); setSearchQuery(""); }}>
-                <X className="h-4 w-4" />
-              </Button>
-            </form>
+            <div className="relative ml-2" ref={dropdownRef}>
+              <form onSubmit={handleSearch} className="flex items-center gap-1">
+                <input
+                  autoFocus
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search products..."
+                  className="h-9 w-52 rounded-full border border-border/60 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary/30"
+                />
+                <Button type="submit" variant="ghost" size="icon" className="h-9 w-9 rounded-full">
+                  <Search className="h-4 w-4" />
+                </Button>
+                <Button type="button" variant="ghost" size="icon" className="h-9 w-9 rounded-full" onClick={() => { setSearchOpen(false); setSearchQuery(""); setShowDropdown(false); }}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </form>
+              <SearchDropdown />
+            </div>
           ) : (
             <Button variant="ghost" size="icon" className="ml-1 h-9 w-9 rounded-full" onClick={() => setSearchOpen(true)} aria-label="Search">
               <Search className="h-4 w-4" />
@@ -101,18 +209,21 @@ const Navbar = () => {
       {/* Mobile search */}
       {searchOpen && (
         <div className="border-t border-border/40 bg-background/95 px-4 py-3 backdrop-blur-xl md:hidden">
-          <form onSubmit={handleSearch} className="flex items-center gap-2">
-            <input
-              autoFocus
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search products..."
-              className="h-10 flex-1 rounded-full border border-border/60 bg-background px-4 text-sm outline-none focus:border-primary"
-            />
-            <Button type="submit" size="sm" className="rounded-full">
-              <Search className="h-4 w-4" />
-            </Button>
-          </form>
+          <div className="relative" ref={!dropdownRef.current ? dropdownRef : undefined}>
+            <form onSubmit={handleSearch} className="flex items-center gap-2">
+              <input
+                autoFocus
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search products..."
+                className="h-10 flex-1 rounded-full border border-border/60 bg-background px-4 text-sm outline-none focus:border-primary"
+              />
+              <Button type="submit" size="sm" className="rounded-full">
+                <Search className="h-4 w-4" />
+              </Button>
+            </form>
+            <SearchDropdown />
+          </div>
         </div>
       )}
 

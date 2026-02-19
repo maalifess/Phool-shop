@@ -19,6 +19,7 @@ type AdminSection = "add_products" | "add_cards" | "add_fundraiser" | "order_man
 type OrderStatus = "Under Process" | "Dispatched" | "Completed" | "Cancelled";
 
 type StoredOrder = {
+  id?: string;
   timestamp: string;
   orderType?: string;
   name?: string;
@@ -34,6 +35,15 @@ type StoredOrder = {
   customColors?: string;
   customTimeline?: string;
   error?: string;
+  // Fields from phool_orders (order tracking system)
+  items?: { id: number; name: string; price: number; quantity: number; customText?: string }[];
+  subtotal?: number;
+  discount?: number;
+  giftWrap?: boolean;
+  giftWrapCost?: number;
+  total?: number;
+  promo?: string | null;
+  date?: string;
 };
 
 const AdminDashboard = () => {
@@ -80,6 +90,45 @@ const AdminDashboard = () => {
       setReviews(nextReviews);
 
       setSection("add_products");
+
+      // Load orders from both storage keys and merge
+      const merged: StoredOrder[] = [];
+      try {
+        const trackingRaw = localStorage.getItem("phool_orders");
+        if (trackingRaw) {
+          const trackingOrders = JSON.parse(trackingRaw) as any[];
+          for (const o of trackingOrders) {
+            merged.push({
+              id: o.id || undefined,
+              timestamp: o.date || new Date().toISOString(),
+              name: o.name || "",
+              products: o.items ? o.items.map((it: any) => `${it.quantity}x ${it.name} (PKR ${it.price})`).join(", ") : "",
+              status: o.status === "pending" ? "Under Process" : (o.status || "Under Process"),
+              items: o.items,
+              subtotal: o.subtotal,
+              discount: o.discount,
+              giftWrap: o.giftWrap,
+              giftWrapCost: o.giftWrapCost,
+              total: o.total,
+              promo: o.promo,
+              date: o.date,
+              orderType: "regular",
+            });
+          }
+        }
+      } catch {}
+      try {
+        const backupRaw = localStorage.getItem("phool_orders_backup");
+        if (backupRaw) {
+          const backupOrders = JSON.parse(backupRaw) as StoredOrder[];
+          for (const o of backupOrders) {
+            // Avoid duplicates by checking if this order already exists
+            const exists = merged.some((m) => m.timestamp === o.timestamp && m.name === o.name);
+            if (!exists) merged.push(o);
+          }
+        }
+      } catch {}
+      setOrders(merged);
     })();
   }, [navigate]);
 
@@ -249,10 +298,29 @@ const AdminDashboard = () => {
     return `${o.timestamp ?? ""}-${o.email ?? ""}-${o.phone ?? ""}-${o.products ?? ""}`;
   }, []);
 
-  const persistOrders = (nextNewestFirst: StoredOrder[]) => {
+  const persistOrders = (nextOrders: StoredOrder[]) => {
     try {
-      const oldestFirst = [...nextNewestFirst].reverse();
-      localStorage.setItem("phool_orders_backup", JSON.stringify(oldestFirst));
+      // Sync back to phool_orders (tracking system) for orders that have IDs
+      const trackingOrders = nextOrders.filter((o) => o.id).map((o) => ({
+        id: o.id,
+        items: o.items || [],
+        subtotal: o.subtotal || 0,
+        discount: o.discount || 0,
+        giftWrap: o.giftWrap || false,
+        giftWrapCost: o.giftWrapCost || 0,
+        total: o.total || 0,
+        promo: o.promo || null,
+        date: o.date || o.timestamp,
+        status: o.status === "Under Process" ? "pending" : o.status === "Dispatched" ? "shipped" : o.status === "Completed" ? "delivered" : o.status === "Cancelled" ? "cancelled" : "pending",
+        name: o.name || "",
+      }));
+      localStorage.setItem("phool_orders", JSON.stringify(trackingOrders));
+
+      // Also persist the old-format backup
+      const oldFormatOrders = nextOrders.filter((o) => !o.id);
+      if (oldFormatOrders.length > 0) {
+        localStorage.setItem("phool_orders_backup", JSON.stringify(oldFormatOrders));
+      }
     } catch (e) {
       // ignore
     }
@@ -900,13 +968,16 @@ const AdminDashboard = () => {
                             const isFundraiser = fundraiserOrderKeySet.has(key);
                             return (
                               <div key={key} className="rounded border border-border/40 p-3">
-                                <div className="flex items-center justify-between">
+                                <div className="flex items-center justify-between flex-wrap gap-2">
                                   <div>
+                                    {o.id && (
+                                      <div className="font-mono text-xs font-bold text-primary mb-1">{o.id}</div>
+                                    )}
                                     <div className="font-medium">{o.name}</div>
                                     <div className="text-sm text-muted-foreground">
-                                      {o.email} • {o.phone} • {new Date(o.timestamp || 0).toLocaleString()}
+                                      {o.email ? `${o.email} • ` : ""}{o.phone ? `${o.phone} • ` : ""}{new Date(o.timestamp || o.date || 0).toLocaleString()}
                                     </div>
-                                    <div className="mt-1 flex items-center gap-2">
+                                    <div className="mt-1 flex items-center gap-2 flex-wrap">
                                       <Badge className={o.orderType === "custom" ? customOrderBadgeClass : regularOrderBadgeClass}>
                                         {o.orderType === "custom" ? "Custom" : "Regular"}
                                       </Badge>
@@ -914,6 +985,19 @@ const AdminDashboard = () => {
                                         <Badge className="bg-orange-500/15 text-orange-700 border-orange-500/30">
                                           Fundraiser
                                         </Badge>
+                                      )}
+                                      {o.giftWrap && (
+                                        <Badge className="bg-pink-500/15 text-pink-700 border-pink-500/30">
+                                          Gift Wrapped
+                                        </Badge>
+                                      )}
+                                      {o.promo && (
+                                        <Badge className="bg-violet-500/15 text-violet-700 border-violet-500/30">
+                                          Promo: {o.promo}
+                                        </Badge>
+                                      )}
+                                      {typeof o.total === "number" && (
+                                        <span className="text-sm font-bold text-foreground">PKR {o.total}</span>
                                       )}
                                     </div>
                                   </div>
@@ -932,11 +1016,14 @@ const AdminDashboard = () => {
                                     <Button variant="destructive" onClick={() => deleteOrder(key)}>Delete</Button>
                                   </div>
                                 </div>
-                                <div className="mt-2 text-sm">
-                                  <div>Products: {o.products}</div>
-                                  <div>Address: {o.address}</div>
-                                  <div>Notes: {o.notes}</div>
-                                  {o.customDescription && <div>Custom: {o.customDescription}</div>}
+                                <div className="mt-2 text-sm space-y-0.5">
+                                  <div><span className="font-medium">Products:</span> {o.products}</div>
+                                  {o.address && <div><span className="font-medium">Address:</span> {o.address}</div>}
+                                  {o.notes && <div><span className="font-medium">Notes:</span> {o.notes}</div>}
+                                  {o.customDescription && <div><span className="font-medium">Custom:</span> {o.customDescription}</div>}
+                                  {typeof o.discount === "number" && o.discount > 0 && (
+                                    <div className="text-green-600"><span className="font-medium">Discount:</span> PKR {o.discount}</div>
+                                  )}
                                 </div>
                               </div>
                             );
