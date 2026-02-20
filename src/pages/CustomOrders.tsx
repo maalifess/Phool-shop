@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sparkles, CheckCircle2 } from "lucide-react";
 import { send } from "@emailjs/browser";
 import { addOrderToGoogleSheet } from "@/services/googleSheets";
+import { createOrder } from "@/lib/supabaseOrders";
 
 const CustomOrders = () => {
   const [submitted, setSubmitted] = useState(false);
@@ -39,6 +40,41 @@ const CustomOrders = () => {
 
     // Enhanced email payload for custom orders
     const orderId = `CUSTOM-${Date.now()}`;
+
+    // Save custom order to Supabase so it shows up in Admin Order Management
+    try {
+      await createOrder({
+        order_id: orderId,
+        name: orderData.name,
+        email: orderData.email,
+        phone: orderData.phone,
+        address: "",
+        products: "Custom Order Request",
+        quantity: "1",
+        payment_method: "To be discussed",
+        notes: [
+          orderData.customDetails.timeline ? `Timeline: ${orderData.customDetails.timeline}` : "",
+        ]
+          .filter(Boolean)
+          .join("\n"),
+        order_type: "custom",
+        status: "Quote Request",
+        items: [],
+        subtotal: 0,
+        discount: 0,
+        total: 0,
+        promo_code: null,
+        gift_wrap: false,
+        gift_wrap_cost: 0,
+        gift_message: "",
+        custom_description: orderData.customDetails.description,
+        custom_colors: orderData.customDetails.colors,
+        custom_timeline: orderData.customDetails.timeline,
+      });
+    } catch (err) {
+      console.error("Supabase custom order save failed:", err);
+    }
+
     const emailPayload = {
       order_id: orderId,
       name: orderData.name,
@@ -181,11 +217,11 @@ const CustomOrders = () => {
                   <div className="grid gap-5 sm:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="name">Your Name</Label>
-                      <Input id="name" placeholder="Jane Doe" required />
+                      <Input id="name" name="name" placeholder="Jane Doe" required />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="email">Email</Label>
-                      <Input id="email" type="email" placeholder="jane@email.com" required />
+                      <Input id="email" name="email" type="email" placeholder="jane@email.com" required />
                     </div>
                   </div>
 
