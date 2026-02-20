@@ -1,5 +1,4 @@
-// Google Sheets API service for PhoolShop
-// This service handles adding order data to a Google Sheet
+
 
 interface OrderData {
   name: string;
@@ -103,6 +102,16 @@ export const getOrdersFromStorage = () => {
   } catch (error) {
     console.error('Error retrieving orders:', error);
     return [];
+  }
+};
+
+// Helper function to save orders to localStorage (for admin status updates)
+export const saveOrdersToStorage = (orders: any[]) => {
+  try {
+    localStorage.setItem('phool_orders_backup', JSON.stringify(orders));
+    console.log('Orders saved to localStorage successfully');
+  } catch (error) {
+    console.error('Error saving orders to localStorage:', error);
   }
 };
 

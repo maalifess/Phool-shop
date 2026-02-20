@@ -14,6 +14,7 @@ import { loadFundraisers as loadSupabaseFundraisers, createFundraiser, updateFun
 import { loadReviews, updateReview, deleteReview } from "@/lib/supabaseReviews";
 import { loadAllOrders, updateOrderStatus as updateOrderStatusSupabase, deleteOrderByOrderId, type OrderRecord } from "@/lib/supabaseOrders";
 import type { Card as SupabaseCard, Fundraiser as SupabaseFundraiser, Review } from "@/lib/supabaseTypes";
+import { OrderStatusBadge } from "@/components/OrderStatusBadge";
 
 type AdminSection = "add_products" | "add_cards" | "add_fundraiser" | "order_management" | "review_management";
 
@@ -864,9 +865,7 @@ const AdminDashboard = () => {
                                       {o.email ? `${o.email} • ` : ""}{o.phone ? `${o.phone} • ` : ""}{new Date(o.created_at || 0).toLocaleString()}
                                     </div>
                                     <div className="mt-1 flex items-center gap-2 flex-wrap">
-                                      <Badge className={o.order_type === "custom" ? customOrderBadgeClass : regularOrderBadgeClass}>
-                                        {o.order_type === "custom" ? "Custom" : "Regular"}
-                                      </Badge>
+                                      <OrderStatusBadge status={o.status} />
                                       {isFundraiser && (
                                         <Badge className="bg-orange-500/15 text-orange-700 border-orange-500/30">
                                           Fundraiser

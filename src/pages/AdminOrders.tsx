@@ -4,10 +4,12 @@ import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Download, Eye, Trash2, Calendar, User, Phone, Mail, Package } from "lucide-react";
-import { getOrdersFromStorage } from "@/services/googleSheets";
+import { Download, Eye, Trash2, Calendar, User, Phone, Mail, Package, ChevronDown } from "lucide-react";
+import { loadAllOrders, updateOrderStatus as updateOrderStatusInSupabase } from "@/lib/supabaseOrders";
 
 interface Order {
+  id?: number;
+  order_id: string;
   timestamp: string;
   orderType: string;
   name: string;
@@ -21,30 +23,107 @@ interface Order {
   customDescription?: string;
   customColors?: string;
   customTimeline?: string;
+  status?: string;
   error?: string;
 }
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const orderStatuses = [
+    { value: 'Under Process', label: 'Under Process', color: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
+    { value: 'Confirmed', label: 'Confirmed', color: 'bg-blue-100 text-blue-800 border-blue-200' },
+    { value: 'In Progress', label: 'In Progress', color: 'bg-purple-100 text-purple-800 border-purple-200' },
+    { value: 'Ready', label: 'Ready', color: 'bg-green-100 text-green-800 border-green-200' },
+    { value: 'Dispatched', label: 'Dispatched', color: 'bg-indigo-100 text-indigo-800 border-indigo-200' },
+    { value: 'Completed', label: 'Completed', color: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
+    { value: 'Delivered', label: 'Delivered', color: 'bg-teal-100 text-teal-800 border-teal-200' },
+    { value: 'Cancelled', label: 'Cancelled', color: 'bg-red-100 text-red-800 border-red-200' },
+  ];
 
   useEffect(() => {
-    const storedOrders = getOrdersFromStorage();
-    setOrders(storedOrders.reverse()); // Show newest first
+    const fetchOrders = async () => {
+      try {
+        setLoading(true);
+        const supabaseOrders = await loadAllOrders();
+        // Convert Supabase orders to the format expected by the component
+        const formattedOrders = supabaseOrders.map(order => ({
+          ...order,
+          timestamp: order.created_at || new Date().toISOString(),
+          orderType: order.order_type,
+          paymentMethod: order.payment_method,
+          customDescription: order.custom_description,
+          customColors: order.custom_colors,
+          customTimeline: order.custom_timeline,
+        }));
+        setOrders(formattedOrders);
+      } catch (error) {
+        console.error('Failed to fetch orders:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
   }, []);
+
+  const updateOrderStatus = async (orderIndex: number, newStatus: string) => {
+    const order = orders[orderIndex];
+    if (!order.order_id) {
+      console.error('No order_id found for order:', order);
+      return;
+    }
+
+    try {
+      console.log(`Updating order ${order.order_id} status to ${newStatus}`);
+      const success = await updateOrderStatusInSupabase(order.order_id, newStatus);
+      if (success) {
+        const updatedOrders = [...orders];
+        updatedOrders[orderIndex].status = newStatus;
+        setOrders(updatedOrders);
+        console.log(`Order ${order.order_id} status updated to ${newStatus}`);
+        
+        // Optional: Refresh orders from Supabase to confirm the update
+        setTimeout(async () => {
+          try {
+            const freshOrders = await loadAllOrders();
+            const formattedOrders = freshOrders.map(o => ({
+              ...o,
+              timestamp: o.created_at || new Date().toISOString(),
+              orderType: o.order_type,
+              paymentMethod: o.payment_method,
+              customDescription: o.custom_description,
+              customColors: o.custom_colors,
+              customTimeline: o.custom_timeline,
+            }));
+            setOrders(formattedOrders);
+          } catch (error) {
+            console.error('Failed to refresh orders:', error);
+          }
+        }, 1000);
+      } else {
+        console.error('Failed to update order status in Supabase');
+      }
+    } catch (error) {
+      console.error('Error updating order status:', error);
+    }
+  };
 
   const downloadOrdersAsCSV = () => {
     if (orders.length === 0) return;
 
     const headers = [
-      'Timestamp', 'Order Type', 'Name', 'Email', 'Phone', 'Address', 
-      'Products', 'Quantity', 'Payment Method', 'Notes', 
+      'Order ID', 'Timestamp', 'Order Type', 'Name', 'Email', 'Phone', 'Address', 
+      'Products', 'Quantity', 'Payment Method', 'Status', 'Notes', 
       'Custom Description', 'Custom Colors', 'Custom Timeline'
     ];
     
     const csvContent = [
       headers.join(','),
       ...orders.map(order => [
+        `"${order.order_id || ''}"`,
         `"${order.timestamp}"`,
         `"${order.orderType}"`,
         `"${order.name}"`,
@@ -54,6 +133,7 @@ const AdminOrders = () => {
         `"${order.products}"`,
         `"${order.quantity}"`,
         `"${order.paymentMethod}"`,
+        `"${order.status || 'Under Process'}"`,
         `"${order.notes}"`,
         `"${order.customDescription || ''}"`,
         `"${order.customColors || ''}"`,
@@ -71,10 +151,9 @@ const AdminOrders = () => {
   };
 
   const clearOrders = () => {
-    if (confirm('Are you sure you want to clear all stored orders? This action cannot be undone.')) {
-      localStorage.removeItem('phool_orders_backup');
-      setOrders([]);
-    }
+    // This function would need to be implemented in Supabase
+    // For now, we'll just refresh the orders
+    alert('Clear orders functionality needs to be implemented in Supabase. Please contact your developer.');
   };
 
   const formatDate = (timestamp: string) => {
@@ -109,7 +188,19 @@ const AdminOrders = () => {
             </div>
           </motion.div>
 
-          {orders.length === 0 ? (
+          {loading ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-16"
+            >
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4" />
+              <h3 className="text-lg font-medium">Loading orders...</h3>
+              <p className="mt-2 text-muted-foreground">
+                Fetching orders from database
+              </p>
+            </motion.div>
+          ) : orders.length === 0 ? (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -133,9 +224,14 @@ const AdminOrders = () => {
                   <Card className="border-border/40 hover:border-border/60 transition-colors">
                     <CardHeader className="pb-3">
                       <div className="flex justify-between items-start">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 flex-wrap">
                           <Badge variant={order.orderType === 'custom' ? 'secondary' : 'default'}>
                             {order.orderType === 'custom' ? 'Custom Order' : 'Regular Order'}
+                          </Badge>
+                          <Badge 
+                            className={`border ${orderStatuses.find(s => s.value === (order.status || 'Under Process'))?.color || 'bg-yellow-100 text-yellow-800 border-yellow-200'}`}
+                          >
+                            {order.status || 'Under Process'}
                           </Badge>
                           {order.error && (
                             <Badge variant="destructive">Sync Error</Badge>
@@ -146,7 +242,14 @@ const AdminOrders = () => {
                           {formatDate(order.timestamp)}
                         </div>
                       </div>
-                      <CardTitle className="text-lg">{order.name}</CardTitle>
+                      <div className="flex items-center gap-2 mt-2">
+                        <CardTitle className="text-lg">{order.name}</CardTitle>
+                        {order.order_id && (
+                          <span className="text-xs text-muted-foreground font-mono bg-muted px-2 py-1 rounded">
+                            ID: {order.order_id}
+                          </span>
+                        )}
+                      </div>
                     </CardHeader>
                     <CardContent>
                       <div className="grid gap-3 text-sm">
@@ -197,15 +300,40 @@ const AdminOrders = () => {
                           </div>
                         )}
                       </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="mt-4"
-                        onClick={() => setSelectedOrder(order)}
-                      >
-                        <Eye className="mr-2 h-4 w-4" />
-                        View Details
-                      </Button>
+                      
+                      {/* Order Status Management */}
+                      <div className="mt-4 p-3 bg-muted/30 rounded-md">
+                        <div className="font-medium mb-2 text-sm">Update Status:</div>
+                        <div className="flex flex-wrap gap-2">
+                          {orderStatuses.map((status) => (
+                            <Button
+                              key={status.value}
+                              variant={order.status === status.value ? "default" : "outline"}
+                              size="sm"
+                              className={`text-xs px-2 py-1 h-auto ${
+                                order.status === status.value 
+                                  ? status.color.replace('bg-', 'bg-').replace('text-', 'text-').replace('border-', 'border-')
+                                  : 'hover:' + status.color
+                              }`}
+                              onClick={() => updateOrderStatus(index, status.value)}
+                            >
+                              {status.label}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-2 mt-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => setSelectedOrder(order)}
+                        >
+                          <Eye className="mr-2 h-4 w-4" />
+                          View Details
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 </motion.div>

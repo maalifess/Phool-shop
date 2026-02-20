@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Package, Clock, CheckCircle2, Copy, Check, Loader2 } from "lucide-react";
 import { searchOrderById, type OrderRecord } from "@/lib/supabaseOrders";
+import { OrderStatusBadge } from "@/components/OrderStatusBadge";
 
 const statusSteps = [
   { key: "Under Process", label: "Order Placed", icon: Package },
@@ -128,6 +129,9 @@ const OrderTracking = () => {
                             {order.name && <p className="text-sm text-muted-foreground">Placed by: {order.name}</p>}
                           </div>
                           <div className="text-right">
+                            <div className="flex items-center justify-end gap-2 mb-2">
+                              <OrderStatusBadge status={order.status} />
+                            </div>
                             <span className="text-lg font-bold text-primary">PKR {order.total}</span>
                             {Number(order.discount) > 0 && (
                               <p className="text-xs text-green-600">Saved PKR {order.discount}</p>
