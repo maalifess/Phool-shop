@@ -219,18 +219,9 @@ const Order = () => {
 
     // 2. Send customer confirmation email (to customer)
     const customerEmailPayload = {
+      ...emailPayload,
       to_email: orderData.email, // Customer's email
       to_name: orderData.name,
-      order_id: newOrderId,
-      order_summary: emailPayload.order_summary,
-      total_amount: totalAmount,
-      payment_method: paymentMethod || 'Not selected',
-      payment_details: emailPayload.payment_details,
-      status: 'Under Process',
-      timestamp: new Date().toLocaleString(),
-      contact_email: import.meta.env.VITE_SHOP_CONTACT_EMAIL || 'phoolshopstore@gmail.com',
-      contact_phone: import.meta.env.VITE_SHOP_CONTACT_PHONE || '0321-000-0000',
-      delivery_note: 'Free delivery - We will contact you to arrange delivery details',
       shop_name: 'Phool Shop',
       thank_you_message: 'Thank you for your order! We will process it as soon as possible and contact you with delivery details.',
       recipient_type: 'customer',

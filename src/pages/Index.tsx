@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Sparkles, Heart, Star } from "lucide-react";
@@ -149,10 +149,31 @@ const Index = () => {
                       }
                     }
                     const img = imgArray.find((v) => v && v.trim() !== "") || "";
-                    return isImageUrl(img) ? (
-                      <img src={img} alt={activeFeatured?.name ?? ""} className="absolute inset-0 h-full w-full object-cover" fetchPriority="high" />
-                    ) : (
-                      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background/30 to-accent/30" />
+                    return (
+                      <AnimatePresence mode="wait" initial={false}>
+                        {isImageUrl(img) ? (
+                          <motion.img
+                            key={img || String(featuredIndex)}
+                            src={img}
+                            alt={activeFeatured?.name ?? ""}
+                            className="absolute inset-0 h-full w-full object-cover will-change-transform"
+                            fetchPriority="high"
+                            initial={{ opacity: 0, scale: 1.04 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 1.01 }}
+                            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+                          />
+                        ) : (
+                          <motion.div
+                            key={`fallback-${featuredIndex}`}
+                            className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background/30 to-accent/30"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.6, ease: "easeInOut" }}
+                          />
+                        )}
+                      </AnimatePresence>
                     );
                   })()}
                 </div>

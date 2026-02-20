@@ -83,21 +83,11 @@ const CustomOrders = () => {
       
       // 2. Send customer confirmation email (to customer)
       const customerEmailPayload = {
+        ...emailPayload,
         to_email: orderData.email, // Customer's email
         to_name: orderData.name,
-        order_id: orderId,
-        order_summary: `Custom Order: ${orderData.customDetails.description}`,
-        total_amount: 'To be quoted',
-        payment_method: 'To be discussed',
-        status: 'Quote Request',
-        timestamp: new Date().toLocaleString(),
-        contact_email: import.meta.env.VITE_SHOP_CONTACT_EMAIL || 'phoolshopstore@gmail.com',
-        contact_phone: import.meta.env.VITE_SHOP_CONTACT_PHONE || '0321-000-0000',
         shop_name: 'Phool Shop',
         thank_you_message: 'Thank you for your custom order request! We will review your requirements and get back to you within 2-3 business days with a quote and timeline.',
-        custom_description: orderData.customDetails.description,
-        custom_colors: orderData.customDetails.colors,
-        custom_timeline: orderData.customDetails.timeline,
         recipient_type: 'customer',
       };
       
