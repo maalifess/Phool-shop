@@ -21,6 +21,7 @@ const Footer = () => {
                 { to: "/custom-orders", label: "Custom Orders" },
                 { to: "/fundraisers", label: "Fundraisers" },
                 { to: "/order", label: "Place an Order" },
+                { to: "/track-order", label: "Track Order" },
               ].map((link) => (
                 <Link
                   key={link.to}

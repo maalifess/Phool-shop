@@ -18,6 +18,7 @@ const Tokri = lazy(() => import("./pages/Tokri"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const OrderTracking = lazy(() => import("./pages/OrderTracking"));
+const OrderTrackingPage = lazy(() => import("./pages/OrderTrackingPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -55,6 +56,7 @@ const App = () => (
               <Route path="/tokri" element={<Tokri />} />
               <Route path="/order" element={<Order />} />
               <Route path="/order-tracking" element={<OrderTracking />} />
+              <Route path="/track-order" element={<OrderTrackingPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

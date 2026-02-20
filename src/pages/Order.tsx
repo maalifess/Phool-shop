@@ -110,15 +110,17 @@ const Order = () => {
     };
 
     const emailPayload = {
-      ...orderData,
       order_id: newOrderId,
+      name: orderData.name,
+      email: orderData.email,
+      phone: orderData.phone,
+      address: orderData.address || "",
       order_summary: incomingItems 
         ? incomingItems.map(item => `${item.quantity}x ${item.name} - PKR ${item.price}${item.customText ? ` (Message: ${item.customText})` : ''}`).join('\n')
         : orderData.products,
       total_amount: totalAmount,
       subtotal: subtotal,
       discount: promoDiscount > 0 ? `PKR ${promoDiscount} (${appliedPromo})` : 'None',
-      discount_amount: promoDiscount,
       promo_code: appliedPromo || 'None',
       gift_wrap: giftWrap ? 'Yes' : 'No',
       gift_wrap_cost: giftWrapCost,
@@ -136,14 +138,13 @@ const Order = () => {
       delivery_note: 'Free delivery - We will contact you to arrange delivery details',
       contact_email: import.meta.env.VITE_SHOP_CONTACT_EMAIL || 'orders@example.com',
       contact_phone: import.meta.env.VITE_SHOP_CONTACT_PHONE || '0321-000-0000',
-      // Additional fields for comprehensive email
-      order_items: incomingItems ? JSON.stringify(incomingItems) : orderData.products,
       customer_notes: String(fd.get("notes") || ""),
       special_instructions: giftWrap ? `Gift wrap requested: ${giftMessage || 'No message'}` : 'No special instructions',
     };
 
     const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || "YOUR_SERVICE_ID";
     const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || "YOUR_TEMPLATE_ID";
+    const customerTemplateId = import.meta.env.VITE_EMAILJS_CUSTOMER_TEMPLATE_ID || "YOUR_CUSTOMER_TEMPLATE_ID";
     const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || "YOUR_PUBLIC_KEY";
 
     // Save order to Supabase first so UI can progress even if EmailJS hangs/fails
@@ -196,10 +197,54 @@ const Order = () => {
       console.error('Google Sheets integration failed:', err);
     });
 
-    // Send email in background (do not block checkout)
-    send(serviceId, templateId, emailPayload, publicKey).catch((err) => {
-      console.error("Order email send failed:", err);
-    });
+    // Send emails in background (do not block checkout)
+    
+    // 1. Send admin notification email (to shop owner)
+    const adminEmailPayload = {
+      ...emailPayload,
+      to_email: import.meta.env.VITE_SHOP_CONTACT_EMAIL || 'phoolshopstore@gmail.com', // Send to shop owner
+      to_name: 'Phool Shop Admin',
+      recipient_type: 'admin',
+    };
+
+    send(serviceId, templateId, adminEmailPayload, publicKey)
+      .then((response) => {
+        console.log("✅ Admin email sent successfully!", response.status, response.text);
+      })
+      .catch((err) => {
+        console.error("❌ Admin email send failed:", err);
+        console.error("🔍 Full error details:", JSON.stringify(err, null, 2));
+        console.error("📧 EmailJS Config:", { serviceId, templateId, publicKey: publicKey.substring(0, 10) + "..." });
+      });
+
+    // 2. Send customer confirmation email (to customer)
+    const customerEmailPayload = {
+      to_email: orderData.email, // Customer's email
+      to_name: orderData.name,
+      order_id: newOrderId,
+      order_summary: emailPayload.order_summary,
+      total_amount: totalAmount,
+      payment_method: paymentMethod || 'Not selected',
+      payment_details: emailPayload.payment_details,
+      status: 'Under Process',
+      timestamp: new Date().toLocaleString(),
+      contact_email: import.meta.env.VITE_SHOP_CONTACT_EMAIL || 'phoolshopstore@gmail.com',
+      contact_phone: import.meta.env.VITE_SHOP_CONTACT_PHONE || '0321-000-0000',
+      delivery_note: 'Free delivery - We will contact you to arrange delivery details',
+      shop_name: 'Phool Shop',
+      thank_you_message: 'Thank you for your order! We will process it as soon as possible and contact you with delivery details.',
+      recipient_type: 'customer',
+    };
+
+    send(serviceId, customerTemplateId, customerEmailPayload, publicKey)
+      .then((response) => {
+        console.log("✅ Customer email sent successfully!", response.status, response.text);
+      })
+      .catch((err) => {
+        console.error("❌ Customer email send failed:", err);
+        console.error("🔍 Full error details:", JSON.stringify(err, null, 2));
+        console.error("📧 Customer EmailJS Config:", { serviceId, customerTemplateId, publicKey: publicKey.substring(0, 10) + "..." });
+      });
   };
 
   if (submitted) {
@@ -240,7 +285,7 @@ const Order = () => {
                 Place Another Order
               </Button>
               <Button asChild variant="outline" className="rounded-full px-8">
-                <Link to="/order-tracking">Track Your Orders</Link>
+                <Link to={`/track-order?order=${orderId}`}>Track Your Order</Link>
               </Button>
             </div>
           </motion.div>

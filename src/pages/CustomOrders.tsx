@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,7 @@ import { addOrderToGoogleSheet } from "@/services/googleSheets";
 
 const CustomOrders = () => {
   const [submitted, setSubmitted] = useState(false);
+  const [customOrderId, setCustomOrderId] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,53 +38,75 @@ const CustomOrders = () => {
     };
 
     // Enhanced email payload for custom orders
+    const orderId = `CUSTOM-${Date.now()}`;
     const emailPayload = {
-      ...orderData,
-      ...orderData.customDetails,
-      order_id: `CUSTOM-${Date.now()}`,
+      order_id: orderId,
+      name: orderData.name,
+      email: orderData.email,
+      phone: orderData.phone,
       order_summary: `Custom Order: ${orderData.customDetails.description}`,
       total_amount: 'To be quoted',
-      subtotal: 'To be quoted',
-      discount: 'None',
-      discount_amount: 0,
-      promo_code: 'None',
-      gift_wrap: 'No',
-      gift_wrap_cost: 0,
-      gift_message: 'Not applicable',
       payment_method: 'To be discussed',
       payment_details: "To be discussed with customer",
       order_type: 'custom',
       status: 'Quote Request',
-      items_count: 1,
       timestamp: new Date().toLocaleString(),
       delivery_note: 'Delivery timeline to be discussed based on custom order requirements',
       contact_email: import.meta.env.VITE_SHOP_CONTACT_EMAIL || 'orders@example.com',
       contact_phone: import.meta.env.VITE_SHOP_CONTACT_PHONE || '0321-000-0000',
       // Custom order specific fields
-      order_items: JSON.stringify([{
-        type: 'custom',
-        description: orderData.customDetails.description,
-        colors: orderData.customDetails.colors,
-        timeline: orderData.customDetails.timeline
-      }]),
-      customer_notes: String(fd.get("timeline") || ""),
-      special_instructions: `Custom order - ${orderData.customDetails.description}`,
       custom_description: orderData.customDetails.description,
       custom_colors: orderData.customDetails.colors,
       custom_timeline: orderData.customDetails.timeline,
+      customer_notes: orderData.customDetails.timeline,
+      special_instructions: `Custom order - ${orderData.customDetails.description}`,
       custom_request: true,
     };
 
-    // Send email via EmailJS
+    // Send emails via EmailJS
     const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || "YOUR_SERVICE_ID";
     const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || "YOUR_TEMPLATE_ID";
+    const customerTemplateId = import.meta.env.VITE_EMAILJS_CUSTOMER_TEMPLATE_ID || "YOUR_CUSTOMER_TEMPLATE_ID";
     const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || "YOUR_PUBLIC_KEY";
 
     try {
-      await send(serviceId, templateId, emailPayload, publicKey);
-      console.log("Custom order email sent successfully");
+      // 1. Send admin notification email (to shop owner)
+      const adminEmailPayload = {
+        ...emailPayload,
+        to_email: import.meta.env.VITE_SHOP_CONTACT_EMAIL || 'phoolshopstore@gmail.com', // Send to shop owner
+        to_name: 'Phool Shop Admin',
+        recipient_type: 'admin',
+      };
+      
+      const response = await send(serviceId, templateId, adminEmailPayload, publicKey);
+      console.log("✅ Admin email sent successfully!", response.status, response.text);
+      
+      // 2. Send customer confirmation email (to customer)
+      const customerEmailPayload = {
+        to_email: orderData.email, // Customer's email
+        to_name: orderData.name,
+        order_id: orderId,
+        order_summary: `Custom Order: ${orderData.customDetails.description}`,
+        total_amount: 'To be quoted',
+        payment_method: 'To be discussed',
+        status: 'Quote Request',
+        timestamp: new Date().toLocaleString(),
+        contact_email: import.meta.env.VITE_SHOP_CONTACT_EMAIL || 'phoolshopstore@gmail.com',
+        contact_phone: import.meta.env.VITE_SHOP_CONTACT_PHONE || '0321-000-0000',
+        shop_name: 'Phool Shop',
+        thank_you_message: 'Thank you for your custom order request! We will review your requirements and get back to you within 2-3 business days with a quote and timeline.',
+        custom_description: orderData.customDetails.description,
+        custom_colors: orderData.customDetails.colors,
+        custom_timeline: orderData.customDetails.timeline,
+        recipient_type: 'customer',
+      };
+      
+      const customerResponse = await send(serviceId, customerTemplateId, customerEmailPayload, publicKey);
+      console.log("✅ Customer email sent successfully!", customerResponse.status, customerResponse.text);
     } catch (err) {
-      console.error("Email send failed:", err);
+      console.error("❌ Custom order email send failed:", err);
+      console.error("🔍 Full error details:", JSON.stringify(err, null, 2));
+      console.error("📧 EmailJS Config:", { serviceId, templateId, customerTemplateId, publicKey: publicKey.substring(0, 10) + "..." });
     }
 
     // Add custom order to Google Sheets
@@ -97,6 +121,7 @@ const CustomOrders = () => {
       console.error("Google Sheets integration failed:", err);
     }
 
+    setCustomOrderId(orderId);
     setSubmitted(true);
   };
 
@@ -112,9 +137,23 @@ const CustomOrders = () => {
             <CheckCircle2 className="mx-auto h-16 w-16 text-primary" />
             <h2 className="mt-6 font-display text-3xl font-bold text-foreground">Request Submitted!</h2>
             <p className="mt-4 text-muted-foreground">We'll get back to you within 2–3 business days. Please send a proof of payment screenshot to WhatsApp on 0333-XXXXXXX.</p>
-            <Button className="mt-8 rounded-full px-8" onClick={() => setSubmitted(false)}>
-              Submit Another Request
-            </Button>
+            {customOrderId && (
+              <div className="mt-4 p-3 bg-muted/30 rounded-lg">
+                <p className="text-sm text-muted-foreground mb-1">Your Custom Order ID:</p>
+                <p className="font-mono font-bold text-primary">{customOrderId}</p>
+                <p className="text-xs text-muted-foreground mt-1">Save this ID to track your custom order</p>
+              </div>
+            )}
+            <div className="mt-6 flex flex-col items-center gap-3">
+              <Button className="rounded-full px-8" onClick={() => setSubmitted(false)}>
+                Submit Another Request
+              </Button>
+              {customOrderId && (
+                <Button asChild variant="outline" className="rounded-full px-8">
+                  <Link to={`/track-order?order=${customOrderId}`}>Track Your Request</Link>
+                </Button>
+              )}
+            </div>
           </motion.div>
         </section>
       </Layout>
