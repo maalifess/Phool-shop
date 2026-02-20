@@ -763,12 +763,19 @@ const AdminDashboard = () => {
                                     ))}
                                   </select>
                                   <div className="flex items-center gap-2">
-                                    <label className="text-sm">Active</label>
-                                    <input
-                                      type="checkbox"
-                                      defaultChecked={f.active}
-                                      onChange={(e) => updateFundraiser(f.id, { active: e.target.checked })}
-                                    />
+                                    <label className="text-sm">Status</label>
+                                    <Select
+                                      defaultValue={f.active ? "active" : "finished"}
+                                      onValueChange={(v) => updateFundraiser(f.id, { active: v === "active" })}
+                                    >
+                                      <SelectTrigger className="h-9 w-[180px]">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="active">Active</SelectItem>
+                                        <SelectItem value="finished">Finished</SelectItem>
+                                      </SelectContent>
+                                    </Select>
                                   </div>
                                 </div>
                               )}

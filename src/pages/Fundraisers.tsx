@@ -58,10 +58,21 @@ const Fundraisers = () => {
             animate="visible"
             className="mt-14 space-y-6"
           >
-            {fundraisers.map((f, i) => (
+            {fundraisers
+              .sort((a, b) => {
+                // Active fundraisers first (true > false), then by creation date
+                if (a.active !== b.active) {
+                  return b.active ? 1 : -1;
+                }
+                // If both have same active status, sort by created_at (newest first)
+                const aDate = a.created_at ? new Date(a.created_at).getTime() : 0;
+                const bDate = b.created_at ? new Date(b.created_at).getTime() : 0;
+                return bDate - aDate;
+              })
+              .map((f, i) => (
               <motion.div key={f.id} variants={fadeUp} custom={i}>
                 <Card className={`border-border/40 ${!f.active ? "opacity-70" : ""}`}>
-                  <CardContent className="flex gap-6 p-6">
+                  <CardContent className={`flex gap-6 p-6 ${!f.active ? "blur-[0.6px]" : ""}`}>
                     <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-accent text-3xl overflow-hidden">
                       {f.image ? (
                         <img src={f.image} alt={f.title} className="h-full w-full object-cover" loading="lazy" />
@@ -76,6 +87,21 @@ const Fundraisers = () => {
                           <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">
                             Active
                           </span>
+                        )}
+                        {!f.active && (
+                          <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                            Inactive
+                          </span>
+                        )}
+                        {f.end_date && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="h-6 rounded-full px-2 text-[11px]"
+                          >
+                            {f.active ? "Ending on" : "Ended on"} {new Date(f.end_date).toLocaleDateString()}
+                          </Button>
                         )}
                       </div>
                       <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{f.description}</p>
