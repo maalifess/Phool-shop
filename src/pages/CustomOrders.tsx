@@ -100,39 +100,45 @@ const CustomOrders = () => {
     };
 
     // Send emails via EmailJS
-    const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || "YOUR_SERVICE_ID";
-    const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || "YOUR_TEMPLATE_ID";
-    const customerTemplateId = import.meta.env.VITE_EMAILJS_CUSTOMER_TEMPLATE_ID || "YOUR_CUSTOMER_TEMPLATE_ID";
-    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || "YOUR_PUBLIC_KEY";
+    const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+    const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+    const customerTemplateId = import.meta.env.VITE_EMAILJS_CUSTOMER_TEMPLATE_ID;
+    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
-    try {
-      // 1. Send admin notification email (to shop owner)
-      const adminEmailPayload = {
-        ...emailPayload,
-        to_email: import.meta.env.VITE_SHOP_CONTACT_EMAIL || 'phoolshopstore@gmail.com', // Send to shop owner
-        to_name: 'Phool Shop Admin',
-        recipient_type: 'admin',
-      };
-      
-      const response = await send(serviceId, templateId, adminEmailPayload, publicKey);
-      console.log("✅ Admin email sent successfully!", response.status, response.text);
-      
-      // 2. Send customer confirmation email (to customer)
-      const customerEmailPayload = {
-        ...emailPayload,
-        to_email: orderData.email, // Customer's email
-        to_name: orderData.name,
-        shop_name: 'Phool Shop',
-        thank_you_message: 'Thank you for your custom order request! We will review your requirements and get back to you within 2-3 business days with a quote and timeline.',
-        recipient_type: 'customer',
-      };
-      
-      const customerResponse = await send(serviceId, customerTemplateId, customerEmailPayload, publicKey);
-      console.log("✅ Customer email sent successfully!", customerResponse.status, customerResponse.text);
-    } catch (err) {
-      console.error("❌ Custom order email send failed:", err);
-      console.error("🔍 Full error details:", JSON.stringify(err, null, 2));
-      console.error("📧 EmailJS Config:", { serviceId, templateId, customerTemplateId, publicKey: publicKey.substring(0, 10) + "..." });
+    // Check if EmailJS is configured before attempting to send
+    if (!serviceId || !templateId || !customerTemplateId || !publicKey || serviceId.includes('YOUR_') || publicKey.includes('YOUR_')) {
+      console.error('❌ EMAILJS NOT CONFIGURED: Missing EmailJS environment variables');
+      console.error('📧 Custom order emails NOT sent. To fix: set VITE_EMAILJS_* env vars in .env and rebuild');
+    } else {
+      try {
+        // 1. Send admin notification email (to shop owner)
+        const adminEmailPayload = {
+          ...emailPayload,
+          to_email: import.meta.env.VITE_SHOP_CONTACT_EMAIL || 'phoolshopstore@gmail.com', // Send to shop owner
+          to_name: 'Phool Shop Admin',
+          recipient_type: 'admin',
+        };
+        
+        const response = await send(serviceId, templateId, adminEmailPayload, publicKey);
+        console.log("✅ Admin email sent successfully!", response.status, response.text);
+        
+        // 2. Send customer confirmation email (to customer)
+        const customerEmailPayload = {
+          ...emailPayload,
+          to_email: orderData.email, // Customer's email
+          to_name: orderData.name,
+          shop_name: 'Phool Shop',
+          thank_you_message: 'Thank you for your custom order request! We will review your requirements and get back to you within 2-3 business days with a quote and timeline.',
+          recipient_type: 'customer',
+        };
+        
+        const customerResponse = await send(serviceId, customerTemplateId, customerEmailPayload, publicKey);
+        console.log("✅ Customer email sent successfully!", customerResponse.status, customerResponse.text);
+      } catch (err) {
+        console.error("❌ Custom order email send failed:", err);
+        console.error("🔍 Full error details:", JSON.stringify(err, null, 2));
+        console.error("📧 EmailJS Config:", { serviceId, templateId, customerTemplateId, publicKey: publicKey.substring(0, 10) + "..." });
+      }
     }
 
     // Add custom order to Google Sheets

@@ -5,8 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { CartProvider } from "@/lib/cart";
-import { LoadingProvider } from "@/contexts/LoadingContext";
-import LoadingSpinner from "@/components/LoadingSpinner";
 
 const Index = lazy(() => import("./pages/Index"));
 const Catalog = lazy(() => import("./pages/Catalog"));
@@ -32,40 +30,34 @@ const queryClient = new QueryClient({
   },
 });
 
-const LoadingFallback = () => (
-  <div className="flex min-h-screen items-center justify-center">
-    <LoadingSpinner size="lg" />
-  </div>
-);
+const LoadingFallback = () => null;
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <CartProvider>
-      <LoadingProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Suspense fallback={<LoadingFallback />}>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/catalog" element={<Catalog />} />
-                <Route path="/product/:id" element={<ProductDetails />} />
-                <Route path="/custom-orders" element={<CustomOrders />} />
-                <Route path="/fundraisers" element={<Fundraisers />} />
-                <Route path="/fundraiser/:id" element={<FundraiserDetails />} />
-                <Route path="/admin-login" element={<AdminLogin />} />
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/tokri" element={<Tokri />} />
-                <Route path="/order" element={<Order />} />
-                <Route path="/order-tracking" element={<OrderTracking />} />
-                <Route path="/track-order" element={<OrderTrackingPage />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
-          </BrowserRouter>
-        </TooltipProvider>
-      </LoadingProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Suspense fallback={<LoadingFallback />}>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/catalog" element={<Catalog />} />
+              <Route path="/product/:id" element={<ProductDetails />} />
+              <Route path="/custom-orders" element={<CustomOrders />} />
+              <Route path="/fundraisers" element={<Fundraisers />} />
+              <Route path="/fundraiser/:id" element={<FundraiserDetails />} />
+              <Route path="/admin-login" element={<AdminLogin />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/tokri" element={<Tokri />} />
+              <Route path="/order" element={<Order />} />
+              <Route path="/order-tracking" element={<OrderTracking />} />
+              <Route path="/track-order" element={<OrderTrackingPage />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
+      </TooltipProvider>
     </CartProvider>
   </QueryClientProvider>
 );

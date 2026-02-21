@@ -142,10 +142,10 @@ const Order = () => {
       special_instructions: giftWrap ? `Gift wrap requested: ${giftMessage || 'No message'}` : 'No special instructions',
     };
 
-    const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || "YOUR_SERVICE_ID";
-    const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || "YOUR_TEMPLATE_ID";
-    const customerTemplateId = import.meta.env.VITE_EMAILJS_CUSTOMER_TEMPLATE_ID || "YOUR_CUSTOMER_TEMPLATE_ID";
-    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || "YOUR_PUBLIC_KEY";
+    const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+    const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+    const customerTemplateId = import.meta.env.VITE_EMAILJS_CUSTOMER_TEMPLATE_ID;
+    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
     // Save order to Supabase first so UI can progress even if EmailJS hangs/fails
     try {
@@ -207,15 +207,21 @@ const Order = () => {
       recipient_type: 'admin',
     };
 
-    send(serviceId, templateId, adminEmailPayload, publicKey)
-      .then((response) => {
-        console.log("✅ Admin email sent successfully!", response.status, response.text);
-      })
-      .catch((err) => {
-        console.error("❌ Admin email send failed:", err);
-        console.error("🔍 Full error details:", JSON.stringify(err, null, 2));
-        console.error("📧 EmailJS Config:", { serviceId, templateId, publicKey: publicKey.substring(0, 10) + "..." });
-      });
+    // Check if EmailJS is configured
+    if (!serviceId || !templateId || !publicKey || serviceId.includes('YOUR_') || publicKey.includes('YOUR_')) {
+      console.error('❌ EMAILJS NOT CONFIGURED: Missing VITE_EMAILJS_SERVICE_ID, VITE_EMAILJS_TEMPLATE_ID, or VITE_EMAILJS_PUBLIC_KEY');
+      console.error('📧 Admin email NOT sent. To fix: set EmailJS env vars in .env and rebuild');
+    } else {
+      send(serviceId, templateId, adminEmailPayload, publicKey)
+        .then((response) => {
+          console.log("✅ Admin email sent successfully!", response.status, response.text);
+        })
+        .catch((err) => {
+          console.error("❌ Admin email send failed:", err);
+          console.error("🔍 Full error details:", JSON.stringify(err, null, 2));
+          console.error("📧 EmailJS Config:", { serviceId, templateId, publicKey: publicKey.substring(0, 10) + "..." });
+        });
+    }
 
     // 2. Send customer confirmation email (to customer)
     const customerEmailPayload = {
@@ -227,15 +233,21 @@ const Order = () => {
       recipient_type: 'customer',
     };
 
-    send(serviceId, customerTemplateId, customerEmailPayload, publicKey)
-      .then((response) => {
-        console.log("✅ Customer email sent successfully!", response.status, response.text);
-      })
-      .catch((err) => {
-        console.error("❌ Customer email send failed:", err);
-        console.error("🔍 Full error details:", JSON.stringify(err, null, 2));
-        console.error("📧 Customer EmailJS Config:", { serviceId, customerTemplateId, publicKey: publicKey.substring(0, 10) + "..." });
-      });
+    // Check if EmailJS is configured
+    if (!serviceId || !customerTemplateId || !publicKey || serviceId.includes('YOUR_') || publicKey.includes('YOUR_')) {
+      console.error('❌ EMAILJS NOT CONFIGURED: Missing VITE_EMAILJS_SERVICE_ID, VITE_EMAILJS_CUSTOMER_TEMPLATE_ID, or VITE_EMAILJS_PUBLIC_KEY');
+      console.error('📧 Customer email NOT sent. To fix: set EmailJS env vars in .env and rebuild');
+    } else {
+      send(serviceId, customerTemplateId, customerEmailPayload, publicKey)
+        .then((response) => {
+          console.log("✅ Customer email sent successfully!", response.status, response.text);
+        })
+        .catch((err) => {
+          console.error("❌ Customer email send failed:", err);
+          console.error("🔍 Full error details:", JSON.stringify(err, null, 2));
+          console.error("📧 Customer EmailJS Config:", { serviceId, customerTemplateId, publicKey: publicKey.substring(0, 10) + "..." });
+        });
+    }
   };
 
   if (submitted) {

@@ -18,7 +18,7 @@ interface OrderData {
   };
 }
 
-const GOOGLE_SHEETS_API_URL = import.meta.env.VITE_GOOGLE_SHEETS_URL || 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
+const GOOGLE_SHEETS_API_URL = import.meta.env.VITE_GOOGLE_SHEETS_URL;
 
 export const addOrderToGoogleSheet = async (orderData: OrderData): Promise<boolean> => {
   try {
@@ -54,28 +54,30 @@ export const addOrderToGoogleSheet = async (orderData: OrderData): Promise<boole
     console.log('💾 Data saved to localStorage as backup');
 
     // Try to send to Google Sheets if script URL is configured
-    if (GOOGLE_SHEETS_API_URL !== 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec') {
-      console.log('🌐 Sending to Google Sheets...');
-      try {
-        const response = await fetch(GOOGLE_SHEETS_API_URL, {
-          method: 'POST',
-          mode: 'no-cors', // Handle CORS issues
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(rowData),
-        });
+    if (!GOOGLE_SHEETS_API_URL || GOOGLE_SHEETS_API_URL.includes('YOUR_SCRIPT_ID')) {
+      console.error('❌ GOOGLE SHEETS NOT CONFIGURED: VITE_GOOGLE_SHEETS_URL is missing or contains placeholder value');
+      console.error('📊 Order saved to localStorage only. To fix: set VITE_GOOGLE_SHEETS_URL in .env and rebuild');
+      return true; // Still return success since localStorage backup worked
+    }
 
-        console.log('📡 Request sent (no-cors mode)');
-        // With no-cors, we can't read the response, but assume success if no error
-        console.log('✅ Google Sheets request completed (response unreadable due to CORS)');
-      } catch (fetchError) {
-        console.warn('❌ Google Sheets fetch failed:', fetchError);
-        console.warn('📊 Data saved locally instead');
-        return false;
-      }
-    } else {
-      console.log('⚠️ Google Sheets URL not configured, using localStorage only');
+    console.log('🌐 Sending to Google Sheets...');
+    try {
+      const response = await fetch(GOOGLE_SHEETS_API_URL, {
+        method: 'POST',
+        mode: 'no-cors', // Handle CORS issues
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(rowData),
+      });
+
+      console.log('📡 Request sent (no-cors mode)');
+      // With no-cors, we can't read the response, but assume success if no error
+      console.log('✅ Google Sheets request completed (response unreadable due to CORS)');
+    } catch (fetchError) {
+      console.warn('❌ Google Sheets fetch failed:', fetchError);
+      console.warn('📊 Data saved locally instead');
+      return false;
     }
 
     console.log('🎉 Order data saved successfully');
