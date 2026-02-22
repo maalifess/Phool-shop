@@ -21,6 +21,42 @@ const PRODUCTS_TTL_MS = 5 * 60_000; // 5 minutes instead of 1 minute
 let productsCache: CacheEntry<Product[]> | null = null;
 let productsInFlight: Promise<Product[]> | null = null;
 
+async function trySelectAllProductsFrom(table: string) {
+  return await supabase
+    .from(table)
+    .select('*')
+    .order('created_at', { ascending: false });
+}
+
+async function trySelectProductByIdFrom(table: string, id: number) {
+  return await supabase
+    .from(table)
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
+}
+
+async function tryInsertProductInto(table: string, product: any) {
+  return await supabase
+    .from(table)
+    .insert(product)
+    .select()
+    .single();
+}
+
+async function tryUpdateProductIn(table: string, id: number, updates: any) {
+  return await supabase
+    .from(table)
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+}
+
+async function tryDeleteProductFrom(table: string, id: number) {
+  return await supabase.from(table).delete().eq('id', id);
+}
+
 /** Fetch all products from Supabase (public read) */
 export async function loadProducts(): Promise<Product[]> {
   const now = Date.now();
@@ -28,10 +64,17 @@ export async function loadProducts(): Promise<Product[]> {
   if (productsInFlight) return productsInFlight;
 
   productsInFlight = (async () => {
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .order('created_at', { ascending: false });
+    // Robust: some projects use a quoted table name "Products" while others use products
+    const tablesToTry = ['products', 'Products'];
+    let data: any[] | null = null;
+    let error: any = null;
+
+    for (const table of tablesToTry) {
+      const res = await trySelectAllProductsFrom(table);
+      data = res.data as any[] | null;
+      error = res.error;
+      if (!error) break;
+    }
 
     if (error) {
       console.error('Failed to load products from Supabase', error);
@@ -66,11 +109,16 @@ export async function loadProductById(id: number): Promise<Product | null> {
     if (cached) return cached;
   }
 
-  const { data, error } = await supabase
-    .from('products')
-    .select('*')
-    .eq('id', id)
-    .maybeSingle();
+  const tablesToTry = ['products', 'Products'];
+  let data: any = null;
+  let error: any = null;
+
+  for (const table of tablesToTry) {
+    const res = await trySelectProductByIdFrom(table, id);
+    data = res.data;
+    error = res.error;
+    if (!error) break;
+  }
 
   if (error) {
     console.error('Failed to load product from Supabase', error);
@@ -99,11 +147,16 @@ export async function loadProductById(id: number): Promise<Product | null> {
 
 /** Create a new product (admin only) */
 export async function createProduct(product: Omit<Product, 'id' | 'created_at'>): Promise<Product | null> {
-  const { data, error } = await supabase
-    .from('products')
-    .insert(product)
-    .select()
-    .single();
+  const tablesToTry = ['products', 'Products'];
+  let data: any = null;
+  let error: any = null;
+
+  for (const table of tablesToTry) {
+    const res = await tryInsertProductInto(table, product);
+    data = res.data;
+    error = res.error;
+    if (!error) break;
+  }
 
   if (error) {
     console.error('Failed to create product', error);
@@ -114,12 +167,16 @@ export async function createProduct(product: Omit<Product, 'id' | 'created_at'>)
 
 /** Update a product (admin only) */
 export async function updateProduct(id: number, updates: Partial<Product>): Promise<Product | null> {
-  const { data, error } = await supabase
-    .from('products')
-    .update(updates)
-    .eq('id', id)
-    .select()
-    .single();
+  const tablesToTry = ['products', 'Products'];
+  let data: any = null;
+  let error: any = null;
+
+  for (const table of tablesToTry) {
+    const res = await tryUpdateProductIn(table, id, updates);
+    data = res.data;
+    error = res.error;
+    if (!error) break;
+  }
 
   if (error) {
     console.error('Failed to update product', error);
@@ -130,7 +187,14 @@ export async function updateProduct(id: number, updates: Partial<Product>): Prom
 
 /** Delete a product (admin only) */
 export async function deleteProduct(id: number): Promise<boolean> {
-  const { error } = await supabase.from('products').delete().eq('id', id);
+  const tablesToTry = ['products', 'Products'];
+  let error: any = null;
+
+  for (const table of tablesToTry) {
+    const res = await tryDeleteProductFrom(table, id);
+    error = res.error;
+    if (!error) break;
+  }
   if (error) {
     console.error('Failed to delete product', error);
     return false;
