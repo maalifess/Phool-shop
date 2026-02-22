@@ -29,7 +29,7 @@ export async function loadProducts(): Promise<Product[]> {
 
   productsInFlight = (async () => {
     const { data, error } = await supabase
-      .from('Products')
+      .from('products')
       .select('*')
       .order('created_at', { ascending: false });
 
@@ -67,7 +67,7 @@ export async function loadProductById(id: number): Promise<Product | null> {
   }
 
   const { data, error } = await supabase
-    .from('Products')
+    .from('products')
     .select('*')
     .eq('id', id)
     .maybeSingle();
@@ -100,7 +100,7 @@ export async function loadProductById(id: number): Promise<Product | null> {
 /** Create a new product (admin only) */
 export async function createProduct(product: Omit<Product, 'id' | 'created_at'>): Promise<Product | null> {
   const { data, error } = await supabase
-    .from('Products')
+    .from('products')
     .insert(product)
     .select()
     .single();
@@ -115,7 +115,7 @@ export async function createProduct(product: Omit<Product, 'id' | 'created_at'>)
 /** Update a product (admin only) */
 export async function updateProduct(id: number, updates: Partial<Product>): Promise<Product | null> {
   const { data, error } = await supabase
-    .from('Products')
+    .from('products')
     .update(updates)
     .eq('id', id)
     .select()
@@ -130,7 +130,7 @@ export async function updateProduct(id: number, updates: Partial<Product>): Prom
 
 /** Delete a product (admin only) */
 export async function deleteProduct(id: number): Promise<boolean> {
-  const { error } = await supabase.from('Products').delete().eq('id', id);
+  const { error } = await supabase.from('products').delete().eq('id', id);
   if (error) {
     console.error('Failed to delete product', error);
     return false;
