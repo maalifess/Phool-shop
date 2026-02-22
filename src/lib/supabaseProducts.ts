@@ -17,7 +17,7 @@ type CacheEntry<T> = {
   data: T;
 };
 
-const PRODUCTS_TTL_MS = 60_000;
+const PRODUCTS_TTL_MS = 5 * 60_000; // 5 minutes instead of 1 minute
 let productsCache: CacheEntry<Product[]> | null = null;
 let productsInFlight: Promise<Product[]> | null = null;
 

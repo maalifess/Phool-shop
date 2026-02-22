@@ -8,7 +8,7 @@ type CacheEntry<T> = {
   data: T;
 };
 
-const CARDS_TTL_MS = 60_000;
+const CARDS_TTL_MS = 5 * 60_000; // 5 minutes instead of 1 minute
 let cardsCache: CacheEntry<Card[]> | null = null;
 let cardsInFlight: Promise<Card[]> | null = null;
 
