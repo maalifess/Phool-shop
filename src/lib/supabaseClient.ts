@@ -3,6 +3,11 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+console.log('🔍 DEBUG - Supabase URL:', supabaseUrl ? 'SET' : 'MISSING');
+console.log('🔍 DEBUG - Supabase Key:', supabaseAnonKey ? 'SET' : 'MISSING');
+console.log('🔍 DEBUG - URL contains localhost:', supabaseUrl?.includes('localhost') || false);
+console.log('🔍 DEBUG - Key contains placeholder:', supabaseAnonKey?.includes('your_anon_key') || false);
+
 let supabase: any;
 
 if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('localhost') || supabaseAnonKey.includes('your_anon_key')) {
