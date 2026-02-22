@@ -1,1 +1,0 @@
-import{s as t}from"./Layout-cKL71s2y.js";async function i(a,n){const{data:s,error:r}=await t.auth.signInWithPassword({email:a,password:n});return{data:s,error:r}}async function o(){const{data:{user:a}}=await t.auth.getUser();return a}export{o as g,i as s};
