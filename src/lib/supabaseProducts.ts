@@ -77,7 +77,12 @@ export async function loadProducts(): Promise<Product[]> {
     }
 
     if (error) {
-      console.error('Failed to load products from Supabase', error);
+      console.error('Failed to load products from Supabase', {
+        code: (error as any)?.code,
+        message: (error as any)?.message,
+        details: (error as any)?.details,
+        hint: (error as any)?.hint,
+      });
       return productsCache?.data ?? [];
     }
 
@@ -121,7 +126,12 @@ export async function loadProductById(id: number): Promise<Product | null> {
   }
 
   if (error) {
-    console.error('Failed to load product from Supabase', error);
+    console.error('Failed to load product from Supabase', {
+      code: (error as any)?.code,
+      message: (error as any)?.message,
+      details: (error as any)?.details,
+      hint: (error as any)?.hint,
+    });
     return null;
   }
 
@@ -159,7 +169,12 @@ export async function createProduct(product: Omit<Product, 'id' | 'created_at'>)
   }
 
   if (error) {
-    console.error('Failed to create product', error);
+    console.error('Failed to create product', {
+      code: (error as any)?.code,
+      message: (error as any)?.message,
+      details: (error as any)?.details,
+      hint: (error as any)?.hint,
+    });
     return null;
   }
   return data;
@@ -179,7 +194,12 @@ export async function updateProduct(id: number, updates: Partial<Product>): Prom
   }
 
   if (error) {
-    console.error('Failed to update product', error);
+    console.error('Failed to update product', {
+      code: (error as any)?.code,
+      message: (error as any)?.message,
+      details: (error as any)?.details,
+      hint: (error as any)?.hint,
+    });
     return null;
   }
   return data;
@@ -196,7 +216,12 @@ export async function deleteProduct(id: number): Promise<boolean> {
     if (!error) break;
   }
   if (error) {
-    console.error('Failed to delete product', error);
+    console.error('Failed to delete product', {
+      code: (error as any)?.code,
+      message: (error as any)?.message,
+      details: (error as any)?.details,
+      hint: (error as any)?.hint,
+    });
     return false;
   }
   return true;

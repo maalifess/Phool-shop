@@ -7,6 +7,13 @@ console.log('🔍 DEBUG - Supabase URL:', supabaseUrl ? 'SET' : 'MISSING');
 console.log('🔍 DEBUG - Supabase Key:', supabaseAnonKey ? 'SET' : 'MISSING');
 console.log('🔍 DEBUG - URL contains localhost:', supabaseUrl?.includes('localhost') || false);
 console.log('🔍 DEBUG - Key contains placeholder:', supabaseAnonKey?.includes('your_anon_key') || false);
+try {
+  const host = supabaseUrl ? new URL(supabaseUrl).host : null;
+  console.log('🔍 DEBUG - Supabase host:', host || 'MISSING');
+} catch {
+  console.log('🔍 DEBUG - Supabase host: INVALID_URL');
+}
+console.log('🔍 DEBUG - Supabase anon key length:', supabaseAnonKey ? String(supabaseAnonKey).length : 0);
 
 let supabase: any;
 
