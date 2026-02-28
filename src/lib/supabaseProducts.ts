@@ -18,6 +18,7 @@ type CacheEntry<T> = {
 };
 
 const PRODUCTS_TTL_MS = 5 * 60_000; // 5 minutes instead of 1 minute
+const PRODUCTS_TIMEOUT_MS = 10_000; // 10 second timeout for Supabase queries
 let productsCache: CacheEntry<Product[]> | null = null;
 let productsInFlight: Promise<Product[]> | null = null;
 
@@ -70,10 +71,21 @@ export async function loadProducts(): Promise<Product[]> {
     let error: any = null;
 
     for (const table of tablesToTry) {
-      const res = await trySelectAllProductsFrom(table);
-      data = res.data as any[] | null;
-      error = res.error;
-      if (!error) break;
+      try {
+        const res = await Promise.race([
+          trySelectAllProductsFrom(table),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Supabase query timeout')), PRODUCTS_TIMEOUT_MS)
+          )
+        ]) as any;
+        data = res.data as any[] | null;
+        error = res.error;
+        if (!error) break;
+      } catch (err: any) {
+        error = err;
+        console.warn(`Timeout or error trying table "${table}":`, err.message);
+        // Continue to next table
+      }
     }
 
     if (error) {
@@ -83,6 +95,7 @@ export async function loadProducts(): Promise<Product[]> {
         details: (error as any)?.details,
         hint: (error as any)?.hint,
       });
+      // Return cached data if available, otherwise empty array
       return productsCache?.data ?? [];
     }
 
