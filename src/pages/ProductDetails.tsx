@@ -192,7 +192,7 @@ const ProductDetails = () => {
       price: foundProduct.price, 
       image: (() => {
         const images = foundProduct.images;
-        return images[0];
+        return images && images.length > 0 ? images[0] : undefined;
       })(), 
       customText: foundProduct.is_custom ? customText : undefined 
     }, quantity);
