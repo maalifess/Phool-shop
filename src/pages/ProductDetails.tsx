@@ -297,7 +297,7 @@ const ProductDetails = () => {
                       transition={{ duration: 0.9 }}
                       className="pointer-events-none absolute top-8 right-8 text-5xl"
                     >
-                      💌
+                      Contact
                     </motion.div>
                   )}
                 </div>
@@ -342,13 +342,13 @@ const ProductDetails = () => {
                 className="space-y-4"
               >
                 <div className="space-y-2">
-                  <h1 className="font-display text-5xl lg:text-6xl font-bold text-foreground leading-tight">
+                  <h1 className="font-display text-5xl lg:text-6xl font-medium text-foreground leading-tight">
                     {foundProduct.name}
                   </h1>
                 </div>
 
                 <div className="flex items-baseline space-x-4">
-                  <span className="text-4xl font-bold text-foreground">PKR {foundProduct.price}</span>
+                  <span className="text-4xl font-medium text-foreground">PKR {foundProduct.price}</span>
                 </div>
 
                 <div className="flex items-center space-x-4 mt-4">
@@ -356,7 +356,7 @@ const ProductDetails = () => {
                   {foundProduct.in_stock ? (
                     <span className="text-green-600 text-sm font-medium">• In Stock</span>
                   ) : (
-                    <span className="text-red-500 text-sm font-semibold">• Out of Stock</span>
+                    <span className="text-red-500 text-sm font-medium">• Out of Stock</span>
                   )}
                 </div>
 
@@ -407,7 +407,7 @@ const ProductDetails = () => {
                   transition={{ duration: 0.6, delay: 0.3 }}
                   className="space-y-3"
                 >
-                  <label className="text-sm font-semibold text-foreground uppercase tracking-wide">Personalize Your Message</label>
+                  <label className="text-sm font-medium text-foreground uppercase tracking-wide">Personalize Your Message</label>
                   <textarea
                     value={customText}
                     onChange={(e) => setCustomText(e.target.value)}
@@ -438,7 +438,7 @@ const ProductDetails = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
                       </svg>
                     </button>
-                    <span className="px-6 py-3 text-center font-semibold min-w-[60px]">{quantity}</span>
+                    <span className="px-6 py-3 text-center font-medium min-w-[60px]">{quantity}</span>
                     <button
                       onClick={() => setQuantity(quantity + 1)}
                       className="p-3 text-foreground hover:bg-gray-50 transition-colors rounded-r-2xl"
@@ -454,7 +454,7 @@ const ProductDetails = () => {
                   <Button
                     ref={buttonRef}
                     size="lg"
-                    className="rounded-full px-12 py-6 text-lg font-semibold bg-primary hover:bg-primary/90 transition-all transform hover:scale-105 shadow-lg"
+                    className="rounded-full px-12 py-6 text-lg font-medium bg-primary hover:bg-primary/90 transition-all transform hover:scale-105 shadow-lg"
                     onClick={handleAdd}
                     disabled={!foundProduct.in_stock || (foundProduct.is_custom && (customText.trim().length === 0 || customText.length > customLimit))}
                   >
@@ -473,12 +473,12 @@ const ProductDetails = () => {
             className="mt-24 border-t border-gray-200 pt-16"
           >
             <div className="max-w-4xl mx-auto">
-              <h2 className="font-display text-3xl font-bold text-foreground mb-8">Customer Reviews</h2>
+              <h2 className="font-display text-3xl font-medium text-foreground mb-8">Customer Reviews</h2>
 
               {/* Reviews Summary */}
               <div className="flex items-center justify-between mb-12 pb-8 border-b border-gray-200">
                 <div className="flex items-center space-x-6">
-                  <div className="text-5xl font-bold text-foreground">{avgRating || "—"}</div>
+                  <div className="text-5xl font-medium text-foreground">{avgRating || "—"}</div>
                   <div>
                     <div className="flex items-center space-x-1 mb-2">
                       {Array.from({ length: 5 }).map((_, i) => {
@@ -507,7 +507,7 @@ const ProductDetails = () => {
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-4 mb-3">
-                          <div className="font-semibold text-foreground">{r.name}</div>
+                          <div className="font-medium text-foreground">{r.name}</div>
                           <div className="flex items-center space-x-1">
                             {Array.from({ length: 5 }).map((_, i) => {
                               const filled = i < r.rating;
@@ -529,7 +529,7 @@ const ProductDetails = () => {
                 ))}
                 {reviews.length === 0 && (
                   <div className="text-center py-16 text-muted-foreground">
-                    <div className="text-6xl mb-4">💬</div>
+                    <div className="text-6xl mb-4">Reviews</div>
                     <p className="text-lg">No reviews yet. Be the first to share your thoughts!</p>
                   </div>
                 )}
@@ -537,10 +537,10 @@ const ProductDetails = () => {
 
               {/* Review Form */}
               <div className="bg-white rounded-3xl p-8 border border-gray-200">
-                <h3 className="text-xl font-bold text-foreground mb-6">Share Your Experience</h3>
+                <h3 className="text-xl font-medium text-foreground mb-6">Share Your Experience</h3>
                 <form onSubmit={submitReview} className="space-y-6">
                   <div>
-                    <label className="text-sm font-semibold text-foreground uppercase tracking-wide block mb-3">Your Rating</label>
+                    <label className="text-sm font-medium text-foreground uppercase tracking-wide block mb-3">Your Rating</label>
                     <div className="flex items-center space-x-3">
                       {[1, 2, 3, 4, 5].map((n) => (
                         <motion.button
@@ -564,7 +564,7 @@ const ProductDetails = () => {
                   </div>
 
                   <div>
-                    <label className="text-sm font-semibold text-foreground uppercase tracking-wide block mb-3">Your Review</label>
+                    <label className="text-sm font-medium text-foreground uppercase tracking-wide block mb-3">Your Review</label>
                     <textarea
                       maxLength={150}
                       value={reviewText}
@@ -582,7 +582,7 @@ const ProductDetails = () => {
                     <Button
                       type="submit"
                       disabled={!rating || reviewText.trim().length === 0}
-                      className="rounded-full px-8 py-4 font-semibold bg-primary hover:bg-primary/90 transition-all"
+                      className="rounded-full px-8 py-4 font-medium bg-primary hover:bg-primary/90 transition-all"
                     >
                       Submit Review
                     </Button>
@@ -591,9 +591,9 @@ const ProductDetails = () => {
                         initial={{ scale: 0.6, opacity: 0 }}
                         animate={{ scale: 1.05, opacity: 1 }}
                         transition={{ duration: 0.35 }}
-                        className="text-primary font-semibold"
+                        className="text-primary font-medium"
                       >
-                        🎉 Review posted!
+                        Review posted!
                       </motion.div>
                     )}
                   </div>
@@ -605,7 +605,7 @@ const ProductDetails = () => {
           {/* Related Products */}
           {relatedProducts.length > 0 && (
             <div className="mt-24 border-t border-gray-200 pt-16">
-              <h2 className="font-display text-3xl font-bold text-foreground mb-8">You May Also Like</h2>
+              <h2 className="font-display text-3xl font-medium text-foreground mb-8">You May Also Like</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 {relatedProducts.map((rp) => {
                   const rpImages = typeof rp.images === 'string' ? (() => { try { return JSON.parse(rp.images || '[]'); } catch { return []; } })() : rp.images;
@@ -621,11 +621,11 @@ const ProductDetails = () => {
                               <div className="h-full w-full flex items-center justify-center bg-accent text-sm text-muted-foreground">No image</div>
                             )}
                             {!rp.in_stock && (
-                              <div className="absolute top-2 left-2 rounded-full bg-red-500/90 px-2 py-0.5 text-xs font-semibold text-white">Out of Stock</div>
+                              <div className="absolute top-2 left-2 rounded-full bg-red-500/90 px-2 py-0.5 text-xs font-medium text-white">Out of Stock</div>
                             )}
                           </div>
                           <div className="p-4">
-                            <p className="font-display text-sm font-semibold text-foreground line-clamp-1">{rp.name}</p>
+                            <p className="font-display text-sm font-medium text-foreground line-clamp-1">{rp.name}</p>
                             <p className="mt-1 text-primary font-medium">PKR {rp.price}</p>
                           </div>
                         </CardContent>

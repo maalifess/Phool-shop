@@ -118,7 +118,7 @@ const Navbar = () => {
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <div className="text-sm font-medium text-foreground truncate">{item.name}</div>
+                <h3 className="font-display text-sm font-thin text-foreground truncate">{item.name}</h3>
                 <div className="text-xs text-muted-foreground">{item.category} • PKR {item.price}</div>
               </div>
             </button>
@@ -138,7 +138,7 @@ const Navbar = () => {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl">
       <div className="container flex h-16 items-center justify-between">
-        <Link to="/" className="font-display text-2xl font-semibold tracking-tight text-foreground hover:scale-110 transition-transform duration-300 inline-block">
+        <Link to="/" className="font-display text-2xl font-medium tracking-tight text-foreground hover:scale-110 transition-transform duration-300 inline-block">
            Phool Shop
         </Link>
 
@@ -148,8 +148,8 @@ const Navbar = () => {
             <Link
               key={link.to}
               to={link.to}
-              className={`rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground ${
-                location.pathname === link.to ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+              className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+                location.pathname === link.to ? "bg-[#EFD8D6] text-[#BC8F8F]" : "text-[#BC8F8F] hover:bg-[#EFD8D6] hover:text-[#BC8F8F]"
               }`}
             >
               <span className="inline-flex items-center gap-2">
@@ -236,8 +236,8 @@ const Navbar = () => {
                 key={link.to}
                 to={link.to}
                 onClick={() => setMobileOpen(false)}
-                className={`rounded-md px-4 py-3 text-sm font-medium transition-colors hover:bg-accent ${
-                  location.pathname === link.to ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+                className={`rounded-md px-4 py-3 text-sm font-medium transition-colors ${
+                  location.pathname === link.to ? "bg-[#EFD8D6] text-[#BC8F8F]" : "text-[#BC8F8F] hover:bg-[#EFD8D6] hover:text-[#BC8F8F]"
                 }`}
               >
                 <span className="inline-flex items-center gap-2">

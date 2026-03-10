@@ -77,7 +77,7 @@ const Fundraisers = () => {
                       {f.image ? (
                         <img src={f.image} alt={f.title} className="h-full w-full object-cover" loading="lazy" />
                       ) : (
-                        "🎗️"
+                        "Fundraiser"
                       )}
                     </div>
                     <div className="flex-1">

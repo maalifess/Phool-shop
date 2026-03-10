@@ -30,7 +30,9 @@ const queryClient = new QueryClient({
   },
 });
 
-const LoadingFallback = () => null;
+const LoadingFallback = () => (
+  <div className="fixed inset-0 bg-white z-50" />
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
