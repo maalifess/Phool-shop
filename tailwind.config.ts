@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ["Baby Gemoy", "Mochi Boom", "Mochiy Pop One", "Baloo 2", "Playfair Display", "serif"],
-        body: ["Baby Gemoy", "Mochi Boom", "Mochiy Pop One", "Baloo 2", "Inter", "sans-serif"],
+        display: ["Fredoka One", "Comfortaa", "Varela Round", "sans-serif"],
+        body: ["Fredoka One", "Comfortaa", "Varela Round", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

@@ -1,7 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Baby+Gemoy&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Baloo+2:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&family=Fredoka+One&family=Varela+Round&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -48,9 +46,9 @@
     --sidebar-border: 0 30% 90%;
     --sidebar-ring: 0 76% 82%;
 
-    /* Primary site font: Baby Gemoy if available, then Mochi Boom, then Mochiy Pop One */
-    --font-display: 'Baby Gemoy', 'Mochi Boom', 'Mochiy Pop One', 'Baloo 2', 'Inter', sans-serif;
-    --font-body: 'Baby Gemoy', 'Mochi Boom', 'Mochiy Pop One', 'Baloo 2', 'Inter', sans-serif;
+    /* Primary site font: Fredoka One as main font for everything */
+    --font-display: 'Fredoka One', 'Comfortaa', 'Varela Round', sans-serif;
+    --font-body: 'Fredoka One', 'Comfortaa', 'Varela Round', sans-serif;
   }
 
   .dark {
@@ -101,7 +99,7 @@
 }
 
 /* Landing page bubbly font (except Phool Shop which uses Great Vibes) */
-.landing-bubbly { font-family: 'Baloo 2', var(--font-body); }
+.landing-bubbly { font-family: 'Fredoka One', 'Comfortaa', 'Varela Round', sans-serif; }
 
 @layer base {
   * {
