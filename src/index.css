@@ -7,44 +7,69 @@
 
 @layer base {
   :root {
-    --background: 0 50% 98%;
-    --foreground: 0 10% 15%;
+    --background: 340 100% 97.5%;
+    /* #fff0f5 */
+    --foreground: 215 28% 17%;
+    /* #1e293b (Slate-800) */
 
-    --card: 0 60% 96%;
-    --card-foreground: 0 10% 15%;
+    --card: 0 0% 100%;
+    /* #ffffff */
+    --card-foreground: 215 28% 17%;
+    /* #1e293b */
 
-    --popover: 0 50% 98%;
-    --popover-foreground: 0 10% 15%;
+    --popover: 0 0% 100%;
+    /* #ffffff */
+    --popover-foreground: 215 28% 17%;
+    /* #1e293b */
 
-    --primary: 0 76% 82%;
-    --primary-foreground: 0 10% 15%;
+    --primary: 329 86% 70%;
+    /* #f472b6 Pink-400 */
+    --primary-foreground: 0 0% 100%;
+    /* #ffffff */
 
-    --secondary: 0 60% 96%;
-    --secondary-foreground: 0 10% 15%;
+    --secondary: 327 100% 93%;
+    /* #fce7f3 Pink-100 */
+    --secondary-foreground: 329 86% 70%;
+    /* #f472b6 Pink-400 */
 
-    --muted: 0 30% 94%;
-    --muted-foreground: 0 5% 45%;
+    --muted: 210 40% 98%;
+    /* #f8fafc Slate-50 */
+    --muted-foreground: 215 16% 47%;
+    /* #64748b Slate-500 */
 
-    --accent: 0 68% 93%;
-    --accent-foreground: 0 10% 15%;
+    --accent: 271 81% 65%;
+    /* #a855f7 Purple-500 */
+    --accent-foreground: 0 0% 100%;
+    /* #ffffff */
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 30% 90%;
-    --input: 0 30% 90%;
-    --ring: 0 76% 82%;
+    --border: 330 93% 88%;
+    /* #fbcfe8 Pink-200 */
+    --input: 330 93% 88%;
+    /* #fbcfe8 Pink-200 */
+    --ring: 329 86% 70%;
+    /* #f472b6 Pink-400 */
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
-    --sidebar-background: 0 60% 96%;
-    --sidebar-foreground: 0 10% 15%;
-    --sidebar-primary: 0 76% 82%;
-    --sidebar-primary-foreground: 0 10% 15%;
-    --sidebar-accent: 0 68% 93%;
-    --sidebar-accent-foreground: 0 10% 15%;
-    --sidebar-border: 0 30% 90%;
-    --sidebar-ring: 0 76% 82%;
+    --sidebar-background: 0 0% 100%;
+    /* #ffffff */
+    --sidebar-foreground: 215 28% 17%;
+    /* #1e293b */
+    --sidebar-primary: 329 86% 70%;
+    /* #f472b6 Pink-400 */
+    --sidebar-primary-foreground: 0 0% 100%;
+    /* #ffffff */
+    --sidebar-accent: 271 81% 65%;
+    /* #a855f7 Purple-500 */
+    --sidebar-accent-foreground: 0 0% 100%;
+    /* #ffffff */
+    --sidebar-border: 330 93% 88%;
+    /* #fbcfe8 Pink-200 */
+    --sidebar-ring: 329 86% 70%;
+    /* #f472b6 Pink-400 */
 
     /* Primary site font: Fredoka One as main font for everything */
     --font-display: 'Fredoka One', 'Comfortaa', 'Varela Round', sans-serif;
@@ -83,23 +108,62 @@
 }
 
 @layer components {
-  .hero-slideshow { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
-  .hero-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1s ease-in-out; }
-  .hero-slide--one { background: linear-gradient(120deg, rgba(255,210,220,0.9), rgba(255,230,240,0.9)); animation: slideFade 12s infinite; }
-  .hero-slide--two { background: linear-gradient(120deg, rgba(255,200,215,0.9), rgba(255,225,235,0.9)); animation: slideFade 12s infinite 4s; }
-  .hero-slide--three { background: linear-gradient(120deg, rgba(255,220,230,0.9), rgba(255,240,245,0.9)); animation: slideFade 12s infinite 8s; }
+  .hero-slideshow {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .hero-slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+  }
+
+  .hero-slide--one {
+    background: linear-gradient(120deg, rgba(255, 210, 220, 0.9), rgba(255, 230, 240, 0.9));
+    animation: slideFade 12s infinite;
+  }
+
+  .hero-slide--two {
+    background: linear-gradient(120deg, rgba(255, 200, 215, 0.9), rgba(255, 225, 235, 0.9));
+    animation: slideFade 12s infinite 4s;
+  }
+
+  .hero-slide--three {
+    background: linear-gradient(120deg, rgba(255, 220, 230, 0.9), rgba(255, 240, 245, 0.9));
+    animation: slideFade 12s infinite 8s;
+  }
 
   @keyframes slideFade {
-    0% { opacity: 0; }
-    8% { opacity: 1; }
-    33% { opacity: 1; }
-    41% { opacity: 0; }
-    100% { opacity: 0; }
+    0% {
+      opacity: 0;
+    }
+
+    8% {
+      opacity: 1;
+    }
+
+    33% {
+      opacity: 1;
+    }
+
+    41% {
+      opacity: 0;
+    }
+
+    100% {
+      opacity: 0;
+    }
   }
 }
 
 /* Landing page bubbly font (except Phool Shop which uses Great Vibes) */
-.landing-bubbly { font-family: 'Fredoka One', 'Comfortaa', 'Varela Round', sans-serif; }
+.landing-bubbly {
+  font-family: 'Fredoka One', 'Comfortaa', 'Varela Round', sans-serif;
+}
 
 @layer base {
   * {
@@ -109,9 +173,27 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body);
+    /* Custom Cute Crochet Hook Cursor */
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="%23ec4899" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 20.5A2.5 2.5 0 0 1 11.5 18V6A3.5 3.5 0 0 1 15 2.5a3.5 3.5 0 0 1 3.5 3.5v1.5H16A1.5 1.5 0 0 0 14.5 9v11.5z"></path></svg>'), auto;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  /* Cute squishy effect when active globally */
+  body:active {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="%23db2777" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M14 20.5A2.5 2.5 0 0 1 11.5 18V6A3.5 3.5 0 0 1 15 2.5a3.5 3.5 0 0 1 3.5 3.5v1.5H16A1.5 1.5 0 0 0 14.5 9v11.5z"></path></svg>'), pointer;
+  }
+
+  /* Exclude cursor override from clickable elements so they can still show pointers if needed */
+  button,
+  a {
+    cursor: pointer;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-display);
   }
 }

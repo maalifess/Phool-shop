@@ -88,7 +88,7 @@ const Order = () => {
       await navigator.clipboard.writeText(orderId);
       setOrderIdCopied(true);
       setTimeout(() => setOrderIdCopied(false), 2000);
-    } catch {}
+    } catch { }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -96,7 +96,7 @@ const Order = () => {
     const form = e.target as HTMLFormElement;
     const fd = new FormData(form);
     const newOrderId = generateOrderId();
-    
+
     const orderData = {
       name: String(fd.get("name") || ""),
       email: String(fd.get("email") || ""),
@@ -115,7 +115,7 @@ const Order = () => {
       email: orderData.email,
       phone: orderData.phone,
       address: orderData.address || "",
-      order_summary: incomingItems 
+      order_summary: incomingItems
         ? incomingItems.map(item => `${item.quantity}x ${item.name} - PKR ${item.price}${item.customText ? ` (Message: ${item.customText})` : ''}`).join('\n')
         : orderData.products,
       total_amount: totalAmount,
@@ -126,11 +126,11 @@ const Order = () => {
       gift_wrap_cost: giftWrapCost,
       gift_message: giftMessage || 'No message',
       payment_method: paymentMethod || 'Not selected',
-      payment_details: paymentMethod === "jazzcash" 
+      payment_details: paymentMethod === "jazzcash"
         ? "JazzCash: 0321-000-0000 (Phool Shop)"
         : paymentMethod === "bank"
-        ? "Bank: Example Bank, IBAN: PK00EXAM00000000000000 (Phool Shop)"
-        : "Not selected",
+          ? "Bank: Example Bank, IBAN: PK00EXAM00000000000000 (Phool Shop)"
+          : "Not selected",
       order_type: 'regular',
       status: 'Under Process',
       items_count: incomingItems ? incomingItems.length : 1,
@@ -198,7 +198,7 @@ const Order = () => {
     });
 
     // Send emails in background (do not block checkout)
-    
+
     // 1. Send admin notification email (to shop owner)
     const adminEmailPayload = {
       ...emailPayload,
@@ -259,7 +259,7 @@ const Order = () => {
               <CheckCircle2 className="mx-auto h-20 w-20 text-primary" />
             </motion.div>
             <motion.h2 initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.15 }} className="mt-6 font-display text-3xl font-bold text-foreground">Order Placed!</motion.h2>
-            
+
             {orderId && (
               <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="mt-4 rounded-xl border border-border/40 bg-accent/50 p-4">
                 <p className="text-sm text-muted-foreground mb-1">Your Order ID</p>
@@ -339,8 +339,8 @@ const Order = () => {
                 <form onSubmit={handleSubmit} className="space-y-5">
                   <div className="grid gap-5 sm:grid-cols-2">
                     <div className="space-y-2">
-                        <Label htmlFor="name">Full Name</Label>
-                        <Input id="name" name="name" required />
+                      <Label htmlFor="name">Full Name</Label>
+                      <Input id="name" name="name" required />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="email">Email</Label>
@@ -475,7 +475,7 @@ const Order = () => {
                     </div>
                   )}
 
-                    <div className="rounded-lg border border-border/60 bg-accent/50 p-4 text-sm text-muted-foreground">
+                  <div className="rounded-lg border border-border/60 bg-accent/50 p-4 text-sm text-muted-foreground">
                     <strong>Payment:</strong> Send screenshot of proof of payment to email or phone below. We'll contact you to confirm and arrange delivery. There are no delivery charges — delivery is free.
                     <div className="mt-3 space-y-1 text-sm">
                       <div>Email: <strong>{import.meta.env.VITE_SHOP_CONTACT_EMAIL || 'orders@example.com'}</strong></div>

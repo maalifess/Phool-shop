@@ -74,7 +74,7 @@ export async function loadProducts(): Promise<Product[]> {
       try {
         const res = await Promise.race([
           trySelectAllProductsFrom(table),
-          new Promise((_, reject) => 
+          new Promise((_, reject) =>
             setTimeout(() => reject(new Error('Supabase query timeout')), PRODUCTS_TIMEOUT_MS)
           )
         ]) as any;

@@ -258,18 +258,16 @@ const OrderTrackingPage = () => {
                                   return (
                                     <div key={step.key} className="flex flex-col items-center flex-1">
                                       <div
-                                        className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${
-                                          isActive
+                                        className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${isActive
                                             ? "bg-primary text-white"
                                             : "bg-muted text-muted-foreground"
-                                        }`}
+                                          }`}
                                       >
                                         <Icon className="h-4 w-4" />
                                       </div>
                                       <span
-                                        className={`mt-2 text-xs font-medium text-center ${
-                                          isActive ? "text-primary" : "text-muted-foreground"
-                                        }`}
+                                        className={`mt-2 text-xs font-medium text-center ${isActive ? "text-primary" : "text-muted-foreground"
+                                          }`}
                                       >
                                         {step.label}
                                       </span>

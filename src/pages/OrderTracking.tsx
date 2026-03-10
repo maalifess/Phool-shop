@@ -37,7 +37,7 @@ const OrderTracking = () => {
       await navigator.clipboard.writeText(id);
       setCopied(id);
       setTimeout(() => setCopied(null), 2000);
-    } catch {}
+    } catch { }
   };
 
   const getStatusIndex = (status: string) => {
@@ -105,92 +105,92 @@ const OrderTracking = () => {
             )}
 
             {!loading && results.map((order) => {
-                const statusIdx = getStatusIndex(order.status);
-                const items = (order.items || []) as { id: number; name: string; price: number; quantity: number }[];
-                return (
-                  <motion.div
-                    key={order.order_id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                  >
-                    <Card className="border-border/40">
-                      <CardContent className="p-6">
-                        <div className="flex items-start justify-between gap-4 flex-wrap">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-mono text-sm font-bold text-foreground">{order.order_id}</span>
-                              <button onClick={() => copyId(order.order_id)} className="rounded p-1 hover:bg-muted transition-colors">
-                                {copied === order.order_id ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5 text-muted-foreground" />}
-                              </button>
-                            </div>
-                            <p className="mt-1 text-sm text-muted-foreground">
-                              {new Date(order.created_at || "").toLocaleDateString()} at {new Date(order.created_at || "").toLocaleTimeString()}
+              const statusIdx = getStatusIndex(order.status);
+              const items = (order.items || []) as { id: number; name: string; price: number; quantity: number }[];
+              return (
+                <motion.div
+                  key={order.order_id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <Card className="border-border/40">
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between gap-4 flex-wrap">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-sm font-bold text-foreground">{order.order_id}</span>
+                            <button onClick={() => copyId(order.order_id)} className="rounded p-1 hover:bg-muted transition-colors">
+                              {copied === order.order_id ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5 text-muted-foreground" />}
+                            </button>
+                          </div>
+                          <p className="mt-1 text-sm text-muted-foreground">
+                            {new Date(order.created_at || "").toLocaleDateString()} at {new Date(order.created_at || "").toLocaleTimeString()}
+                          </p>
+                          {order.name && <p className="text-sm text-muted-foreground">Placed by: {order.name}</p>}
+                        </div>
+                        <div className="text-right">
+                          <div className="flex items-center justify-end gap-2 mb-2">
+                            <OrderStatusBadge status={order.status} />
+                          </div>
+                          <span className="text-lg font-bold text-primary">PKR {order.total}</span>
+                          {Number(order.discount) > 0 && (
+                            <p className="text-xs text-green-600">Saved PKR {order.discount}</p>
+                          )}
+                          {order.gift_wrap && (
+                            <p className="text-xs text-muted-foreground flex items-center justify-end gap-1">
+                              <span>Gift wrapped</span>
                             </p>
-                            {order.name && <p className="text-sm text-muted-foreground">Placed by: {order.name}</p>}
-                          </div>
-                          <div className="text-right">
-                            <div className="flex items-center justify-end gap-2 mb-2">
-                              <OrderStatusBadge status={order.status} />
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Items */}
+                      {items.length > 0 && (
+                        <div className="mt-4 space-y-1">
+                          {items.map((item, i) => (
+                            <div key={i} className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">{item.quantity}x {item.name}</span>
+                              <span>PKR {item.price * item.quantity}</span>
                             </div>
-                            <span className="text-lg font-bold text-primary">PKR {order.total}</span>
-                            {Number(order.discount) > 0 && (
-                              <p className="text-xs text-green-600">Saved PKR {order.discount}</p>
-                            )}
-                            {order.gift_wrap && (
-                              <p className="text-xs text-muted-foreground flex items-center justify-end gap-1">
-                                <span>Gift wrapped</span>
-                              </p>
-                            )}
-                          </div>
+                          ))}
                         </div>
+                      )}
 
-                        {/* Items */}
-                        {items.length > 0 && (
-                          <div className="mt-4 space-y-1">
-                            {items.map((item, i) => (
-                              <div key={i} className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">{item.quantity}x {item.name}</span>
-                                <span>PKR {item.price * item.quantity}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Status tracker */}
-                        <div className="mt-6">
-                          <div className="flex items-center justify-between">
-                            {statusSteps.map((step, i) => {
-                              const active = i <= statusIdx;
-                              const Icon = step.icon;
-                              return (
-                                <div key={step.key} className="flex flex-col items-center flex-1">
-                                  <div className={`flex h-8 w-8 items-center justify-center rounded-full ${active ? "bg-primary text-white" : "bg-muted text-muted-foreground"} transition-colors`}>
-                                    <Icon className="h-4 w-4" />
-                                  </div>
-                                  <span className={`mt-2 text-xs font-medium ${active ? "text-primary" : "text-muted-foreground"}`}>
-                                    {step.label}
-                                  </span>
+                      {/* Status tracker */}
+                      <div className="mt-6">
+                        <div className="flex items-center justify-between">
+                          {statusSteps.map((step, i) => {
+                            const active = i <= statusIdx;
+                            const Icon = step.icon;
+                            return (
+                              <div key={step.key} className="flex flex-col items-center flex-1">
+                                <div className={`flex h-8 w-8 items-center justify-center rounded-full ${active ? "bg-primary text-white" : "bg-muted text-muted-foreground"} transition-colors`}>
+                                  <Icon className="h-4 w-4" />
                                 </div>
-                              );
-                            })}
-                          </div>
-                          <div className="mt-1 flex">
-                            {statusSteps.slice(0, -1).map((_, i) => (
-                              <div key={i} className={`flex-1 h-0.5 mx-4 rounded ${i < statusIdx ? "bg-primary" : "bg-muted"}`} />
-                            ))}
-                          </div>
+                                <span className={`mt-2 text-xs font-medium ${active ? "text-primary" : "text-muted-foreground"}`}>
+                                  {step.label}
+                                </span>
+                              </div>
+                            );
+                          })}
                         </div>
+                        <div className="mt-1 flex">
+                          {statusSteps.slice(0, -1).map((_, i) => (
+                            <div key={i} className={`flex-1 h-0.5 mx-4 rounded ${i < statusIdx ? "bg-primary" : "bg-muted"}`} />
+                          ))}
+                        </div>
+                      </div>
 
-                        {order.status === "Cancelled" && (
-                          <div className="mt-4 rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700 text-center font-medium">
-                            This order has been cancelled.
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                );
-              })
+                      {order.status === "Cancelled" && (
+                        <div className="mt-4 rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700 text-center font-medium">
+                          This order has been cancelled.
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })
             }
           </div>
         </div>
