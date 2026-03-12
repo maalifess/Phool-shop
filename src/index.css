@@ -1,6 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Sacramento&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&family=Fredoka+One&family=Varela+Round&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sacramento&family=Great+Vibes&family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -8,165 +6,52 @@
 
 @layer base {
   :root {
-    --background: 45 25% 96%;
-    /* #F7F3ED */
-    --foreground: 20 25% 26%;
-    /* #442f2a */
+    --background: 30 33% 95%;
+    --foreground: 15 30% 16%;
 
-    --card: 0 0% 100%;
-    /* #ffffff */
-    --card-foreground: 215 28% 17%;
-    /* #1e293b */
+    --card: 20 50% 97%;
+    --card-foreground: 15 30% 16%;
 
-    --popover: 0 0% 100%;
-    /* #ffffff */
-    --popover-foreground: 215 28% 17%;
-    /* #1e293b */
+    --popover: 20 50% 97%;
+    --popover-foreground: 15 30% 16%;
 
-    --primary: 329 86% 70%;
-    /* #f472b6 Pink-400 */
-    --primary-foreground: 0 0% 100%;
-    /* #ffffff */
+    --primary: 15 30% 16%;
+    --primary-foreground: 30 33% 95%;
 
-    --secondary: 327 100% 93%;
-    /* #fce7f3 Pink-100 */
-    --secondary-foreground: 329 86% 70%;
-    /* #f472b6 Pink-400 */
+    --secondary: 0 25% 65%;
+    --secondary-foreground: 30 33% 95%;
 
-    --muted: 210 40% 98%;
-    /* #f8fafc Slate-50 */
-    --muted-foreground: 215 16% 47%;
-    /* #64748b Slate-500 */
+    --muted: 20 20% 90%;
+    --muted-foreground: 15 15% 45%;
 
-    --accent: 271 81% 65%;
-    /* #a855f7 Purple-500 */
-    --accent-foreground: 0 0% 100%;
-    /* #ffffff */
+    --accent: 10 50% 90%;
+    --accent-foreground: 15 30% 16%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 330 93% 88%;
-    /* #fbcfe8 Pink-200 */
-    --input: 330 93% 88%;
-    /* #fbcfe8 Pink-200 */
-    --ring: 329 86% 70%;
-    /* #f472b6 Pink-400 */
+    --border: 20 20% 82%;
+    --input: 20 20% 82%;
+    --ring: 15 30% 16%;
 
-    --radius: 1rem;
+    --radius: 2rem;
 
-    --sidebar-background: 0 0% 100%;
-    /* #ffffff */
-    --sidebar-foreground: 215 28% 17%;
-    /* #1e293b */
-    --sidebar-primary: 329 86% 70%;
-    /* #f472b6 Pink-400 */
-    --sidebar-primary-foreground: 0 0% 100%;
-    /* #ffffff */
-    --sidebar-accent: 271 81% 65%;
-    /* #a855f7 Purple-500 */
-    --sidebar-accent-foreground: 0 0% 100%;
-    /* #ffffff */
-    --sidebar-border: 330 93% 88%;
-    /* #fbcfe8 Pink-200 */
-    --sidebar-ring: 329 86% 70%;
-    /* #f472b6 Pink-400 */
+    --cream: 30 33% 95%;
+    --deep-brown: 15 30% 16%;
+    --rosy: 0 25% 65%;
+    --blush: 10 50% 90%;
+    --golden: 42 90% 60%;
+    --golden-light: 42 90% 75%;
+    --seashell: 20 100% 97%;
 
-    /* Primary site font: Fredoka as main font for everything */
-    --font-display: 'Fredoka', 'Varela Round', sans-serif;
-    --font-body: 'Fredoka', 'Varela Round', sans-serif;
+    --shadow-retro: 4px 4px 0px hsl(var(--deep-brown));
+    --shadow-retro-sm: 2px 2px 0px hsl(var(--deep-brown));
+
+    --font-display: 'Sacramento', cursive;
+    --font-heading: 'Fredoka One', cursive;
+    --font-body: 'Nunito', sans-serif;
   }
 
-  .dark {
-    --background: 0 10% 8%;
-    --foreground: 0 50% 98%;
-    --card: 0 10% 12%;
-    --card-foreground: 0 50% 98%;
-    --popover: 0 10% 8%;
-    --popover-foreground: 0 50% 98%;
-    --primary: 0 76% 82%;
-    --primary-foreground: 0 10% 15%;
-    --secondary: 0 10% 15%;
-    --secondary-foreground: 0 50% 98%;
-    --muted: 0 10% 18%;
-    --muted-foreground: 0 10% 60%;
-    --accent: 0 20% 20%;
-    --accent-foreground: 0 50% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 0 10% 20%;
-    --input: 0 10% 20%;
-    --ring: 0 76% 82%;
-    --sidebar-background: 0 10% 10%;
-    --sidebar-foreground: 0 50% 98%;
-    --sidebar-primary: 0 76% 82%;
-    --sidebar-primary-foreground: 0 10% 15%;
-    --sidebar-accent: 0 20% 20%;
-    --sidebar-accent-foreground: 0 50% 98%;
-    --sidebar-border: 0 10% 20%;
-    --sidebar-ring: 0 76% 82%;
-  }
-}
-
-@layer components {
-  .hero-slideshow {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    overflow: hidden;
-  }
-
-  .hero-slide {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    transition: opacity 1s ease-in-out;
-  }
-
-  .hero-slide--one {
-    background: linear-gradient(120deg, rgba(255, 210, 220, 0.9), rgba(255, 230, 240, 0.9));
-    animation: slideFade 12s infinite;
-  }
-
-  .hero-slide--two {
-    background: linear-gradient(120deg, rgba(255, 200, 215, 0.9), rgba(255, 225, 235, 0.9));
-    animation: slideFade 12s infinite 4s;
-  }
-
-  .hero-slide--three {
-    background: linear-gradient(120deg, rgba(255, 220, 230, 0.9), rgba(255, 240, 245, 0.9));
-    animation: slideFade 12s infinite 8s;
-  }
-
-  @keyframes slideFade {
-    0% {
-      opacity: 0;
-    }
-
-    8% {
-      opacity: 1;
-    }
-
-    33% {
-      opacity: 1;
-    }
-
-    41% {
-      opacity: 0;
-    }
-
-    100% {
-      opacity: 0;
-    }
-  }
-}
-
-/* Landing page bubbly font (except Phool Shop which uses Great Vibes) */
-.landing-bubbly {
-  font-family: 'Fredoka', 'Varela Round', sans-serif;
-}
-
-@layer base {
   * {
     @apply border-border;
   }
@@ -174,21 +59,6 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body);
-    font-weight: 400;
-    /* Custom Cute Crochet Hook Cursor - TEMPORARILY DISABLED */
-    /* cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="%23ec4899" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 20.5A2.5 2.5 0 0 1 11.5 18V6A3.5 3.5 0 0 1 15 2.5a3.5 3.5 0 0 1 3.5 3.5v1.5H16A1.5 1.5 0 0 0 14.5 9v11.5z"></path></svg>'), auto; */
-    cursor: default;
-  }
-
-  /* Cute squishy effect when active globally - TEMPORARILY DISABLED */
-  /* body:active {
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="%23db2777" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M14 20.5A2.5 2.5 0 0 1 11.5 18V6A3.5 3.5 0 0 1 15 2.5a3.5 3.5 0 0 1 3.5 3.5v1.5H16A1.5 1.5 0 0 0 14.5 9v11.5z"></path></svg>'), pointer;
-  } */
-
-  /* Exclude cursor override from clickable elements so they can still show pointers if needed */
-  button,
-  a {
-    cursor: pointer;
   }
 
   h1,
@@ -197,7 +67,95 @@
   h4,
   h5,
   h6 {
-    font-family: var(--font-display);
-    font-weight: 400;
+    font-family: var(--font-heading);
   }
+}
+
+@layer components {
+  .font-script {
+    font-family: var(--font-display);
+  }
+
+  .font-heading {
+    font-family: var(--font-heading);
+  }
+
+  .font-body {
+    font-family: var(--font-body);
+  }
+
+  .pill-btn {
+    @apply inline-flex items-center justify-center rounded-full px-6 py-3 font-heading text-sm uppercase tracking-wider transition-all duration-200;
+    border: 2px solid hsl(var(--deep-brown));
+  }
+
+  .pill-btn-primary {
+    @apply pill-btn;
+    background: hsl(var(--deep-brown));
+    color: hsl(var(--cream));
+  }
+
+  .pill-btn-primary:hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-retro);
+  }
+
+  .pill-btn-outline {
+    @apply pill-btn;
+    background: transparent;
+    color: hsl(var(--deep-brown));
+  }
+
+  .pill-btn-outline:hover {
+    background: hsl(var(--deep-brown));
+    color: hsl(var(--cream));
+  }
+
+  .pill-btn-golden {
+    @apply inline-flex items-center justify-center rounded-full px-6 py-3 font-heading text-sm uppercase tracking-wider transition-all duration-200;
+    background: hsl(var(--golden));
+    color: hsl(var(--deep-brown));
+    border: 2px solid hsl(var(--deep-brown));
+  }
+
+  .pill-btn-golden:hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-retro);
+  }
+
+  .retro-card {
+    @apply rounded-3xl overflow-hidden;
+    border: 3px solid hsl(var(--deep-brown));
+  }
+
+  .marquee-track {
+    display: flex;
+    animation: marquee 20s linear infinite;
+    width: max-content;
+  }
+
+  .section-border-top {
+    border-top: 3px solid hsl(var(--deep-brown));
+  }
+
+  .section-border-bottom {
+    border-bottom: 3px solid hsl(var(--deep-brown));
+  }
+
+  .dotted-line {
+    background-image: radial-gradient(circle, hsl(var(--golden)) 3px, transparent 3px);
+    background-size: 20px 20px;
+    background-repeat: repeat-x;
+    height: 10px;
+  }
+
+  .polka-dots {
+    background-image: radial-gradient(circle, hsl(var(--deep-brown) / 0.3) 2px, transparent 2px);
+    background-size: 16px 16px;
+  }
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }

@@ -31,7 +31,9 @@ const queryClient = new QueryClient({
 });
 
 const LoadingFallback = () => (
-  <div className="fixed inset-0 bg-white z-50" />
+  <div style={{ position: 'fixed', inset: 0, background: '#FFF5EE', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', color: '#442f2a' }}>
+    Loading...
+  </div>
 );
 
 const App = () => (
