@@ -164,7 +164,14 @@ const Index = () => {
   const [isResizing, setIsResizing] = useState(false);
   const [showStickerPanel, setShowStickerPanel] = useState(false);
 
-  // Simple working drag handlers
+  // Handle clicking on empty space to deselect
+  const handleContainerClick = (e: React.MouseEvent) => {
+    if (!isEditMode) return;
+    // Only deselect if clicking on the container itself, not on stickers
+    if (e.target === e.currentTarget) {
+      setSelectedSticker(null);
+    }
+  };
   const handleStickerMouseDown = (e: React.MouseEvent, index: number) => {
     if (!isEditMode) return;
     e.preventDefault();
@@ -511,45 +518,80 @@ const Index = () => {
         </motion.div>
 
         {/* Scattered Stickers */}
-        <div id="sticker-container" className="absolute inset-0 pointer-events-none z-10">
+        <div id="sticker-container" className="absolute inset-0 pointer-events-none z-10" onClick={handleContainerClick}>
           {/* Edit Controls - Minimal */}
-          <div className="absolute top-4 left-4 z-50 pointer-events-auto">
-            <div className="flex gap-2 flex-wrap">
-              <button
-                onClick={() => setIsEditMode(!isEditMode)}
-                className={`px-3 py-2 rounded-lg font-medium text-sm transition-colors ${
-                  isEditMode 
-                    ? 'bg-pink-500 text-white hover:bg-pink-600' 
-                    : 'bg-pink-100 text-pink-700 hover:bg-pink-200'
-                }`}
-              >
-                {isEditMode ? '✓ Done' : '✏️ Edit'}
-              </button>
-              {isEditMode && (
-                <>
+          <div className="absolute top-4 right-4 z-50 pointer-events-auto">
+            <div className="bg-white/90 backdrop-blur p-3 rounded-lg shadow-lg border border-pink-200">
+              <div className="flex gap-2 items-center mb-2">
+                <button
+                  onClick={() => setIsEditMode(!isEditMode)}
+                  className={`px-3 py-2 rounded-lg font-medium text-sm transition-colors ${
+                    isEditMode 
+                      ? 'bg-pink-500 text-white hover:bg-pink-600' 
+                      : 'bg-pink-100 text-pink-700 hover:bg-pink-200'
+                  }`}
+                >
+                  {isEditMode ? '✓ Done' : '✏️ Edit'}
+                </button>
+                {isEditMode && (
+                  <>
+                    <button
+                      onClick={() => setShowStickerPanel(!showStickerPanel)}
+                      className={`px-3 py-2 rounded-lg font-medium text-sm transition-colors ${
+                        showStickerPanel 
+                          ? 'bg-purple-500 text-white hover:bg-purple-600' 
+                          : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                      }`}
+                    >
+                      🎨 Stickers
+                    </button>
+                    <button
+                      onClick={savePositions}
+                      className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium text-sm transition-colors"
+                    >
+                      💾 Save
+                    </button>
+                    <button
+                      onClick={() => setStickerPositions([])}
+                      className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 font-medium text-sm transition-colors"
+                    >
+                      🗑️ Clear
+                    </button>
+                  </>
+                )}
+              </div>
+              
+              {/* Sticker Navigation */}
+              {isEditMode && stickerPositions.length > 0 && (
+                <div className="flex items-center gap-2 pt-2 border-t border-pink-200">
                   <button
-                    onClick={() => setShowStickerPanel(!showStickerPanel)}
-                    className={`px-3 py-2 rounded-lg font-medium text-sm transition-colors ${
-                      showStickerPanel 
-                        ? 'bg-purple-500 text-white hover:bg-purple-600' 
-                        : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
-                    }`}
+                    onClick={() => {
+                      if (selectedSticker === null) {
+                        setSelectedSticker(0);
+                      } else {
+                        setSelectedSticker((prev) => prev === null ? 0 : (prev - 1 + stickerPositions.length) % stickerPositions.length);
+                      }
+                    }}
+                    className="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 font-medium text-sm transition-colors"
                   >
-                    🎨 Stickers
+                    ◀
                   </button>
+                  <span className="text-sm font-medium text-gray-700 min-w-[80px] text-center">
+                    {selectedSticker !== null ? `Sticker ${selectedSticker + 1}/${stickerPositions.length}` : 'None'}
+                  </span>
                   <button
-                    onClick={savePositions}
-                    className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium text-sm transition-colors"
+                    onClick={() => {
+                      if (selectedSticker === null) {
+                        setSelectedSticker(0);
+                      } else {
+                        setSelectedSticker((prev) => prev === null ? 0 : (prev + 1) % stickerPositions.length);
+                      }
+                    }}
+                    className="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 font-medium text-sm transition-colors"
                   >
-                    💾 Save
+                    ▶
                   </button>
-                  <button
-                    onClick={() => setStickerPositions([])}
-                    className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 font-medium text-sm transition-colors"
-                  >
-                    🗑️ Clear
-                  </button>
-                </>
+                </div>
               )}
             </div>
           </div>
