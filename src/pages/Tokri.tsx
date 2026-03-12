@@ -22,7 +22,7 @@ const Tokri = () => {
     <Layout>
       <section className="py-16 md:py-24">
         <div className="container max-w-3xl">
-          <h1 className="font-display text-3xl font-bold">Tokri</h1>
+          <h1 className="font-display text-3xl font-bold" style={{color: '#442f2a'}}>Tokri</h1>
           {items.length === 0 ? (
             <div className="mt-8 text-center">
               <p className="text-muted-foreground">Your Tokri is empty.</p>

@@ -47,7 +47,7 @@ const Fundraisers = () => {
             className="text-center"
           >
             <Heart className="mx-auto h-10 w-10 text-primary" />
-            <h1 className="mt-4 font-display text-4xl font-bold text-foreground md:text-5xl">Fundraisers</h1>
+            <h1 className="mt-4 font-display text-4xl font-bold md:text-5xl" style={{color: '#442f2a'}}>Fundraisers</h1>
             <p className="mx-auto mt-4 max-w-lg text-muted-foreground">
               We use our craft to give back. Check out our active campaigns and past initiatives.
             </p>

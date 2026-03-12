@@ -454,7 +454,7 @@ const Index = () => {
               transition={{ duration: 1, type: "spring", bounce: 0.5 }}
               className="mb-4 relative"
             >
-              <h1 className="font-display text-3xl md:text-4xl font-medium leading-tight tracking-tight drop-shadow-sm mb-2" style={{fontFamily: '"Sacramento", cursive', color: '#91766E'}}>
+              <h1 className="font-display text-3xl md:text-4xl font-medium leading-tight tracking-tight drop-shadow-sm mb-2" style={{fontFamily: '"Sacramento", cursive', color: '#442f2a'}}>
                 looped with love
               </h1>
               <motion.div
@@ -472,7 +472,7 @@ const Index = () => {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5, duration: 1 }}
               className="max-w-2xl text-xl leading-relaxed md:text-2xl mt-8 font-medium"
-              style={{color: '#91766E'}}
+              style={{color: '#442f2a'}}
             >
               Discover adorable crochet creations made entirely by hand. From sweet amigurumi friends to warm, cuddly blankets.
             </motion.p>
@@ -488,7 +488,7 @@ const Index = () => {
                 whileTap={{ scale: 0.95 }}
                 onHoverStart={playPopSound}
               >
-                <Button asChild onClick={fireConfetti} size="lg" className="rounded-full px-10 h-16 text-xl bg-gradient-to-r from-[#BC8F8F] to-[#EFD8D6] hover:from-[#BC8F8F] hover:to-[#F7F3ED] border-none shadow-xl shadow-[#EFD8D6]/40 cursor-none">
+                <Button asChild onClick={fireConfetti} size="lg" className="rounded-full px-10 h-16 text-xl bg-gradient-to-r from-[#442f2a] to-[#EFD8D6] hover:from-[#442f2a] hover:to-[#F7F3ED] border-none shadow-xl shadow-[#EFD8D6]/40 cursor-none">
                   <Link to="/catalog">
                     Shop Collection <ArrowRight className="ml-2 h-6 w-6" />
                   </Link>
@@ -499,7 +499,7 @@ const Index = () => {
                 whileTap={{ scale: 0.95 }}
                 onHoverStart={playPopSound}
               >
-                <Button asChild variant="outline" size="lg" className="rounded-full px-10 h-16 text-xl bg-white/60 backdrop-blur-xl border-[#EFD8D6] border-2 text-[#BC8F8F] hover:bg-white hover:text-[#BC8F8F] shadow-lg shadow-[#EFD8D6]/20 cursor-none">
+                <Button asChild variant="outline" size="lg" className="rounded-full px-10 h-16 text-xl bg-white/60 backdrop-blur-xl border-[#EFD8D6] border-2 text-[#442f2a] hover:bg-white hover:text-[#442f2a] shadow-lg shadow-[#EFD8D6]/20 cursor-none">
                   <Link to="/custom-orders">
                     <Sparkles className="mr-2 h-6 w-6 text-purple-400" /> Custom Orders
                   </Link>
@@ -560,7 +560,7 @@ const Index = () => {
         <div className="container max-w-7xl relative z-10 px-4">
           <div className="flex flex-col items-center text-center mb-12">
             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }}>
-              <motion.h2 variants={fadeUp} custom={1} className="font-display text-4xl font-medium tracking-tight md:text-5xl" style={{color: '#BC8F8F'}}>
+              <motion.h2 variants={fadeUp} custom={1} className="font-display text-4xl font-medium tracking-tight md:text-5xl" style={{color: '#442f2a'}}>
                 Featured Items
               </motion.h2>
             </motion.div>
@@ -577,7 +577,7 @@ const Index = () => {
                 <span className="text-xl font-medium" style={{color: '#BC8F8F'}}>Loading cuteness...</span>
               </div>
             ) : featuredItems.length === 0 ? (
-              <div className="text-center bg-[#EFD8D6] rounded-[3rem] p-16 font-medium text-xl" style={{color: '#BC8F8F'}}>No products available yet.</div>
+              <div className="text-center bg-[#EFD8D6] rounded-[3rem] p-16 font-medium text-xl" style={{color: '#442f2a'}}>No products available yet.</div>
             ) : (
               <div className="mx-auto rounded-[3rem] bg-gradient-to-br from-[#EFD8D6] via-[#F7F3ED] to-[#EFD8D6] p-3 md:p-8 shadow-xl border-4 border-white max-w-7xl">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

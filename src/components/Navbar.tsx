@@ -149,7 +149,7 @@ const Navbar = () => {
               key={link.to}
               to={link.to}
               className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
-                location.pathname === link.to ? "bg-[#EFD8D6] text-[#BC8F8F]" : "text-[#BC8F8F] hover:bg-[#EFD8D6] hover:text-[#BC8F8F]"
+                location.pathname === link.to ? "bg-[#EFD8D6] text-[#442f2a]" : "text-[#442f2a] hover:bg-[#EFD8D6] hover:text-[#442f2a]"
               }`}
             >
               <span className="inline-flex items-center gap-2">
@@ -237,7 +237,7 @@ const Navbar = () => {
                 to={link.to}
                 onClick={() => setMobileOpen(false)}
                 className={`rounded-md px-4 py-3 text-sm font-medium transition-colors ${
-                  location.pathname === link.to ? "bg-[#EFD8D6] text-[#BC8F8F]" : "text-[#BC8F8F] hover:bg-[#EFD8D6] hover:text-[#BC8F8F]"
+                  location.pathname === link.to ? "bg-[#EFD8D6] text-[#442f2a]" : "text-[#442f2a] hover:bg-[#EFD8D6] hover:text-[#442f2a]"
                 }`}
               >
                 <span className="inline-flex items-center gap-2">

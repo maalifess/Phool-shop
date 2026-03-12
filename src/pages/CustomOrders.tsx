@@ -203,7 +203,7 @@ const CustomOrders = () => {
             className="text-center"
           >
             <Sparkles className="mx-auto h-10 w-10 text-primary" />
-            <h1 className="mt-4 font-display text-4xl font-bold text-foreground md:text-5xl">Custom Orders</h1>
+            <h1 className="mt-4 font-display text-4xl font-bold md:text-5xl" style={{color: '#442f2a'}}>Custom Orders</h1>
             <p className="mx-auto mt-4 max-w-md text-muted-foreground">
               Have something specific in mind? Tell us about your dream crochet piece and we'll bring it to life.
             </p>

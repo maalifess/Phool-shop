@@ -71,6 +71,37 @@ This document tracks all changes made to the PhoolShop project during developmen
   - Updated `.landing-bubbly` class to use Comfortaa for consistency
   - Maintained Varela Round and sans-serif as fallback fonts
 
+### Global Text Color Change
+- **File**: `src/index.css`
+- **Changes**:
+  - Updated `--foreground` CSS variable from `#BC8F8F` to `#442f2a`
+  - Changed HSL values from `340 25% 72%` to `20 25% 26%`
+  - This affects all text using the `text-foreground` class across the entire website
+  - Creates a darker, richer brown tone for better readability and contrast
+
+### Specific Text Elements Color Update
+- **File**: `src/pages/Index.tsx`
+- **Changes**:
+  - Updated "looped with love" tagline color from `#91766E` to `#442f2a`
+  - Updated description paragraph color from `#91766E` to `#442f2a`
+  - Updated "Shop Collection" button gradient start color from `#BC8F8F` to `#442f2a`
+  - Updated "Custom Orders" button text color from `#BC8F8F` to `#442f2a`
+  - Updated "Featured Items" heading color from `#BC8F8F` to `#442f2a`
+  - Updated "No products available yet" text color from `#BC8F8F` to `#442f2a`
+  - All text elements now consistently use the #442f2a color scheme
+
+### Navigation and Page Headings Color Update
+- **Files**: `src/components/Navbar.tsx`, `src/pages/*.tsx`
+- **Changes**:
+  - Updated all navigation links (Home, Catalog, Custom Orders, Fundraisers, Tokri) from `#BC8F8F` to `#442f2a`
+  - Updated "Customer Reviews" heading in ProductDetails.tsx from `text-foreground` to `#442f2a`
+  - Updated "Tokri" page heading from default to `#442f2a`
+  - Updated "Our Catalog" page heading from `text-foreground` to `#442f2a`
+  - Updated "Fundraisers" page heading from `text-foreground` to `#442f2a`
+  - Updated "Custom Orders" page heading from `text-foreground` to `#442f2a`
+  - Applied to both desktop and mobile navigation
+  - All navigation and page headings now use consistent #442f2a color
+
 ---
 
 ## Session: March 13, 2026

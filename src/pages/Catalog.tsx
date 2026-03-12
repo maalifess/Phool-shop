@@ -118,7 +118,7 @@ const Catalog = () => {
             transition={{ duration: 0.6 }}
             className="text-center"
           >
-            <h1 className="font-display text-4xl font-bold text-foreground md:text-5xl">Our Catalog</h1>
+            <h1 className="font-display text-4xl font-bold md:text-5xl" style={{color: '#442f2a'}}>Our Catalog</h1>
             <p className="mx-auto mt-4 max-w-lg text-muted-foreground">
               Browse our handcrafted collection — each piece made with care.
             </p>
