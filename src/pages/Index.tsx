@@ -104,15 +104,15 @@ const Index = () => {
         <div className={`hidden lg:flex left-1/2 -translate-x-1/2 w-[93vw] lg:max-w-[1280px] fixed top-10 z-50 h-min transition-transform duration-500 ${navVisible ? 'translate-y-0' : '-translate-y-[200%]'}`}>
           <div className="flex items-center justify-between w-full gap-6">
             <div className="flex items-center justify-center gap-2 border-2 rounded-full px-4 py-2.5 w-full" style={{ backgroundColor: '#FFF5EE', borderColor: '#442f2a' }}>
-              <a href="#about" className="border-2 rounded-full px-4 pt-1.5 text-lg transition-colors duration-200 whitespace-nowrap" style={{ borderColor: '#442f2a', backgroundColor: '#BC8F8F', color: '#FFF5EE' }}>About</a>
-              <a href="#custom-orders" className="border-2 rounded-full px-4 pt-1.5 text-lg transition-colors duration-200 whitespace-nowrap" style={{ borderColor: '#442f2a', backgroundColor: '#BC8F8F', color: '#FFF5EE' }}>Custom Orders</a>
+              <Link to="/" className="border-2 rounded-full px-4 pt-1.5 text-lg transition-colors duration-200 whitespace-nowrap" style={{ borderColor: '#442f2a', backgroundColor: '#BC8F8F', color: '#FFF5EE' }}>Home</Link>
+              <Link to="/custom-orders" className="border-2 rounded-full px-4 pt-1.5 text-lg transition-colors duration-200 whitespace-nowrap" style={{ borderColor: '#442f2a', backgroundColor: '#BC8F8F', color: '#FFF5EE' }}>Custom Orders</Link>
               <Link to="/catalog" className="border-2 rounded-full px-4 pt-1.5 text-lg transition-colors duration-200 whitespace-nowrap" style={{ borderColor: '#442f2a', backgroundColor: '#BC8F8F', color: '#FFF5EE' }}>Shop</Link>
             </div>
             <div className="w-full flex items-center justify-center">
               <Link to="/" className="text-3xl font-bold tracking-tight" style={{ color: '#442f2a', fontFamily: '"Fredoka One", cursive' }}>Phool</Link>
             </div>
             <div className="flex items-center justify-center gap-2 border-2 rounded-full px-4 py-2.5 w-full" style={{ backgroundColor: '#FFF5EE', borderColor: '#442f2a' }}>
-              <a href="#find-us" className="border-2 rounded-full px-4 pt-1.5 text-lg transition-colors duration-200 whitespace-nowrap" style={{ borderColor: '#442f2a', backgroundColor: '#BC8F8F', color: '#FFF5EE' }}>Find Us</a>
+              <Link to="/fundraisers" className="border-2 rounded-full px-4 pt-1.5 text-lg transition-colors duration-200 whitespace-nowrap" style={{ borderColor: '#442f2a', backgroundColor: '#BC8F8F', color: '#FFF5EE' }}>Fundraisers</Link>
               <Link to="/tokri" className="border-2 rounded-full px-4 pt-1.5 text-lg transition-colors duration-200 whitespace-nowrap" style={{ borderColor: '#442f2a', backgroundColor: '#BC8F8F', color: '#FFF5EE' }} aria-label="Cart">
                 Tokri
               </Link>
@@ -286,33 +286,81 @@ const Index = () => {
           </section>
         </div>
 
-        <div id="custom-orders" className="xl:max-w-[1360px] mx-auto">
+        <div id="reviews" className="xl:max-w-[1360px] mx-auto">
           <section className="w-full border-x-2 border-[#442f2a] bg-[#F7F3ED] text-[#442f2a] max-w-[90vw] md:max-w-[95vw] mx-auto relative py-16 md:py-20">
-            <div className="max-w-[1080px] mx-auto px-4 grid md:grid-cols-2 gap-10 items-start">
-              <div className="order-2 md:order-1">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="border-2 rounded-[1.5rem] p-4" style={{ borderColor: '#442f2a', backgroundColor: '#FFF5EE' }}>Gift wrapping</div>
-                  <div className="border-2 rounded-[1.5rem] p-4" style={{ borderColor: '#442f2a', backgroundColor: '#FFF5EE' }}>Custom colors</div>
-                  <div className="border-2 rounded-[1.5rem] p-4" style={{ borderColor: '#442f2a', backgroundColor: '#FFF5EE' }}>Bulk orders</div>
-                  <div className="border-2 rounded-[1.5rem] p-4" style={{ borderColor: '#442f2a', backgroundColor: '#FFF5EE' }}>Fast replies</div>
+            <div className="max-w-[1080px] flex flex-col items-center justify-center gap-10 px-4 mx-auto">
+              <div className="w-full flex items-center justify-between gap-6 mt-16">
+                <div className="hidden md:flex w-16 h-16 border-2 rounded-full items-center justify-center" style={{ borderColor: '#442f2a', backgroundColor: '#FFF5EE' }}>
+                  <ArrowRight className="h-6 w-6" />
+                </div>
+                <h2 className="text-[4rem] md:text-[8rem] leading-[1] rotate-[-10deg]" style={{ fontFamily: '"Sacramento", cursive' }}>Reviews</h2>
+                <div className="hidden md:flex w-16 h-16 border-2 rounded-full items-center justify-center" style={{ borderColor: '#442f2a', backgroundColor: '#FFF5EE' }}>
+                  <ArrowRight className="h-6 w-6 rotate-180" />
                 </div>
               </div>
-              <div className="order-1 md:order-2">
-                <h2 className="text-[4rem] md:text-[6rem] leading-[1] rotate-[-8deg]" style={{ fontFamily: '"Sacramento", cursive' }}>Custom Orders</h2>
-                <p className="mt-6 text-base md:text-lg leading-[1.6]">
-                  Need something specific? We can create custom crochet orders for gifts, themes, or special requests.
-                </p>
-                <div className="mt-8">
-                  <Button asChild className="rounded-full px-6 border-2" style={{ borderColor: '#442f2a', backgroundColor: '#BC8F8F', color: '#FFF5EE' }}>
-                    <Link to="/custom-orders">Learn more</Link>
-                  </Button>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+                <div className="border-2 rounded-[2rem] overflow-hidden" style={{ borderColor: '#442f2a', backgroundColor: '#FFF5EE' }}>
+                  <div className="p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="w-12 h-12 border-2 rounded-full flex items-center justify-center" style={{ borderColor: '#442f2a', backgroundColor: '#EFD8D6' }}>
+                        <span className="text-xl">🌸</span>
+                      </div>
+                      <div>
+                        <div className="font-bold" style={{ color: '#442f2a' }}>Sarah K.</div>
+                        <div className="text-sm" style={{ color: '#BC8F8F' }}>⭐⭐⭐⭐⭐</div>
+                      </div>
+                    </div>
+                    <p className="text-base md:text-lg leading-[1.6]" style={{ color: '#442f2a' }}>
+                      "Absolutely love my crochet flowers! The craftsmanship is amazing and they look perfect in my home. Will definitely order again!"
+                    </p>
+                  </div>
                 </div>
+
+                <div className="border-2 rounded-[2rem] overflow-hidden" style={{ borderColor: '#442f2a', backgroundColor: '#FFF5EE' }}>
+                  <div className="p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="w-12 h-12 border-2 rounded-full flex items-center justify-center" style={{ borderColor: '#442f2a', backgroundColor: '#EFD8D6' }}>
+                        <span className="text-xl">🧸</span>
+                      </div>
+                      <div>
+                        <div className="font-bold" style={{ color: '#442f2a' }}>Ahmed R.</div>
+                        <div className="text-sm" style={{ color: '#BC8F8F' }}>⭐⭐⭐⭐⭐</div>
+                      </div>
+                    </div>
+                    <p className="text-base md:text-lg leading-[1.6]" style={{ color: '#442f2a' }}>
+                      "Ordered a custom teddy bear for my daughter's birthday. It turned out even better than I imagined! Great communication throughout."
+                    </p>
+                  </div>
+                </div>
+
+                <div className="border-2 rounded-[2rem] overflow-hidden" style={{ borderColor: '#442f2a', backgroundColor: '#FFF5EE' }}>
+                  <div className="p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="w-12 h-12 border-2 rounded-full flex items-center justify-center" style={{ borderColor: '#442f2a', backgroundColor: '#EFD8D6' }}>
+                        <span className="text-xl">🎀</span>
+                      </div>
+                      <div>
+                        <div className="font-bold" style={{ color: '#442f2a' }}>Fatima M.</div>
+                        <div className="text-sm" style={{ color: '#BC8F8F' }}>⭐⭐⭐⭐⭐</div>
+                      </div>
+                    </div>
+                    <p className="text-base md:text-lg leading-[1.6]" style={{ color: '#442f2a' }}>
+                      "The gift wrapping was beautiful! My friend loved her custom crochet blanket. The attention to detail is incredible. Highly recommend!"
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8">
+                <Button asChild className="rounded-full px-6 border-2" style={{ borderColor: '#442f2a', backgroundColor: '#BC8F8F', color: '#FFF5EE' }}>
+                  <Link to="/catalog">Shop Now</Link>
+                </Button>
               </div>
             </div>
           </section>
         </div>
 
-        
         <div id="find-us" className="w-full py-16" style={{ backgroundColor: '#FFF5EE' }}>
           <div className="xl:max-w-[1360px] mx-auto px-4">
             <div className="w-[95vw] max-w-[1080px] mx-auto border-2 rounded-[2rem]" style={{ borderColor: '#442f2a', backgroundColor: '#BC8F8F', color: '#FFF5EE' }}>
