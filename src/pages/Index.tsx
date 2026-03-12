@@ -14,6 +14,34 @@ import { loadApprovedReviews } from "@/lib/supabaseReviews";
 import confetti from "canvas-confetti";
 import { MouseTrail } from "@/components/MouseTrail";
 
+// Import sticker images
+import sticker1 from '@/assets/stickers/1.png';
+import sticker2 from '@/assets/stickers/2.png';
+import sticker3 from '@/assets/stickers/3.png';
+import sticker4 from '@/assets/stickers/4.png';
+import sticker5 from '@/assets/stickers/5.png';
+import sticker6 from '@/assets/stickers/6.png';
+import sticker7 from '@/assets/stickers/7.png';
+import sticker8 from '@/assets/stickers/8.png';
+import sticker9 from '@/assets/stickers/9.png';
+import sticker10 from '@/assets/stickers/10.png';
+import sticker11 from '@/assets/stickers/11.png';
+import sticker12 from '@/assets/stickers/12.png';
+import sticker13 from '@/assets/stickers/13.png';
+import sticker14 from '@/assets/stickers/14.png';
+import sticker15 from '@/assets/stickers/15.png';
+import sticker16 from '@/assets/stickers/16.png';
+import sticker17 from '@/assets/stickers/17.png';
+import sticker18 from '@/assets/stickers/18.png';
+import sticker19 from '@/assets/stickers/19.png';
+import sticker20 from '@/assets/stickers/20.png';
+import sticker21 from '@/assets/stickers/21.png';
+import sticker22 from '@/assets/stickers/22.png';
+import sticker23 from '@/assets/stickers/23.png';
+import sticker24 from '@/assets/stickers/24.png';
+import sticker25 from '@/assets/stickers/25.png';
+import sticker26 from '@/assets/stickers/26.png';
+
 // Floating element helper tied to scroll (Parallax)
 const ParallaxFloater = ({
   children,
@@ -125,7 +153,155 @@ const Index = () => {
 
   const [audioEnabled, setAudioEnabled] = useState(false);
 
-  // Create a tiny, gentle bloop sound programmatically (Web Audio API)
+  // Drag state for stickers - simplified
+  const [stickerPositions, setStickerPositions] = useState<Array<{x: number, y: number, rotate: number, width: number, stickerIndex: number}>>([
+    // Start with empty array - stickers will be added when dragged from sidebar
+  ]);
+  const [selectedSticker, setSelectedSticker] = useState<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const [showStickerPanel, setShowStickerPanel] = useState(false);
+
+  // Simple working drag handlers
+  const handleStickerMouseDown = (e: React.MouseEvent, index: number) => {
+    if (!isEditMode) return;
+    e.preventDefault();
+    e.stopPropagation();
+    
+    setSelectedSticker(index);
+    setIsDragging(true);
+    
+    const rect = e.currentTarget.getBoundingClientRect();
+    setDragOffset({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    });
+  };
+
+  const handleSidebarMouseDown = (e: React.MouseEvent, stickerIndex: number) => {
+    if (!isEditMode) return;
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Create new sticker at mouse position
+    const container = document.getElementById('sticker-container');
+    if (!container) return;
+    
+    const containerRect = container.getBoundingClientRect();
+    const newSticker = {
+      x: e.clientX - containerRect.left - 50,
+      y: e.clientY - containerRect.top - 50,
+      rotate: 0,
+      width: 100,
+      stickerIndex
+    };
+    
+    setStickerPositions(prev => [...prev, newSticker]);
+    setSelectedSticker(stickerPositions.length);
+    setIsDragging(true);
+    
+    setDragOffset({ x: 50, y: 50 });
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isDragging || !isEditMode || selectedSticker === null) return;
+    
+    const container = document.getElementById('sticker-container');
+    if (!container) return;
+    
+    const containerRect = container.getBoundingClientRect();
+    const newX = e.clientX - containerRect.left - dragOffset.x;
+    const newY = e.clientY - containerRect.top - dragOffset.y;
+    
+    setStickerPositions(prev => {
+      const newPositions = [...prev];
+      if (newPositions[selectedSticker]) {
+        newPositions[selectedSticker] = {
+          ...newPositions[selectedSticker],
+          x: Math.max(0, Math.min(newX, containerRect.width - newPositions[selectedSticker].width)),
+          y: Math.max(0, Math.min(newY, containerRect.height - newPositions[selectedSticker].width))
+        };
+      }
+      return newPositions;
+    });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  // Keyboard controls
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isEditMode || selectedSticker === null) return;
+      
+      const step = e.shiftKey ? 10 : 1;
+      
+      setStickerPositions(prev => {
+        const newPositions = [...prev];
+        if (!newPositions[selectedSticker]) return newPositions;
+        
+        switch(e.key) {
+          case 'ArrowUp':
+            newPositions[selectedSticker].y = Math.max(0, newPositions[selectedSticker].y - step);
+            break;
+          case 'ArrowDown':
+            newPositions[selectedSticker].y += step;
+            break;
+          case 'ArrowLeft':
+            newPositions[selectedSticker].x = Math.max(0, newPositions[selectedSticker].x - step);
+            break;
+          case 'ArrowRight':
+            newPositions[selectedSticker].x += step;
+            break;
+          case '+':
+          case '=':
+            newPositions[selectedSticker].width = Math.min(300, newPositions[selectedSticker].width + 5);
+            break;
+          case '-':
+          case '_':
+            newPositions[selectedSticker].width = Math.max(50, newPositions[selectedSticker].width - 5);
+            break;
+          case 'r':
+          case 'R':
+            newPositions[selectedSticker].rotate += 15;
+            break;
+          case 'Delete':
+          case 'Backspace':
+            newPositions.splice(selectedSticker, 1);
+            setSelectedSticker(null);
+            break;
+        }
+        return newPositions;
+      });
+    };
+    
+    if (isEditMode) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [isEditMode, selectedSticker]);
+
+  useEffect(() => {
+    if (isEditMode) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isEditMode, isDragging, selectedSticker, dragOffset]);
+
+  // Save positions to console
+  const savePositions = () => {
+    console.log('=== STICKER POSITIONS ===');
+    console.log('Copy this array into the code:');
+    console.log(JSON.stringify(stickerPositions, null, 2));
+    alert(`Positions saved to console! ${stickerPositions.length} stickers exported.`);
+  };
   const playPopSound = () => {
     if (!audioEnabled) return;
     try {
@@ -334,69 +510,173 @@ const Index = () => {
           </div>
         </motion.div>
 
-        {/* Scattered Polaroids with Actual Products */}
-        <div className="absolute inset-0 pointer-events-none z-10">
-          {/* Get first 8 products for polaroids */}
-          {featuredItems.slice(0, 8).map((item, index) => {
-            const positions = [
-              { top: '16px', left: '12px', rotate: -8, width: '160px' },
-              { top: '24px', right: '16px', rotate: 6, width: '150px' },
-              { bottom: '20px', left: '20px', rotate: 4, width: '170px' },
-              { bottom: '32px', right: '24px', rotate: -5, width: '140px' },
-              { top: '50%', right: '8px', rotate: 10, width: '155px', marginTop: '-80px' },
-              { top: '50%', left: '10px', rotate: -7, width: '165px', marginTop: '-100px' },
-              { top: '120px', left: '180px', rotate: 12, width: '145px' },
-              { bottom: '120px', right: '180px', rotate: -9, width: '158px' }
+        {/* Scattered Stickers */}
+        <div id="sticker-container" className="absolute inset-0 pointer-events-none z-10">
+          {/* Edit Controls - Minimal */}
+          <div className="absolute top-4 left-4 z-50 pointer-events-auto">
+            <div className="flex gap-2 flex-wrap">
+              <button
+                onClick={() => setIsEditMode(!isEditMode)}
+                className={`px-3 py-2 rounded-lg font-medium text-sm transition-colors ${
+                  isEditMode 
+                    ? 'bg-pink-500 text-white hover:bg-pink-600' 
+                    : 'bg-pink-100 text-pink-700 hover:bg-pink-200'
+                }`}
+              >
+                {isEditMode ? '✓ Done' : '✏️ Edit'}
+              </button>
+              {isEditMode && (
+                <>
+                  <button
+                    onClick={() => setShowStickerPanel(!showStickerPanel)}
+                    className={`px-3 py-2 rounded-lg font-medium text-sm transition-colors ${
+                      showStickerPanel 
+                        ? 'bg-purple-500 text-white hover:bg-purple-600' 
+                        : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                    }`}
+                  >
+                    🎨 Stickers
+                  </button>
+                  <button
+                    onClick={savePositions}
+                    className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium text-sm transition-colors"
+                  >
+                    💾 Save
+                  </button>
+                  <button
+                    onClick={() => setStickerPositions([])}
+                    className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 font-medium text-sm transition-colors"
+                  >
+                    🗑️ Clear
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Sticker Top Panel */}
+          {isEditMode && showStickerPanel && (
+            <div className="absolute top-0 left-0 right-0 bg-white/95 backdrop-blur shadow-xl border-b border-pink-200 z-40 pointer-events-auto">
+              <div className="p-2 border-b border-pink-200 flex items-center justify-between">
+                <h3 className="text-xs font-bold text-pink-600">🎨 Drag stickers onto the screen</h3>
+                <button
+                  onClick={() => setShowStickerPanel(false)}
+                  className="text-gray-500 hover:text-gray-700 text-sm"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="max-h-16 overflow-y-auto p-2">
+                <div className="flex gap-1 flex-wrap">
+                  {[
+                    sticker1, sticker2, sticker3, sticker4, sticker5, sticker6, sticker7, sticker8,
+                    sticker9, sticker10, sticker11, sticker12, sticker13, sticker14, sticker15, sticker16,
+                    sticker17, sticker18, sticker19, sticker20, sticker21, sticker22, sticker23, sticker24,
+                    sticker25, sticker26
+                  ].map((sticker, index) => (
+                    <div
+                      key={`sidebar-sticker-${index}`}
+                      className="relative group cursor-grab active:cursor-grabbing flex-shrink-0"
+                      onMouseDown={(e) => handleSidebarMouseDown(e, index)}
+                    >
+                      <img
+                        src={sticker}
+                        alt={`Sticker ${index + 1}`}
+                        className="w-10 h-10 object-contain border border-gray-200 rounded group-hover:border-pink-300 group-hover:shadow-sm transition-all"
+                      />
+                      <div className="absolute -top-1 -right-1 bg-pink-500 text-white text-xs w-3 h-3 rounded-full flex items-center justify-center font-bold text-[8px]">
+                        {index + 1}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Stickers - Simplified Working Version */}
+          {stickerPositions.map((sticker, index) => {
+            const stickerImages = [
+              sticker1, sticker2, sticker3, sticker4, sticker5, sticker6, sticker7, sticker8,
+              sticker9, sticker10, sticker11, sticker12, sticker13, sticker14, sticker15, sticker16,
+              sticker17, sticker18, sticker19, sticker20, sticker21, sticker22, sticker23, sticker24,
+              sticker25, sticker26
             ];
             
-            const position = positions[index];
-            const images = item.images;
-            let imageArray: string[] = [];
-            if (Array.isArray(images)) {
-              imageArray = images;
-            } else if (typeof images === 'string') {
-              try {
-                imageArray = JSON.parse(images || '[]');
-              } catch {
-                imageArray = [];
-              }
-            }
+            const isSelected = selectedSticker === index;
             
             return (
-              <motion.div
-                key={`polaroid-${item.id}-${item.kind}`}
-                initial={{ opacity: 0, rotate: position.rotate - 5 }}
-                animate={{ opacity: 1, rotate: position.rotate }}
-                transition={{ delay: 1.2 + index * 0.2, duration: 0.8 }}
-                className="absolute bg-white p-4 rounded-lg shadow-xl border-4 border-white"
-                style={{ 
-                  transform: `rotate(${position.rotate}deg)`, 
-                  width: position.width,
-                  ...position.top ? { top: position.top } : {},
-                  ...position.bottom ? { bottom: position.bottom } : {},
-                  ...position.left ? { left: position.left } : {},
-                  ...position.right ? { right: position.right } : {},
-                  ...position.marginTop ? { marginTop: position.marginTop } : {}
+              <div
+                key={`sticker-${index}`}
+                className={`absolute ${isEditMode ? 'pointer-events-auto' : 'pointer-events-none'}`}
+                style={{
+                  left: `${sticker.x}px`,
+                  top: `${sticker.y}px`,
+                  width: `${sticker.width}px`,
+                  transform: `rotate(${sticker.rotate}deg)`,
+                  zIndex: isSelected ? 100 : 10,
+                  cursor: isEditMode ? 'grab' : 'default',
+                  userSelect: 'none'
                 }}
+                onMouseDown={(e) => handleStickerMouseDown(e, index)}
               >
-                <div className="relative">
-                  {imageArray.length > 0 && isImageUrl(imageArray[0]) ? (
-                    <img 
-                      src={imageArray[0]} 
-                      alt={item.name}
-                      className="w-full h-32 object-cover rounded mb-3"
-                    />
-                  ) : (
-                    <div className="bg-gradient-to-br from-[#EFD8D6] to-[#F7F3ED] h-32 rounded mb-3 flex items-center justify-center">
-                      <span className="text-sm font-bold text-[#BC8F8F] text-center px-2">{item.name}</span>
+                {/* Selection area */}
+                <div 
+                  className={`absolute border-4 rounded-xl transition-all duration-200 ${
+                    isSelected 
+                      ? 'border-pink-500 bg-pink-100/30 shadow-xl' 
+                      : 'border-transparent hover:border-pink-300 hover:bg-pink-50/20'
+                  }`}
+                  style={{
+                    top: '-15px',
+                    left: '-15px',
+                    right: '-15px',
+                    bottom: '-15px',
+                  }}
+                />
+                
+                {/* Sticker image */}
+                <img 
+                  src={stickerImages[sticker.stickerIndex]}
+                  alt={`Sticker ${sticker.stickerIndex + 1}`}
+                  className="w-full h-auto object-contain drop-shadow-lg pointer-events-none"
+                  style={{ 
+                    imageRendering: 'crisp-edges',
+                  }}
+                />
+                
+                {/* Controls for selected sticker */}
+                {isSelected && isEditMode && (
+                  <>
+                    {/* Sticker number */}
+                    <div className="absolute -top-8 left-0 bg-pink-500 text-white text-sm font-bold px-3 py-1 rounded-lg shadow-lg">
+                      #{sticker.stickerIndex + 1}
                     </div>
-                  )}
-                  <div className="text-center">
-                    <span className="text-sm font-bold text-gray-800 block">{item.name}</span>
-                    <span className="text-xs font-medium text-[#BC8F8F] capitalize">{item.kind}</span>
-                  </div>
-                </div>
-              </motion.div>
+                    
+                    {/* Size indicator */}
+                    <div className="absolute -top-8 right-0 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded shadow-lg">
+                      {Math.round(sticker.width)}px
+                    </div>
+                    
+                    {/* Rotation indicator */}
+                    <div className="absolute top-0 left-0 bg-purple-500 text-white text-xs font-bold px-2 py-1 rounded shadow-lg">
+                      {sticker.rotate}°
+                    </div>
+                    
+                    {/* Delete button */}
+                    <button
+                      className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg text-xs font-bold"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setStickerPositions(prev => prev.filter((_, i) => i !== index));
+                        setSelectedSticker(null);
+                      }}
+                    >
+                      ×
+                    </button>
+                  </>
+                )}
+              </div>
             );
           })}
         </div>
