@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { motion } from "framer-motion";
 import Layout from "@/components/Layout";
+import HepHeader from "@/components/HepHeader";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link, useSearchParams } from "react-router-dom";
 import { ArrowRight, Search, X } from "lucide-react";
@@ -123,6 +125,7 @@ const Catalog = () => {
   };
 
   return (
+<<<<<<< Updated upstream
     <Layout hideNavbar hideFooter>
       <MouseTrail />
       
@@ -348,6 +351,181 @@ const Catalog = () => {
         </div>
       </div>
     </Layout>
+=======
+    <div className="min-h-screen bg-[#FFF5EE]">
+      <HepHeader />
+
+      {/* Hero Section */}
+      <section className="pt-32 pb-16">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="mx-auto max-w-4xl rounded-3xl border border-[#EFD8D6] bg-white/60 p-12 text-center shadow-lg backdrop-blur-sm"
+          >
+            <h1 className="font-display text-4xl font-bold md:text-5xl" style={{color: '#442f2a'}}>Our Catalog</h1>
+            <p className="mx-auto mt-4 max-w-lg text-[#BC8F8F]">
+              Browse our handcrafted collection — each piece made with care.
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Search and Filters */}
+      <section className="pb-16">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="mx-auto max-w-4xl rounded-3xl border border-[#EFD8D6] bg-white/60 p-8 shadow-lg backdrop-blur-sm"
+          >
+            {/* Search bar */}
+            <div className="mx-auto max-w-md">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#BC8F8F]" />
+                <input
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  placeholder="Search by name, description, or category..."
+                  className="h-11 w-full rounded-full border border-[#EFD8D6] bg-[#F7F3ED] pl-10 pr-10 text-sm outline-none focus:border-[#BC8F8F] focus:ring-1 focus:ring-[#BC8F8F]/30"
+                />
+                {searchText && (
+                  <button onClick={clearSearch} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#BC8F8F] hover:text-[#442f2a]">
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Filters row */}
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+              {categories.map((cat) => (
+                <Button
+                  key={cat}
+                  variant={activeCategory === cat ? "default" : "outline"}
+                  size="sm"
+                  className={`rounded-full ${activeCategory === cat ? 'bg-[#BC8F8F] text-white' : 'border-[#EFD8D6] text-[#BC8F8F] hover:bg-[#F7F3ED]'}`}
+                  onClick={() => setActiveCategory(cat)}
+                >
+                  {cat}
+                </Button>
+              ))}
+            </div>
+
+            {/* Sort */}
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+              <select value={sort} onChange={(e) => setSort(e.target.value)} className="rounded-md border border-[#EFD8D6] bg-[#F7F3ED] px-3 py-2 text-sm text-[#442f2a]">
+                <option value="default">Sort</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+                <option value="name-asc">Name: A-Z</option>
+              </select>
+            </div>
+
+            {/* Results count */}
+            <div className="mt-6 text-center text-sm text-[#BC8F8F]">
+              {loading ? "Loading..." : `${displayed.length} item${displayed.length !== 1 ? "s" : ""} found`}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Products grid */}
+      <section className="pb-16">
+        <div className="container mx-auto px-4">
+          <motion.div
+            key={`${activeCategory}-${searchText}`}
+            initial="hidden"
+            animate="visible"
+            className="mx-auto max-w-6xl rounded-3xl border border-[#EFD8D6] bg-white/60 p-8 shadow-lg backdrop-blur-sm"
+          >
+            <motion.div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {displayed.map((product, i) => (
+                <motion.div key={product.id} variants={fadeUp} custom={i}>
+                  <Card className="group h-full border-[#EFD8D6]/40 bg-[#F7F3ED] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                    <CardContent className="flex h-full flex-col p-6 text-center">
+                      <div className="relative mx-auto aspect-square w-full overflow-hidden rounded-2xl border border-[#EFD8D6]/40">
+                        {(() => {
+                          const firstImage = product.images.find((v) => (v || "").trim() !== "") || "";
+                          return isImageUrl(firstImage) ? (
+                            <img 
+                              src={firstImage} 
+                              alt={product.name} 
+                              className="absolute inset-0 h-full w-full object-cover" 
+                              loading="lazy"
+                              decoding="async"
+                            />
+                          ) : (
+                          <div className="absolute inset-0 flex items-center justify-center bg-[#EFD8D6] text-sm text-[#BC8F8F]">
+                            No image
+                          </div>
+                          );
+                        })()}
+
+                        <div className="absolute inset-0 translate-y-full bg-[#EFD8D6]/20 transition-transform duration-300 ease-out group-hover:translate-y-0" />
+
+                        {!product.in_stock && (
+                          <div className="absolute top-2 left-2 rounded-full bg-red-500/90 px-2.5 py-0.5 text-xs font-semibold text-white">
+                            Out of Stock
+                          </div>
+                        )}
+
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                          {product.in_stock ? (
+                            <Button asChild size="sm" className="rounded-full bg-[#BC8F8F] hover:bg-[#442f2a]">
+                              <Link to={`/product/${product.id}`}>
+                                <ShoppingBag className="mr-2 h-4 w-4" /> View
+                              </Link>
+                            </Button>
+                          ) : (
+                            <Button size="sm" disabled className="rounded-full">
+                              Out of Stock
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="mt-4 flex items-end justify-between gap-3 text-left">
+                        <div className="min-w-0">
+                          <div className="font-display text-sm font-semibold text-[#442f2a] line-clamp-1">{product.name}</div>
+                          <div className="mt-0.5 flex flex-wrap gap-1">
+                            {product.category.split(',').map((c, i) => (
+                              <span key={i} className="inline-block rounded-full bg-[#EFD8D6] px-2 py-0.5 text-xs text-[#BC8F8F]">
+                                {c.trim()}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="shrink-0 text-lg font-medium text-[#BC8F8F]">PKR {product.price}</div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </motion.div>
+
+            {!loading && displayed.length === 0 && (
+              <div className="mt-16 text-center text-[#BC8F8F]">
+                <p className="text-lg">No products match your filters.</p>
+                <Button variant="outline" className="mt-4 rounded-full border-[#EFD8D6] text-[#BC8F8F] hover:bg-[#F7F3ED]" onClick={() => { setActiveCategory("All"); setSearchText(""); }}>
+                  Clear all filters
+                </Button>
+              </div>
+            )}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-[#F7F3ED] py-12">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-[#BC8F8F]">© 2024 Phool Shop. All rights reserved.</p>
+        </div>
+      </footer>
+    </div>
+>>>>>>> Stashed changes
   );
 };
 
