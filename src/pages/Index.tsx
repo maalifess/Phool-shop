@@ -157,148 +157,148 @@ const Index = () => {
   // Static sticker positions
   const stickerPositions = [
     {
-      "x": 245,
-      "y": 50,
+      "x": 235,
+      "y": 45,
       "rotate": 360,
       "width": 135,
       "stickerIndex": 1
     },
     {
-      "x": 248,
-      "y": 510,
+      "x": 238,
+      "y": 505,
       "rotate": 0,
       "width": 175,
       "stickerIndex": 2
     },
     {
-      "x": 1280,
-      "y": 60,
+      "x": 1210,
+      "y": 55,
       "rotate": 0,
       "width": 105,
       "stickerIndex": 3
     },
     {
-      "x": 138,
-      "y": 550,
+      "x": 128,
+      "y": 545,
       "rotate": 0,
       "width": 135,
       "stickerIndex": 4
     },
     {
-      "x": 0,
-      "y": 100,
+      "x": -10,
+      "y": 95,
       "rotate": 0,
       "width": 180,
       "stickerIndex": 6
     },
     {
-      "x": 50,
-      "y": 220.6666717529297,
+      "x": 40,
+      "y": 215.6666717529297,
       "rotate": 690,
       "width": 200,
       "stickerIndex": 7
     },
     {
-      "x": 0,
-      "y": 520,
+      "x": -10,
+      "y": 515,
       "rotate": 0,
       "width": 170,
       "stickerIndex": 8
     },
     {
-      "x": 139,
-      "y": 348.33333587646484,
+      "x": 129,
+      "y": 343.33333587646484,
       "rotate": 0,
       "width": 245,
       "stickerIndex": 9
     },
     {
-      "x": 1380,
-      "y": 90,
+      "x": 1310,
+      "y": 85,
       "rotate": 0,
       "width": 110,
       "stickerIndex": 10
     },
     {
-      "x": 1180,
-      "y": 0,
+      "x": 1110,
+      "y": -5,
       "rotate": 30,
       "width": 145,
       "stickerIndex": 11
     },
     {
-      "x": 1140,
-      "y": 479.3333435058594,
+      "x": 1070,
+      "y": 474.3333435058594,
       "rotate": 0,
       "width": 190,
       "stickerIndex": 13
     },
     {
-      "x": 1340,
-      "y": 210,
+      "x": 1270,
+      "y": 205,
       "rotate": 705,
       "width": 180,
       "stickerIndex": 14
     },
     {
-      "x": 1340,
-      "y": 532.3333435058594,
+      "x": 1270,
+      "y": 527.3333435058594,
       "rotate": 0,
       "width": 150,
       "stickerIndex": 15
     },
     {
-      "x": 0,
-      "y": 275.3333435058594,
+      "x": -10,
+      "y": 270.3333435058594,
       "rotate": 0,
       "width": 140,
       "stickerIndex": 16
     },
     {
-      "x": 92,
-      "y": 0,
+      "x": 82,
+      "y": -5,
       "rotate": 0,
       "width": 140,
       "stickerIndex": 17
     },
     {
-      "x": 1180,
-      "y": 174.33334350585938,
+      "x": 1110,
+      "y": 169.33334350585938,
       "rotate": 255,
       "width": 140,
       "stickerIndex": 18
     },
     {
-      "x": 1340,
-      "y": 380,
+      "x": 1270,
+      "y": 375,
       "rotate": 0,
       "width": 165,
       "stickerIndex": 19
     },
     {
-      "x": 1140,
-      "y": 23,
+      "x": 1070,
+      "y": 18,
       "rotate": 0,
       "width": 115,
       "stickerIndex": 22
     },
     {
-      "x": 1180,
-      "y": 304.3333435058594,
+      "x": 1110,
+      "y": 299.3333435058594,
       "rotate": 0,
       "width": 215,
       "stickerIndex": 21
     },
     {
-      "x": 10,
-      "y": 370,
+      "x": 0,
+      "y": 365,
       "rotate": 0,
       "width": 160,
       "stickerIndex": 23
     },
     {
-      "x": 102,
-      "y": 120,
+      "x": 92,
+      "y": 115,
       "rotate": 0,
       "width": 180,
       "stickerIndex": 25
@@ -514,8 +514,8 @@ const Index = () => {
         </motion.div>
 
         
-      {/* Static Stickers */}
-        <div className="absolute inset-0 pointer-events-none z-10">
+      {/* Responsive Stickers */}
+        <div className="absolute inset-0 pointer-events-none z-10 hidden md:block">
           {stickerPositions.map((sticker, index) => {
             const stickerImages = [
               sticker1, sticker2, sticker3, sticker4, sticker5, sticker6, sticker7, sticker8,
@@ -525,13 +525,20 @@ const Index = () => {
             ];
             
             return (
-              <div
+              <motion.div
                 key={`sticker-${index}`}
                 className="absolute pointer-events-none"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ 
+                  duration: 0.8,
+                  delay: index * 0.15,
+                  ease: "easeOut"
+                }}
                 style={{
-                  left: `${sticker.x}px`,
-                  top: `${sticker.y}px`,
-                  width: `${sticker.width}px`,
+                  left: `${(sticker.x / 1440) * 100}%`,
+                  top: `${(sticker.y / 800) * 100}%`,
+                  width: `${(sticker.width / 1440) * 100}vw`,
                   transform: `rotate(${sticker.rotate}deg)`,
                   zIndex: 10,
                   userSelect: 'none'
@@ -545,7 +552,7 @@ const Index = () => {
                     imageRendering: 'crisp-edges',
                   }}
                 />
-              </div>
+              </motion.div>
             );
           })}
         </div>
