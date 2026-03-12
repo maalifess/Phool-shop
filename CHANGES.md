@@ -102,6 +102,13 @@ This document tracks all changes made to the PhoolShop project during developmen
   - Applied to both desktop and mobile navigation
   - All navigation and page headings now use consistent #442f2a color
 
+### Navigation Text Bold Update
+- **File**: `src/components/Navbar.tsx`
+- **Changes**:
+  - Changed navigation text weight from `font-medium` to `font-bold`
+  - Applied to both desktop and mobile navigation links
+  - Navigation text now has stronger visual emphasis
+
 ---
 
 ## Session: March 13, 2026

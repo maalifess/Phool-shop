@@ -148,7 +148,7 @@ const Navbar = () => {
             <Link
               key={link.to}
               to={link.to}
-              className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+              className={`rounded-md px-4 py-2 text-sm font-bold transition-colors ${
                 location.pathname === link.to ? "bg-[#EFD8D6] text-[#442f2a]" : "text-[#442f2a] hover:bg-[#EFD8D6] hover:text-[#442f2a]"
               }`}
             >
@@ -236,7 +236,7 @@ const Navbar = () => {
                 key={link.to}
                 to={link.to}
                 onClick={() => setMobileOpen(false)}
-                className={`rounded-md px-4 py-3 text-sm font-medium transition-colors ${
+                className={`rounded-md px-4 py-3 text-sm font-bold transition-colors ${
                   location.pathname === link.to ? "bg-[#EFD8D6] text-[#442f2a]" : "text-[#442f2a] hover:bg-[#EFD8D6] hover:text-[#442f2a]"
                 }`}
               >
