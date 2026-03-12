@@ -1,5 +1,5 @@
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link } from "react-router-dom";
-import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
 import type { Variants } from 'framer-motion';
 import { Button } from "@/components/ui/button";
@@ -41,6 +41,7 @@ import sticker23 from '@/assets/stickers/23.png';
 import sticker24 from '@/assets/stickers/24.png';
 import sticker25 from '@/assets/stickers/25.png';
 import sticker26 from '@/assets/stickers/26.png';
+
 
 // Floating element helper tied to scroll (Parallax)
 const ParallaxFloater = ({
@@ -153,162 +154,157 @@ const Index = () => {
 
   const [audioEnabled, setAudioEnabled] = useState(false);
 
-  // Drag state for stickers - simplified
-  const [stickerPositions, setStickerPositions] = useState<Array<{x: number, y: number, rotate: number, width: number, stickerIndex: number}>>([
-    // Start with empty array - stickers will be added when dragged from sidebar
-  ]);
-  const [selectedSticker, setSelectedSticker] = useState<number | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [isResizing, setIsResizing] = useState(false);
-  const [showStickerPanel, setShowStickerPanel] = useState(false);
-
-  // Handle clicking on empty space to deselect
-  const handleContainerClick = (e: React.MouseEvent) => {
-    if (!isEditMode) return;
-    // Only deselect if clicking on the container itself, not on stickers
-    if (e.target === e.currentTarget) {
-      setSelectedSticker(null);
+  // Static sticker positions
+  const stickerPositions = [
+    {
+      "x": 245,
+      "y": 50,
+      "rotate": 360,
+      "width": 135,
+      "stickerIndex": 1
+    },
+    {
+      "x": 248,
+      "y": 510,
+      "rotate": 0,
+      "width": 175,
+      "stickerIndex": 2
+    },
+    {
+      "x": 1280,
+      "y": 60,
+      "rotate": 0,
+      "width": 105,
+      "stickerIndex": 3
+    },
+    {
+      "x": 138,
+      "y": 550,
+      "rotate": 0,
+      "width": 135,
+      "stickerIndex": 4
+    },
+    {
+      "x": 0,
+      "y": 100,
+      "rotate": 0,
+      "width": 180,
+      "stickerIndex": 6
+    },
+    {
+      "x": 50,
+      "y": 220.6666717529297,
+      "rotate": 690,
+      "width": 200,
+      "stickerIndex": 7
+    },
+    {
+      "x": 0,
+      "y": 520,
+      "rotate": 0,
+      "width": 170,
+      "stickerIndex": 8
+    },
+    {
+      "x": 139,
+      "y": 348.33333587646484,
+      "rotate": 0,
+      "width": 245,
+      "stickerIndex": 9
+    },
+    {
+      "x": 1380,
+      "y": 90,
+      "rotate": 0,
+      "width": 110,
+      "stickerIndex": 10
+    },
+    {
+      "x": 1180,
+      "y": 0,
+      "rotate": 30,
+      "width": 145,
+      "stickerIndex": 11
+    },
+    {
+      "x": 1140,
+      "y": 479.3333435058594,
+      "rotate": 0,
+      "width": 190,
+      "stickerIndex": 13
+    },
+    {
+      "x": 1340,
+      "y": 210,
+      "rotate": 705,
+      "width": 180,
+      "stickerIndex": 14
+    },
+    {
+      "x": 1340,
+      "y": 532.3333435058594,
+      "rotate": 0,
+      "width": 150,
+      "stickerIndex": 15
+    },
+    {
+      "x": 0,
+      "y": 275.3333435058594,
+      "rotate": 0,
+      "width": 140,
+      "stickerIndex": 16
+    },
+    {
+      "x": 92,
+      "y": 0,
+      "rotate": 0,
+      "width": 140,
+      "stickerIndex": 17
+    },
+    {
+      "x": 1180,
+      "y": 174.33334350585938,
+      "rotate": 255,
+      "width": 140,
+      "stickerIndex": 18
+    },
+    {
+      "x": 1340,
+      "y": 380,
+      "rotate": 0,
+      "width": 165,
+      "stickerIndex": 19
+    },
+    {
+      "x": 1140,
+      "y": 23,
+      "rotate": 0,
+      "width": 115,
+      "stickerIndex": 22
+    },
+    {
+      "x": 1180,
+      "y": 304.3333435058594,
+      "rotate": 0,
+      "width": 215,
+      "stickerIndex": 21
+    },
+    {
+      "x": 10,
+      "y": 370,
+      "rotate": 0,
+      "width": 160,
+      "stickerIndex": 23
+    },
+    {
+      "x": 102,
+      "y": 120,
+      "rotate": 0,
+      "width": 180,
+      "stickerIndex": 25
     }
-  };
-  const handleStickerMouseDown = (e: React.MouseEvent, index: number) => {
-    if (!isEditMode) return;
-    e.preventDefault();
-    e.stopPropagation();
-    
-    setSelectedSticker(index);
-    setIsDragging(true);
-    
-    const rect = e.currentTarget.getBoundingClientRect();
-    setDragOffset({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
-    });
-  };
+  ];
 
-  const handleSidebarMouseDown = (e: React.MouseEvent, stickerIndex: number) => {
-    if (!isEditMode) return;
-    e.preventDefault();
-    e.stopPropagation();
-    
-    // Create new sticker at mouse position
-    const container = document.getElementById('sticker-container');
-    if (!container) return;
-    
-    const containerRect = container.getBoundingClientRect();
-    const newSticker = {
-      x: e.clientX - containerRect.left - 50,
-      y: e.clientY - containerRect.top - 50,
-      rotate: 0,
-      width: 100,
-      stickerIndex
-    };
-    
-    setStickerPositions(prev => [...prev, newSticker]);
-    setSelectedSticker(stickerPositions.length);
-    setIsDragging(true);
-    
-    setDragOffset({ x: 50, y: 50 });
-  };
-
-  const handleMouseMove = (e: MouseEvent) => {
-    if (!isDragging || !isEditMode || selectedSticker === null) return;
-    
-    const container = document.getElementById('sticker-container');
-    if (!container) return;
-    
-    const containerRect = container.getBoundingClientRect();
-    const newX = e.clientX - containerRect.left - dragOffset.x;
-    const newY = e.clientY - containerRect.top - dragOffset.y;
-    
-    setStickerPositions(prev => {
-      const newPositions = [...prev];
-      if (newPositions[selectedSticker]) {
-        newPositions[selectedSticker] = {
-          ...newPositions[selectedSticker],
-          x: Math.max(0, Math.min(newX, containerRect.width - newPositions[selectedSticker].width)),
-          y: Math.max(0, Math.min(newY, containerRect.height - newPositions[selectedSticker].width))
-        };
-      }
-      return newPositions;
-    });
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  // Keyboard controls
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isEditMode || selectedSticker === null) return;
-      
-      const step = e.shiftKey ? 10 : 1;
-      
-      setStickerPositions(prev => {
-        const newPositions = [...prev];
-        if (!newPositions[selectedSticker]) return newPositions;
-        
-        switch(e.key) {
-          case 'ArrowUp':
-            newPositions[selectedSticker].y = Math.max(0, newPositions[selectedSticker].y - step);
-            break;
-          case 'ArrowDown':
-            newPositions[selectedSticker].y += step;
-            break;
-          case 'ArrowLeft':
-            newPositions[selectedSticker].x = Math.max(0, newPositions[selectedSticker].x - step);
-            break;
-          case 'ArrowRight':
-            newPositions[selectedSticker].x += step;
-            break;
-          case '+':
-          case '=':
-            newPositions[selectedSticker].width = Math.min(300, newPositions[selectedSticker].width + 5);
-            break;
-          case '-':
-          case '_':
-            newPositions[selectedSticker].width = Math.max(50, newPositions[selectedSticker].width - 5);
-            break;
-          case 'r':
-          case 'R':
-            newPositions[selectedSticker].rotate += 15;
-            break;
-          case 'Delete':
-          case 'Backspace':
-            newPositions.splice(selectedSticker, 1);
-            setSelectedSticker(null);
-            break;
-        }
-        return newPositions;
-      });
-    };
-    
-    if (isEditMode) {
-      document.addEventListener('keydown', handleKeyDown);
-      return () => document.removeEventListener('keydown', handleKeyDown);
-    }
-  }, [isEditMode, selectedSticker]);
-
-  useEffect(() => {
-    if (isEditMode) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-      return () => {
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
-      };
-    }
-  }, [isEditMode, isDragging, selectedSticker, dragOffset]);
-
-  // Save positions to console
-  const savePositions = () => {
-    console.log('=== STICKER POSITIONS ===');
-    console.log('Copy this array into the code:');
-    console.log(JSON.stringify(stickerPositions, null, 2));
-    alert(`Positions saved to console! ${stickerPositions.length} stickers exported.`);
-  };
   const playPopSound = () => {
     if (!audioEnabled) return;
     try {
@@ -517,126 +513,9 @@ const Index = () => {
           </div>
         </motion.div>
 
-        {/* Scattered Stickers */}
-        <div id="sticker-container" className="absolute inset-0 pointer-events-none z-10" onClick={handleContainerClick}>
-          {/* Edit Controls - Minimal */}
-          <div className="absolute top-4 right-4 z-50 pointer-events-auto">
-            <div className="bg-white/90 backdrop-blur p-3 rounded-lg shadow-lg border border-pink-200">
-              <div className="flex gap-2 items-center mb-2">
-                <button
-                  onClick={() => setIsEditMode(!isEditMode)}
-                  className={`px-3 py-2 rounded-lg font-medium text-sm transition-colors ${
-                    isEditMode 
-                      ? 'bg-pink-500 text-white hover:bg-pink-600' 
-                      : 'bg-pink-100 text-pink-700 hover:bg-pink-200'
-                  }`}
-                >
-                  {isEditMode ? '✓ Done' : '✏️ Edit'}
-                </button>
-                {isEditMode && (
-                  <>
-                    <button
-                      onClick={() => setShowStickerPanel(!showStickerPanel)}
-                      className={`px-3 py-2 rounded-lg font-medium text-sm transition-colors ${
-                        showStickerPanel 
-                          ? 'bg-purple-500 text-white hover:bg-purple-600' 
-                          : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
-                      }`}
-                    >
-                      🎨 Stickers
-                    </button>
-                    <button
-                      onClick={savePositions}
-                      className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium text-sm transition-colors"
-                    >
-                      💾 Save
-                    </button>
-                    <button
-                      onClick={() => setStickerPositions([])}
-                      className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 font-medium text-sm transition-colors"
-                    >
-                      🗑️ Clear
-                    </button>
-                  </>
-                )}
-              </div>
-              
-              {/* Sticker Navigation */}
-              {isEditMode && stickerPositions.length > 0 && (
-                <div className="flex items-center gap-2 pt-2 border-t border-pink-200">
-                  <button
-                    onClick={() => {
-                      if (selectedSticker === null) {
-                        setSelectedSticker(0);
-                      } else {
-                        setSelectedSticker((prev) => prev === null ? 0 : (prev - 1 + stickerPositions.length) % stickerPositions.length);
-                      }
-                    }}
-                    className="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 font-medium text-sm transition-colors"
-                  >
-                    ◀
-                  </button>
-                  <span className="text-sm font-medium text-gray-700 min-w-[80px] text-center">
-                    {selectedSticker !== null ? `Sticker ${selectedSticker + 1}/${stickerPositions.length}` : 'None'}
-                  </span>
-                  <button
-                    onClick={() => {
-                      if (selectedSticker === null) {
-                        setSelectedSticker(0);
-                      } else {
-                        setSelectedSticker((prev) => prev === null ? 0 : (prev + 1) % stickerPositions.length);
-                      }
-                    }}
-                    className="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 font-medium text-sm transition-colors"
-                  >
-                    ▶
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Sticker Top Panel */}
-          {isEditMode && showStickerPanel && (
-            <div className="absolute top-0 left-0 right-0 bg-white/95 backdrop-blur shadow-xl border-b border-pink-200 z-40 pointer-events-auto">
-              <div className="p-2 border-b border-pink-200 flex items-center justify-between">
-                <h3 className="text-xs font-bold text-pink-600">🎨 Drag stickers onto the screen</h3>
-                <button
-                  onClick={() => setShowStickerPanel(false)}
-                  className="text-gray-500 hover:text-gray-700 text-sm"
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="max-h-16 overflow-y-auto p-2">
-                <div className="flex gap-1 flex-wrap">
-                  {[
-                    sticker1, sticker2, sticker3, sticker4, sticker5, sticker6, sticker7, sticker8,
-                    sticker9, sticker10, sticker11, sticker12, sticker13, sticker14, sticker15, sticker16,
-                    sticker17, sticker18, sticker19, sticker20, sticker21, sticker22, sticker23, sticker24,
-                    sticker25, sticker26
-                  ].map((sticker, index) => (
-                    <div
-                      key={`sidebar-sticker-${index}`}
-                      className="relative group cursor-grab active:cursor-grabbing flex-shrink-0"
-                      onMouseDown={(e) => handleSidebarMouseDown(e, index)}
-                    >
-                      <img
-                        src={sticker}
-                        alt={`Sticker ${index + 1}`}
-                        className="w-10 h-10 object-contain border border-gray-200 rounded group-hover:border-pink-300 group-hover:shadow-sm transition-all"
-                      />
-                      <div className="absolute -top-1 -right-1 bg-pink-500 text-white text-xs w-3 h-3 rounded-full flex items-center justify-center font-bold text-[8px]">
-                        {index + 1}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Stickers - Simplified Working Version */}
+        
+      {/* Static Stickers */}
+        <div className="absolute inset-0 pointer-events-none z-10">
           {stickerPositions.map((sticker, index) => {
             const stickerImages = [
               sticker1, sticker2, sticker3, sticker4, sticker5, sticker6, sticker7, sticker8,
@@ -645,79 +524,27 @@ const Index = () => {
               sticker25, sticker26
             ];
             
-            const isSelected = selectedSticker === index;
-            
             return (
               <div
                 key={`sticker-${index}`}
-                className={`absolute ${isEditMode ? 'pointer-events-auto' : 'pointer-events-none'}`}
+                className="absolute pointer-events-none"
                 style={{
                   left: `${sticker.x}px`,
                   top: `${sticker.y}px`,
                   width: `${sticker.width}px`,
                   transform: `rotate(${sticker.rotate}deg)`,
-                  zIndex: isSelected ? 100 : 10,
-                  cursor: isEditMode ? 'grab' : 'default',
+                  zIndex: 10,
                   userSelect: 'none'
                 }}
-                onMouseDown={(e) => handleStickerMouseDown(e, index)}
               >
-                {/* Selection area */}
-                <div 
-                  className={`absolute border-4 rounded-xl transition-all duration-200 ${
-                    isSelected 
-                      ? 'border-pink-500 bg-pink-100/30 shadow-xl' 
-                      : 'border-transparent hover:border-pink-300 hover:bg-pink-50/20'
-                  }`}
-                  style={{
-                    top: '-15px',
-                    left: '-15px',
-                    right: '-15px',
-                    bottom: '-15px',
-                  }}
-                />
-                
-                {/* Sticker image */}
                 <img 
                   src={stickerImages[sticker.stickerIndex]}
                   alt={`Sticker ${sticker.stickerIndex + 1}`}
-                  className="w-full h-auto object-contain drop-shadow-lg pointer-events-none"
+                  className="w-full h-auto object-contain drop-shadow-lg"
                   style={{ 
                     imageRendering: 'crisp-edges',
                   }}
                 />
-                
-                {/* Controls for selected sticker */}
-                {isSelected && isEditMode && (
-                  <>
-                    {/* Sticker number */}
-                    <div className="absolute -top-8 left-0 bg-pink-500 text-white text-sm font-bold px-3 py-1 rounded-lg shadow-lg">
-                      #{sticker.stickerIndex + 1}
-                    </div>
-                    
-                    {/* Size indicator */}
-                    <div className="absolute -top-8 right-0 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded shadow-lg">
-                      {Math.round(sticker.width)}px
-                    </div>
-                    
-                    {/* Rotation indicator */}
-                    <div className="absolute top-0 left-0 bg-purple-500 text-white text-xs font-bold px-2 py-1 rounded shadow-lg">
-                      {sticker.rotate}°
-                    </div>
-                    
-                    {/* Delete button */}
-                    <button
-                      className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg text-xs font-bold"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setStickerPositions(prev => prev.filter((_, i) => i !== index));
-                        setSelectedSticker(null);
-                      }}
-                    >
-                      ×
-                    </button>
-                  </>
-                )}
               </div>
             );
           })}
