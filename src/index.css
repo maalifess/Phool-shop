@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sacramento&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&family=Fredoka+One&family=Varela+Round&display=swap');
 
 @tailwind base;
@@ -71,9 +72,9 @@
     --sidebar-ring: 329 86% 70%;
     /* #f472b6 Pink-400 */
 
-    /* Primary site font: Fredoka One as main font for everything */
-    --font-display: 'Fredoka One', 'Comfortaa', 'Varela Round', sans-serif;
-    --font-body: 'Fredoka One', 'Comfortaa', 'Varela Round', sans-serif;
+    /* Primary site font: Comfortaa as main font for everything */
+    --font-display: 'Comfortaa', 'Varela Round', sans-serif;
+    --font-body: 'Comfortaa', 'Varela Round', sans-serif;
   }
 
   .dark {
@@ -162,7 +163,7 @@
 
 /* Landing page bubbly font (except Phool Shop which uses Great Vibes) */
 .landing-bubbly {
-  font-family: 'Fredoka One', 'Comfortaa', 'Varela Round', sans-serif;
+  font-family: 'Comfortaa', 'Varela Round', sans-serif;
 }
 
 @layer base {

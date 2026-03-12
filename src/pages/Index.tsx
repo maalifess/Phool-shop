@@ -454,6 +454,9 @@ const Index = () => {
               transition={{ duration: 1, type: "spring", bounce: 0.5 }}
               className="mb-4 relative"
             >
+              <h1 className="font-display text-3xl md:text-4xl font-medium leading-tight tracking-tight drop-shadow-sm mb-2" style={{fontFamily: '"Sacramento", cursive', color: '#91766E'}}>
+                looped with love
+              </h1>
               <motion.div
                 className="text-7xl md:text-9xl text-[#f472b6] drop-shadow-md mb-4"
                 style={{ fontFamily: '"Great Vibes", cursive' }}
@@ -462,13 +465,6 @@ const Index = () => {
               >
                 Phool Shop
               </motion.div>
-              <h1 className="font-display text-5xl md:text-7xl font-medium leading-tight tracking-tight drop-shadow-sm" style={{color: '#91766E'}}>
-                Creating cozy moments,
-                <br />
-                <span style={{color: '#91766E'}}>
-                  one soft stitch at a time.
-                </span>
-              </h1>
             </motion.div>
 
             <motion.p
