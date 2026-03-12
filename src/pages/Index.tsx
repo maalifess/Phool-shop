@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -48,6 +48,8 @@ const Index = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [cards, setCards] = useState<SupabaseCard[]>([]);
   const [featuredLoading, setFeaturedLoading] = useState(true);
+  const [navVisible, setNavVisible] = useState(true);
+  const lastScrollY = useRef(0);
 
   const isImageUrl = (v?: string) => {
     if (!v) return false;
@@ -75,6 +77,22 @@ const Index = () => {
     })();
   }, []);
 
+  // Scroll-based navbar hiding
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY.current) {
+        setNavVisible(false);
+      } else {
+        setNavVisible(true);
+      }
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
     <Layout hideNavbar hideFooter>
       <MouseTrail />
@@ -83,27 +101,26 @@ const Index = () => {
       </style>
 
       <div className="min-h-screen" style={{ backgroundColor: '#FFF5EE' }}>
-        <div className="hidden lg:flex left-1/2 -translate-x-1/2 w-[93vw] lg:max-w-[1280px] fixed top-10 z-50 h-min transition-transform duration-300 translate-y-0">
+        <div className={`hidden lg:flex left-1/2 -translate-x-1/2 w-[93vw] lg:max-w-[1280px] fixed top-10 z-50 h-min transition-transform duration-500 ${navVisible ? 'translate-y-0' : '-translate-y-[200%]'}`}>
           <div className="flex items-center justify-between w-full gap-6">
             <div className="flex items-center justify-center gap-2 border-2 rounded-full px-4 py-2.5 w-full" style={{ backgroundColor: '#FFF5EE', borderColor: '#442f2a' }}>
               <a href="#about" className="border-2 rounded-full px-4 pt-1.5 text-lg transition-colors duration-200 whitespace-nowrap" style={{ borderColor: '#442f2a', backgroundColor: '#BC8F8F', color: '#FFF5EE' }}>About</a>
-              <a href="#services" className="border-2 rounded-full px-4 pt-1.5 text-lg transition-colors duration-200 whitespace-nowrap" style={{ borderColor: '#442f2a', backgroundColor: '#BC8F8F', color: '#FFF5EE' }}>Services</a>
+              <a href="#custom-orders" className="border-2 rounded-full px-4 pt-1.5 text-lg transition-colors duration-200 whitespace-nowrap" style={{ borderColor: '#442f2a', backgroundColor: '#BC8F8F', color: '#FFF5EE' }}>Custom Orders</a>
               <Link to="/catalog" className="border-2 rounded-full px-4 pt-1.5 text-lg transition-colors duration-200 whitespace-nowrap" style={{ borderColor: '#442f2a', backgroundColor: '#BC8F8F', color: '#FFF5EE' }}>Shop</Link>
             </div>
             <div className="w-full flex items-center justify-center">
               <Link to="/" className="text-3xl font-bold tracking-tight" style={{ color: '#442f2a', fontFamily: '"Fredoka One", cursive' }}>Phool</Link>
             </div>
             <div className="flex items-center justify-center gap-2 border-2 rounded-full px-4 py-2.5 w-full" style={{ backgroundColor: '#FFF5EE', borderColor: '#442f2a' }}>
-              <a href="#events" className="border-2 rounded-full px-4 pt-1.5 text-lg transition-colors duration-200 whitespace-nowrap" style={{ borderColor: '#442f2a', backgroundColor: '#BC8F8F', color: '#FFF5EE' }}>Events</a>
               <a href="#find-us" className="border-2 rounded-full px-4 pt-1.5 text-lg transition-colors duration-200 whitespace-nowrap" style={{ borderColor: '#442f2a', backgroundColor: '#BC8F8F', color: '#FFF5EE' }}>Find Us</a>
-              <Link to="/tokri" className="border-2 rounded-full w-12 h-12 flex items-center justify-center" style={{ borderColor: '#442f2a', backgroundColor: '#BC8F8F', color: '#FFF5EE' }} aria-label="Cart">
-                <span className="text-xl">🛒</span>
+              <Link to="/tokri" className="border-2 rounded-full px-4 pt-1.5 text-lg transition-colors duration-200 whitespace-nowrap" style={{ borderColor: '#442f2a', backgroundColor: '#BC8F8F', color: '#FFF5EE' }} aria-label="Cart">
+                Tokri
               </Link>
             </div>
           </div>
         </div>
 
-        <div className="lg:hidden fixed w-full top-0 left-0 right-0 z-50 bg-transparent p-4">
+        <div className={`lg:hidden fixed w-full top-0 left-0 right-0 z-50 bg-transparent p-4 transition-transform duration-500 ${navVisible ? 'translate-y-0' : '-translate-y-[200%]'}`}>
           <div className="relative w-full flex items-center">
             <div className="w-14 h-14 flex items-center justify-center flex-shrink-0 border-2 rounded-full" style={{ borderColor: '#442f2a', backgroundColor: '#FFF5EE' }}>
               <span className="text-xl">≡</span>
@@ -112,8 +129,8 @@ const Index = () => {
               <Link to="/" className="text-xl font-bold" style={{ color: '#442f2a', fontFamily: '"Fredoka One", cursive' }}>Phool</Link>
             </div>
             <div className="flex items-center gap-3 ml-auto flex-shrink-0">
-              <Link to="/tokri" className="w-14 h-14 flex items-center justify-center border-2 rounded-full" style={{ borderColor: '#442f2a', backgroundColor: '#FFF5EE' }} aria-label="Cart">
-                <span className="text-xl">🛒</span>
+              <Link to="/tokri" className="w-14 h-14 flex items-center justify-center border-2 rounded-full text-xs font-bold" style={{ borderColor: '#442f2a', backgroundColor: '#FFF5EE', color: '#442f2a' }} aria-label="Cart">
+                Tokri
               </Link>
             </div>
           </div>
@@ -269,7 +286,7 @@ const Index = () => {
           </section>
         </div>
 
-        <div id="services" className="xl:max-w-[1360px] mx-auto">
+        <div id="custom-orders" className="xl:max-w-[1360px] mx-auto">
           <section className="w-full border-x-2 border-[#442f2a] bg-[#F7F3ED] text-[#442f2a] max-w-[90vw] md:max-w-[95vw] mx-auto relative py-16 md:py-20">
             <div className="max-w-[1080px] mx-auto px-4 grid md:grid-cols-2 gap-10 items-start">
               <div className="order-2 md:order-1">
@@ -281,7 +298,7 @@ const Index = () => {
                 </div>
               </div>
               <div className="order-1 md:order-2">
-                <h2 className="text-[4rem] md:text-[6rem] leading-[1] rotate-[-8deg]" style={{ fontFamily: '"Sacramento", cursive' }}>Services</h2>
+                <h2 className="text-[4rem] md:text-[6rem] leading-[1] rotate-[-8deg]" style={{ fontFamily: '"Sacramento", cursive' }}>Custom Orders</h2>
                 <p className="mt-6 text-base md:text-lg leading-[1.6]">
                   Need something specific? We can create custom crochet orders for gifts, themes, or special requests.
                 </p>
@@ -295,40 +312,7 @@ const Index = () => {
           </section>
         </div>
 
-        <section id="events" className="w-full flex flex-col items-center justify-center border-y-4 border-[#442f2a] pb-20 px-6 md:px-0" style={{ backgroundColor: '#BC8F8F', color: '#FFF5EE' }}>
-          <div className="w-full flex flex-col items-center justify-center gap-6 md:gap-8 md:w-[85vw] max-w-[1200px] mx-auto mt-16">
-            {[{
-              title: "New drops every week",
-              date: "FRI",
-              location: "Online catalog",
-              link: "/catalog",
-            }, {
-              title: "Custom order slots",
-              date: "OPEN",
-              location: "DM / Form",
-              link: "/custom-orders",
-            }, {
-              title: "Fundraiser spotlight",
-              date: "MONTHLY",
-              location: "Community",
-              link: "/fundraisers",
-            }].map((e, i) => (
-              <div key={i} className="group flex md:grid md:grid-cols-3 justify-between items-end w-full border-b-2 border-dashed mb-6 gap-1 pb-4 md:pb-0 md:relative md:transition-all md:duration-200" style={{ borderColor: '#FFF5EE' }}>
-                <Link to={e.link} className="md:contents">
-                  <h3 className="text-xl md:text-3xl font-bold">{e.title}</h3>
-                  <p className="text-xs md:text-xl md:text-center">{e.date}</p>
-                  <p className="text-xs md:text-xl md:text-right">{e.location}</p>
-                </Link>
-              </div>
-            ))}
-            <div>
-              <Button asChild className="rounded-full px-6 border-2" style={{ borderColor: '#442f2a', backgroundColor: '#FFF5EE', color: '#442f2a' }}>
-                <Link to="/catalog">See more</Link>
-              </Button>
-            </div>
-          </div>
-        </section>
-
+        
         <div id="find-us" className="w-full py-16" style={{ backgroundColor: '#FFF5EE' }}>
           <div className="xl:max-w-[1360px] mx-auto px-4">
             <div className="w-[95vw] max-w-[1080px] mx-auto border-2 rounded-[2rem]" style={{ borderColor: '#442f2a', backgroundColor: '#BC8F8F', color: '#FFF5EE' }}>
