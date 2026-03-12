@@ -48,30 +48,6 @@ const Catalog = () => {
     return ["All", ...Array.from(cats)];
   }, [products, cards]);
 
-  const allProducts = useMemo(() => {
-    const arr = [];
-    for (const p of products) {
-      arr.push(p);
-    }
-    for (const c of cards) {
-      arr.push({ ...c, images: c.images });
-    }
-    return arr;
-  }, [products, cards]);
-
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      const [productsData, cardsData] = await Promise.all([
-        loadProducts(),
-        loadCards()
-      ]);
-      setProducts(productsData);
-      setCards(cardsData);
-      setLoading(false);
-    })();
-  }, []);
-
   // Scroll-based navbar hiding
   useEffect(() => {
     const handleScroll = () => {
@@ -88,61 +64,65 @@ const Catalog = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const displayed = useMemo(() => {
-    let result = [...allProducts];
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      const [p, c] = await Promise.all([loadProducts(), loadCards()]);
+      setProducts(p);
+      setCards(c);
+      setLoading(false);
+    })();
+  }, []);
 
-    // Search filter
-    const q = searchText.toLowerCase().trim();
-    if (q) {
-      result = result.filter((p) =>
-        p.name.toLowerCase().includes(q) ||
-        (p.description || "").toLowerCase().includes(q) ||
-        p.category.toLowerCase().includes(q)
-      );
+  const filteredItems = useMemo(() => {
+    const combined = [
+      ...products.map(p => ({ ...p, kind: 'product' as const })),
+      ...cards.map(c => ({ ...c, kind: 'card' as const }))
+    ];
+
+    let filtered = combined.filter(item => {
+      const matchesSearch = !searchText || 
+        item.name.toLowerCase().includes(searchText.toLowerCase()) ||
+        item.category.toLowerCase().includes(searchText.toLowerCase()) ||
+        (item.description && item.description.toLowerCase().includes(searchText.toLowerCase()));
+      
+      const matchesCategory = activeCategory === "All" || item.category.includes(activeCategory);
+      
+      return matchesSearch && matchesCategory;
+    });
+
+    // Sorting
+    if (sort === "name-asc") {
+      filtered.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sort === "name-desc") {
+      filtered.sort((a, b) => b.name.localeCompare(a.name));
+    } else if (sort === "price-asc") {
+      filtered.sort((a, b) => a.price - b.price);
+    } else if (sort === "price-desc") {
+      filtered.sort((a, b) => b.price - a.price);
     }
 
-    // Category filter
-    if (activeCategory !== "All") {
-      result = result.filter((p) => {
-        const cats = p.category.split(',').map(s => s.trim()).filter(Boolean);
-        return cats.includes(activeCategory);
-      });
-    }
-
-    // Sort
-    if (sort === "price-asc") result.sort((a, b) => a.price - b.price);
-    else if (sort === "price-desc") result.sort((a, b) => b.price - a.price);
-    else if (sort === "name-asc") result.sort((a, b) => a.name.localeCompare(b.name));
-
-    return result;
-  }, [allProducts, searchText, activeCategory, sort]);
-
-  const clearSearch = () => {
-    setSearchText("");
-    setSearchParams({});
-  };
+    return filtered;
+  }, [products, cards, searchText, activeCategory, sort]);
 
   return (
     <Layout hideNavbar hideFooter>
       <MouseTrail />
-      
       <div className="min-h-screen" style={{ backgroundColor: '#FFF5EE' }}>
         {/* Desktop Navigation */}
         <div className={`hidden lg:flex left-1/2 -translate-x-1/2 w-[93vw] lg:max-w-[1280px] fixed top-10 z-50 h-min transition-transform duration-500 ${navVisible ? 'translate-y-0' : '-translate-y-[200%]'}`}>
           <div className="flex items-center justify-between w-full gap-6">
             <div className="flex items-center justify-center gap-2 border-2 rounded-full px-4 py-2.5 w-full" style={{ backgroundColor: '#FFF5EE', borderColor: '#442f2a' }}>
-              <Link to="/#about" className="border-2 rounded-full px-4 pt-1.5 text-lg transition-colors duration-200 whitespace-nowrap" style={{ borderColor: '#442f2a', backgroundColor: '#BC8F8F', color: '#FFF5EE' }}>About</Link>
-              <Link to="/#custom-orders" className="border-2 rounded-full px-4 pt-1.5 text-lg transition-colors duration-200 whitespace-nowrap" style={{ borderColor: '#442f2a', backgroundColor: '#BC8F8F', color: '#FFF5EE' }}>Custom Orders</Link>
-              <Link to="/catalog" className="border-2 rounded-full px-4 pt-1.5 text-lg transition-colors duration-200 whitespace-nowrap" style={{ borderColor: '#442f2a', backgroundColor: '#442f2a', color: '#FFF5EE' }}>Shop</Link>
+              <Link to="/" className="border-2 rounded-full px-4 pt-1.5 text-lg transition-colors duration-200 whitespace-nowrap" style={{ borderColor: '#442f2a', backgroundColor: '#BC8F8F', color: '#FFF5EE' }}>Home</Link>
+              <Link to="/custom-orders" className="border-2 rounded-full px-4 pt-1.5 text-lg transition-colors duration-200 whitespace-nowrap" style={{ borderColor: '#442f2a', backgroundColor: '#BC8F8F', color: '#FFF5EE' }}>Custom Orders</Link>
+              <Link to="/catalog" className="border-2 rounded-full px-4 pt-1.5 text-lg transition-colors duration-200 whitespace-nowrap" style={{ borderColor: '#442f2a', backgroundColor: '#BC8F8F', color: '#FFF5EE' }}>Shop</Link>
             </div>
             <div className="w-full flex items-center justify-center">
               <Link to="/" className="text-3xl font-bold tracking-tight" style={{ color: '#442f2a', fontFamily: '"Fredoka One", cursive' }}>Phool</Link>
             </div>
             <div className="flex items-center justify-center gap-2 border-2 rounded-full px-4 py-2.5 w-full" style={{ backgroundColor: '#FFF5EE', borderColor: '#442f2a' }}>
-              <Link to="/#find-us" className="border-2 rounded-full px-4 pt-1.5 text-lg transition-colors duration-200 whitespace-nowrap" style={{ borderColor: '#442f2a', backgroundColor: '#BC8F8F', color: '#FFF5EE' }}>Find Us</Link>
-              <Link to="/tokri" className="border-2 rounded-full px-4 pt-1.5 text-lg transition-colors duration-200 whitespace-nowrap" style={{ borderColor: '#442f2a', backgroundColor: '#BC8F8F', color: '#FFF5EE' }} aria-label="Cart">
-                Tokri
-              </Link>
+              <Link to="/fundraisers" className="border-2 rounded-full px-4 pt-1.5 text-lg transition-colors duration-200 whitespace-nowrap" style={{ borderColor: '#442f2a', backgroundColor: '#BC8F8F', color: '#FFF5EE' }}>Fundraisers</Link>
+              <Link to="/tokri" className="border-2 rounded-full px-4 pt-1.5 text-lg transition-colors duration-200 whitespace-nowrap" style={{ borderColor: '#442f2a', backgroundColor: '#BC8F8F', color: '#FFF5EE' }}>Tokri</Link>
             </div>
           </div>
         </div>
@@ -157,9 +137,7 @@ const Catalog = () => {
               <Link to="/" className="text-xl font-bold" style={{ color: '#442f2a', fontFamily: '"Fredoka One", cursive' }}>Phool</Link>
             </div>
             <div className="flex items-center gap-3 ml-auto flex-shrink-0">
-              <Link to="/tokri" className="w-14 h-14 flex items-center justify-center border-2 rounded-full text-xs font-bold" style={{ borderColor: '#442f2a', backgroundColor: '#FFF5EE', color: '#442f2a' }} aria-label="Cart">
-                Tokri
-              </Link>
+              <Link to="/tokri" className="w-14 h-14 flex items-center justify-center border-2 rounded-full text-xs font-bold" style={{ borderColor: '#442f2a', backgroundColor: '#FFF5EE', color: '#442f2a' }}>Tokri</Link>
             </div>
           </div>
         </div>
@@ -174,176 +152,153 @@ const Catalog = () => {
                     Shop
                   </h1>
                   <p className="max-w-[44ch] text-base md:text-lg text-center" style={{ color: '#442f2a' }}>
-                    Browse our handcrafted collection — each piece made with care.
+                    Browse our collection of handmade crochet treasures
                   </p>
-                  
-                  {/* Search bar */}
-                  <div className="w-full max-w-md">
-                    <div className="relative">
-                      <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2" style={{ color: '#BC8F8F' }} />
-                      <input
-                        value={searchText}
-                        onChange={(e) => setSearchText(e.target.value)}
-                        placeholder="Search products..."
-                        className="h-12 w-full rounded-full border-2 pl-12 pr-10 text-base outline-none"
-                        style={{ borderColor: '#442f2a', backgroundColor: '#FFF5EE', color: '#442f2a' }}
-                      />
-                      {searchText && (
-                        <button onClick={clearSearch} className="absolute right-4 top-1/2 -translate-y-1/2" style={{ color: '#BC8F8F' }}>
-                          <X className="h-5 w-5" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Products Section */}
-        <div className="xl:max-w-[1360px] mx-auto">
-          <section className="w-full border-x-2 border-[#442f2a] bg-[#F7F3ED] text-[#442f2a] max-w-[90vw] md:max-w-[95vw] mx-auto relative py-8 md:py-12">
-            <div className="max-w-[1080px] flex flex-col items-center justify-center gap-6 px-4 mx-auto">
-              
-              {/* Filters row */}
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                {categories.map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => setActiveCategory(cat)}
-                    className="border-2 rounded-full px-4 py-1.5 text-sm md:text-base transition-colors duration-200"
-                    style={{
-                      borderColor: '#442f2a',
-                      backgroundColor: activeCategory === cat ? '#442f2a' : '#FFF5EE',
-                      color: activeCategory === cat ? '#FFF5EE' : '#442f2a'
-                    }}
+        {/* Search and Filters */}
+        <div className="xl:max-w-[1360px] mx-auto mt-8">
+          <div className="w-full max-w-[90vw] md:max-w-[95vw] mx-auto px-4">
+            <div className="border-2 rounded-[2rem] p-6" style={{ borderColor: '#442f2a', backgroundColor: '#FFF5EE' }}>
+              <div className="flex flex-col md:flex-row gap-4">
+                {/* Search */}
+                <div className="flex-1">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5" style={{ color: '#BC8F8F' }} />
+                    <input
+                      type="text"
+                      placeholder="Search products..."
+                      value={searchText}
+                      onChange={(e) => {
+                        setSearchText(e.target.value);
+                        if (e.target.value) {
+                          setSearchParams({ search: e.target.value });
+                        } else {
+                          setSearchParams({});
+                        }
+                      }}
+                      className="w-full pl-10 pr-10 py-3 border-2 rounded-xl outline-none"
+                      style={{ borderColor: '#442f2a', backgroundColor: '#FFF5EE', color: '#442f2a' }}
+                    />
+                    {searchText && (
+                      <button
+                        onClick={() => {
+                          setSearchText("");
+                          setSearchParams({});
+                        }}
+                        className="absolute right-3 top-1/2 -translate-y-1/2"
+                      >
+                        <X className="h-5 w-5" style={{ color: '#BC8F8F' }} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Category Filter */}
+                <div className="md:w-48">
+                  <select
+                    value={activeCategory}
+                    onChange={(e) => setActiveCategory(e.target.value)}
+                    className="w-full px-4 py-3 border-2 rounded-xl outline-none"
+                    style={{ borderColor: '#442f2a', backgroundColor: '#FFF5EE', color: '#442f2a' }}
                   >
-                    {cat}
-                  </button>
+                    {categories.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Sort */}
+                <div className="md:w-48">
+                  <select
+                    value={sort}
+                    onChange={(e) => setSort(e.target.value)}
+                    className="w-full px-4 py-3 border-2 rounded-xl outline-none"
+                    style={{ borderColor: '#442f2a', backgroundColor: '#FFF5EE', color: '#442f2a' }}
+                  >
+                    <option value="default">Sort by</option>
+                    <option value="name-asc">Name (A-Z)</option>
+                    <option value="name-desc">Name (Z-A)</option>
+                    <option value="price-asc">Price (Low-High)</option>
+                    <option value="price-desc">Price (High-Low)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Products Grid */}
+        <div className="xl:max-w-[1360px] mx-auto mt-8">
+          <div className="w-full max-w-[90vw] md:max-w-[95vw] mx-auto px-4">
+            {loading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="border-2 rounded-[2rem] overflow-hidden animate-pulse" style={{ borderColor: '#442f2a', backgroundColor: '#FFF5EE' }}>
+                    <div className="aspect-[4/5] bg-[#EFD8D6]" />
+                    <div className="h-16 bg-[#BC8F8F]" />
+                  </div>
                 ))}
               </div>
-
-              {/* Sort */}
-              <div className="flex items-center gap-2">
-                <select 
-                  value={sort} 
-                  onChange={(e) => setSort(e.target.value)} 
-                  className="border-2 rounded-full px-4 py-1.5 text-sm md:text-base outline-none"
-                  style={{ borderColor: '#442f2a', backgroundColor: '#FFF5EE', color: '#442f2a' }}
-                >
-                  <option value="default">Sort</option>
-                  <option value="price-asc">Price: Low to High</option>
-                  <option value="price-desc">Price: High to Low</option>
-                  <option value="name-asc">Name: A-Z</option>
-                </select>
+            ) : filteredItems.length === 0 ? (
+              <div className="text-center py-16">
+                <p className="text-lg" style={{ color: '#442f2a' }}>No items found matching your criteria.</p>
               </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredItems.map((item) => {
+                  let img = "";
+                  if (item.kind === 'product') {
+                    const images = item.images;
+                    let imgArray: string[] = [];
+                    if (Array.isArray(images)) imgArray = images;
+                    else if (typeof images === 'string') {
+                      try { imgArray = JSON.parse(images || '[]'); } catch { imgArray = []; }
+                    }
+                    img = imgArray.find((v) => v && v.trim() !== "") || "";
+                  } else if (item.kind === 'card') {
+                    img = (item as any).image || "";
+                  }
 
-              {/* Results count */}
-              <div className="text-sm" style={{ color: '#BC8F8F' }}>
-                {loading ? "Loading..." : `${displayed.length} item${displayed.length !== 1 ? "s" : ""} found`}
-              </div>
-
-              {/* Products grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 w-full mt-4">
-                {loading ? (
-                  <div className="col-span-full text-center py-12" style={{ color: '#BC8F8F' }}>
-                    Loading beautiful creations...
-                  </div>
-                ) : displayed.length === 0 ? (
-                  <div className="col-span-full text-center py-12" style={{ color: '#BC8F8F' }}>
-                    <p className="text-lg">No products match your filters.</p>
-                    <Button 
-                      className="mt-4 rounded-full px-6 border-2" 
-                      style={{ borderColor: '#442f2a', backgroundColor: '#BC8F8F', color: '#FFF5EE' }}
-                      onClick={() => { setActiveCategory("All"); setSearchText(""); }}
+                  return (
+                    <motion.div
+                      key={`${item.kind}-${item.id}`}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5 }}
                     >
-                      Clear all filters
-                    </Button>
-                  </div>
-                ) : (
-                  displayed.map((product, idx) => {
-                    const firstImage = product.images.find((v) => (v || "").trim() !== "") || "";
-                    
-                    return (
                       <Link
-                        key={`${product.id}-${idx}`}
-                        to={`/product/${product.id}`}
+                        to={`/${item.kind === 'product' ? 'product' : 'card'}/${item.id}`}
                         className="group block"
                       >
-                        <div className="border-2 rounded-[2rem] overflow-hidden transition-transform duration-300 hover:scale-[1.02]" style={{ borderColor: '#442f2a', backgroundColor: '#FFF5EE' }}>
-                          <div className="aspect-[4/5] relative overflow-hidden" style={{ backgroundColor: '#EFD8D6' }}>
-                            {isImageUrl(firstImage) ? (
-                              <img src={firstImage} alt={product.name ?? ''} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+                        <div className="border-2 rounded-[2rem] overflow-hidden transition-transform duration-200 group-hover:scale-[1.02]" style={{ borderColor: '#442f2a', backgroundColor: '#FFF5EE' }}>
+                          <div className="aspect-[4/5] bg-[#EFD8D6] relative overflow-hidden">
+                            {isImageUrl(img) ? (
+                              <img src={img} alt={item.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
                             ) : (
                               <div className="absolute inset-0 grid place-items-center" style={{ color: '#442f2a' }}>🌸</div>
                             )}
-                            
-                            {!product.in_stock && (
-                              <div className="absolute top-3 left-3 border-2 rounded-full px-3 py-1 text-xs font-bold" style={{ borderColor: '#442f2a', backgroundColor: '#442f2a', color: '#FFF5EE' }}>
-                                Out of Stock
-                              </div>
-                            )}
                           </div>
-                          <div className="border-t-2 px-4 py-4" style={{ borderColor: '#442f2a', backgroundColor: '#BC8F8F', color: '#FFF5EE' }}>
-                            <div className="font-bold text-center truncate">{product.name}</div>
-                            <div className="text-center mt-1">PKR {product.price}</div>
+                          <div className="p-4">
+                            <h3 className="font-bold text-lg mb-2" style={{ color: '#442f2a' }}>{item.name}</h3>
+                            <div className="flex justify-between items-center">
+                              <span className="text-lg font-bold" style={{ color: '#BC8F8F' }}>PKR {item.price}</span>
+                              <span className="text-sm px-2 py-1 rounded-full" style={{ backgroundColor: '#EFD8D6', color: '#442f2a' }}>
+                                {item.category}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </Link>
-                    );
-                  })
-                )}
+                    </motion.div>
+                  );
+                })}
               </div>
-            </div>
-          </section>
-        </div>
-
-        {/* Footer Section */}
-        <div className="w-full py-16" style={{ backgroundColor: '#FFF5EE' }}>
-          <div className="xl:max-w-[1360px] mx-auto px-4">
-            <div className="w-[95vw] max-w-[1080px] mx-auto border-2 rounded-[2rem]" style={{ borderColor: '#442f2a', backgroundColor: '#BC8F8F', color: '#FFF5EE' }}>
-              <div className="p-8 md:p-12 border-b-2" style={{ borderColor: '#FFF5EE' }}>
-                <h3 className="uppercase text-4xl sm:text-6xl md:text-7xl leading-[0.9]" style={{ fontFamily: '"Fredoka One", cursive' }}>
-                  thanks for
-                  <br />
-                  shopping with us!
-                </h3>
-              </div>
-              <div className="grid md:grid-cols-3">
-                <div className="p-8 border-b-2 md:border-b-0 md:border-r-2" style={{ borderColor: '#FFF5EE' }}>
-                  <div className="text-base md:text-lg">hello@phool.shop</div>
-                  <div className="mt-2 text-base md:text-lg">WhatsApp: +92 …</div>
-                  <div className="mt-2 text-base md:text-lg">Pakistan</div>
-                  <div className="mt-2 text-base md:text-lg">Online orders</div>
-                </div>
-                <div className="p-8 border-b-2 md:border-b-0 md:border-r-2" style={{ borderColor: '#FFF5EE' }}>
-                  <div className="text-base md:text-lg">Newsletter</div>
-                  <div className="mt-4">
-                    <input
-                      type="email"
-                      placeholder="Email"
-                      className="w-full bg-transparent border-b-2 outline-none px-2 py-2"
-                      style={{ borderColor: '#FFF5EE' }}
-                    />
-                  </div>
-                  <div className="mt-4">
-                    <Button className="rounded-full px-6 border-2" style={{ borderColor: '#442f2a', backgroundColor: '#FFF5EE', color: '#442f2a' }}>
-                      Subscribe
-                    </Button>
-                  </div>
-                </div>
-                <div className="p-8 flex items-center justify-center relative">
-                  <motion.img
-                    src={sticker1}
-                    alt=""
-                    className="w-40 h-40 object-contain"
-                    animate={{ y: [-4, 4, -4] }}
-                    transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
-                  />
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
