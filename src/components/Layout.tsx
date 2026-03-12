@@ -2,12 +2,20 @@ import { ReactNode } from "react";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 
-const Layout = ({ children }: { children: ReactNode }) => {
+const Layout = ({
+  children,
+  hideNavbar = false,
+  hideFooter = false,
+}: {
+  children: ReactNode;
+  hideNavbar?: boolean;
+  hideFooter?: boolean;
+}) => {
   return (
     <div className="flex min-h-screen flex-col">
-      <Navbar />
+      {!hideNavbar && <Navbar />}
       <main className="flex-1">{children}</main>
-      <Footer />
+      {!hideFooter && <Footer />}
     </div>
   );
 };
