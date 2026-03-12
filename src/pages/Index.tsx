@@ -861,7 +861,7 @@ const Index = () => {
             transition={{ type: "spring", bounce: 0.5 }}
             className="text-center"
           >
-            <h2 className="font-display text-5xl font-medium tracking-tight md:text-6xl" style={{color: '#91766E'}}>
+            <h2 className="font-display text-5xl font-medium tracking-tight md:text-6xl" style={{color: '#442f2a'}}>
               Customer Reviews
             </h2>
           </motion.div>

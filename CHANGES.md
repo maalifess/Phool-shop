@@ -88,6 +88,7 @@ This document tracks all changes made to the PhoolShop project during developmen
   - Updated "Custom Orders" button text color from `#BC8F8F` to `#442f2a`
   - Updated "Featured Items" heading color from `#BC8F8F` to `#442f2a`
   - Updated "No products available yet" text color from `#BC8F8F` to `#442f2a`
+  - Updated "Customer Reviews" section heading in Index.tsx from `#91766E` to `#442f2a`
   - All text elements now consistently use the #442f2a color scheme
 
 ### Navigation and Page Headings Color Update
