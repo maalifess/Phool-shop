@@ -63,12 +63,12 @@ This document tracks all changes made to the PhoolShop project during developmen
   - Adjusted margins: tagline has `mb-2`, Phool Shop has `mb-4`
   - Maintained all styling (Sacramento font, text-3xl md:text-4xl, #91766E color)
 
-### Global Font Update to Comfortaa
+### Global Font Update to Fredoka
 - **File**: `src/index.css`
 - **Changes**:
-  - Updated `--font-display` CSS variable to use Comfortaa as primary font
-  - Updated `--font-body` CSS variable to use Comfortaa as primary font
-  - Updated `.landing-bubbly` class to use Comfortaa for consistency
+  - Updated `--font-display` CSS variable to use Fredoka as primary font
+  - Updated `--font-body` CSS variable to use Fredoka as primary font
+  - Updated `.landing-bubbly` class to use Fredoka for consistency
   - Maintained Varela Round and sans-serif as fallback fonts
 
 ### Global Text Color Change

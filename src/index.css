@@ -72,9 +72,9 @@
     --sidebar-ring: 329 86% 70%;
     /* #f472b6 Pink-400 */
 
-    /* Primary site font: Comfortaa as main font for everything */
-    --font-display: 'Comfortaa', 'Varela Round', sans-serif;
-    --font-body: 'Comfortaa', 'Varela Round', sans-serif;
+    /* Primary site font: Fredoka as main font for everything */
+    --font-display: 'Fredoka', 'Varela Round', sans-serif;
+    --font-body: 'Fredoka', 'Varela Round', sans-serif;
   }
 
   .dark {
@@ -163,7 +163,7 @@
 
 /* Landing page bubbly font (except Phool Shop which uses Great Vibes) */
 .landing-bubbly {
-  font-family: 'Comfortaa', 'Varela Round', sans-serif;
+  font-family: 'Fredoka', 'Varela Round', sans-serif;
 }
 
 @layer base {
