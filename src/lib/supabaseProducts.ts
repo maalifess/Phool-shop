@@ -65,45 +65,64 @@ export async function loadProducts(): Promise<Product[]> {
   if (productsInFlight) return productsInFlight;
 
   productsInFlight = (async () => {
-    // Robust: some projects use a quoted table name "Products" while others use products
-    const tablesToTry = ['products', 'Products'];
+    // Try multiple possible table names for maximum resilience
+    const tablesToTry = ['products', 'Products', 'product'];
     let data: any[] | null = null;
-    let error: any = null;
+    let finalError: any = null;
+
+    console.log('📦 Attempting to load products from Supabase...');
 
     for (const table of tablesToTry) {
       try {
-        const res = await Promise.race([
-          trySelectAllProductsFrom(table),
-          new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Supabase query timeout')), PRODUCTS_TIMEOUT_MS)
-          )
-        ]) as any;
-        data = res.data as any[] | null;
-        error = res.error;
-        if (!error) break;
+        console.log(`🔍 Trying table: "${table}"`);
+        const { data: tableData, error: tableError } = await trySelectAllProductsFrom(table);
+
+        if (tableError) {
+          console.warn(`⚠️ Table "${table}" error:`, tableError.message);
+          finalError = tableError;
+          continue;
+        }
+
+        if (tableData) {
+          console.log(`✅ Successfully loaded ${tableData.length} records from "${table}"`);
+          data = tableData;
+          finalError = null; // Clear error if we found a working table
+          break;
+        }
       } catch (err: any) {
-        error = err;
-        console.warn(`Timeout or error trying table "${table}":`, err.message);
-        // Continue to next table
+        console.error(`❌ Unexpected error querying "${table}":`, err.message);
+        finalError = err;
       }
     }
 
-    if (error) {
-      console.error('Failed to load products from Supabase', {
-        code: (error as any)?.code,
-        message: (error as any)?.message,
-        details: (error as any)?.details,
-        hint: (error as any)?.hint,
-      });
-      // Return cached data if available, otherwise empty array
+    if (finalError || !data) {
+      if (finalError) {
+        console.error('❌ Failed to load products from any table:', finalError);
+      } else {
+        console.warn('⚠️ No products found in any table.');
+      }
       return productsCache?.data ?? [];
     }
 
-    const next = (data || []).map((p: any) => {
-      const images = typeof p.images === 'string' ? (() => {
-        try { return JSON.parse(p.images || '[]'); } catch { return []; }
-      })() : p.images;
-      return { ...p, images } as Product;
+    const next = data.map((p: any) => {
+      // Normalize images: handle JSON strings or arrays
+      let images: string[] = [];
+      if (Array.isArray(p.images)) {
+        images = p.images;
+      } else if (typeof p.images === 'string') {
+        try {
+          images = JSON.parse(p.images || '[]');
+        } catch {
+          images = p.images.split(',').map((s: string) => s.trim()).filter(Boolean);
+        }
+      }
+
+      return {
+        ...p,
+        images,
+        in_stock: p.in_stock ?? true,
+        price: Number(p.price) || 0
+      } as Product;
     });
 
     productsCache = { ts: Date.now(), data: next };
@@ -116,6 +135,7 @@ export async function loadProducts(): Promise<Product[]> {
     productsInFlight = null;
   }
 }
+
 
 /** Fetch a single product by id from Supabase (public read) */
 export async function loadProductById(id: number): Promise<Product | null> {
