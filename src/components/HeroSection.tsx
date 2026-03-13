@@ -46,9 +46,9 @@ const HeroSection = () => {
               ease: "easeInOut"
             }
           }}
-          className="flex-1 flex justify-center lg:justify-end mt-8 lg:mt-0"
+          className="flex-1 flex justify-center lg:justify-end mt-8 lg:mt-0 lg:-translate-x-12"
         >
-          <div className="w-32 h-32 md:w-48 md:h-48 lg:w-64 lg:h-64 flex items-center justify-center overflow-hidden">
+          <div className="w-48 h-48 md:w-64 md:h-64 lg:w-[450px] lg:h-[450px] flex items-center justify-center overflow-hidden">
             <img src="/assets/branding/girl.png" alt="Sticker" className="w-full h-full object-contain" />
           </div>
         </motion.div>
