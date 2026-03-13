@@ -9,7 +9,7 @@ const MarqueeBanner = () => {
   ));
 
   return (
-    <div className="bg-golden py-3 border-y-[3px] border-foreground overflow-hidden polka-dots">
+    <div className="bg-[#F7D9E0] py-3 border-y-[3px] border-foreground overflow-hidden polka-dots">
       <div className="marquee-track">
         <div className="flex">{content}</div>
         <div className="flex">{content}</div>

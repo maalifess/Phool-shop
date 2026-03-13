@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
-    <footer id="contact" className="bg-secondary text-primary-foreground relative overflow-hidden section-border-top">
+    <footer id="contact" className="bg-secondary relative overflow-hidden section-border-top" style={{ color: '#FFFAF2' }}>
       <div className="container mx-auto px-8 py-16">
         <motion.h2
           initial={{ opacity: 0, y: 30 }}
@@ -22,12 +22,12 @@ const Footer = () => {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="text-center space-y-4"
         >
-          <h3 className="font-heading text-2xl md:text-3xl text-primary-foreground">Reach us out &lt;3</h3>
+          <h3 className="font-heading text-2xl md:text-3xl" style={{ color: '#FFFAF2' }}>Reach us out &lt;3</h3>
           
-          <div className="space-y-2 font-body text-base">
+          <div className="space-y-2 font-body text-base" style={{ color: '#FFFAF2' }}>
             <p>phoolshopstore@gmail.com</p>
             <p>+92 321 0000000</p>
-            <a href="https://www.instagram.com/phoolshopp/" target="_blank" rel="noopener noreferrer" className="underline hover:text-golden transition-colors">@phoolshopp</a>
+            <a href="https://www.instagram.com/phoolshopp/" target="_blank" rel="noopener noreferrer" className="underline hover:text-golden transition-colors" style={{ color: '#FFFAF2' }}>@phoolshopp</a>
           </div>
           
           <div className="space-y-3 pt-4">
@@ -38,7 +38,7 @@ const Footer = () => {
               Track Your Order
             </Link>
             <br />
-            <a href="/admin-login" className="inline-block font-heading text-xs uppercase tracking-wider underline hover:text-golden transition-colors">Admin login</a>
+            <a href="/admin-login" className="inline-block font-heading text-xs uppercase tracking-wider underline hover:text-golden transition-colors" style={{ color: '#FFFAF2' }}>Admin login</a>
           </div>
         </motion.div>
       </div>

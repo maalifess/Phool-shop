@@ -13,7 +13,7 @@ const Navbar = () => {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ type: "spring", stiffness: 100, damping: 20 }}
-      className="sticky top-0 z-50 bg-background border-b-[3px] border-foreground"
+      className="sticky top-0 z-50 bg-[#FFFAF2] border-b-[3px] border-foreground"
     >
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between relative">

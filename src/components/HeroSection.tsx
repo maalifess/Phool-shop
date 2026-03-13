@@ -2,9 +2,9 @@ import { motion } from "framer-motion";
 
 const HeroSection = () => {
   return (
-    <section className="relative bg-background overflow-hidden min-h-[80vh] flex items-center">
+    <section className="relative bg-[#D4A8AC] overflow-hidden min-h-[80vh] flex items-center">
       {/* Border frame */}
-      <div className="absolute inset-4 border-[3px] border-foreground rounded-3xl pointer-events-none" />
+      <div className="absolute inset-4 border-[3px] border-foreground rounded-3xl pointer-events-none bg-[#FFFAF2]" />
 
       <div className="container mx-auto px-8 py-16 flex flex-col lg:flex-row items-center justify-between relative z-10">
         {/* Centered text */}

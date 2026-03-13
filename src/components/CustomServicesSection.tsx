@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 
 const CustomServicesSection = () => {
   return (
-    <div className="w-full lg:w-1/2 bg-background py-20 relative border-r-[3px] border-foreground">
+    <div className="w-full lg:w-1/2 bg-[#FFFAF2] py-20 relative">
       <div className="absolute inset-4 border-[3px] border-foreground rounded-3xl pointer-events-none" />
 
       <div className="container mx-auto px-8">

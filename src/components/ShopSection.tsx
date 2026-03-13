@@ -77,21 +77,29 @@ const ShopSection = () => {
   };
 
   return (
-    <section id="shop" className="bg-background py-20 relative">
+    <section id="shop" className="bg-[#8E6E58] py-20 relative" style={{ color: '#D4A8AC' }}>
       {/* Border frame */}
-      <div className="absolute inset-4 border-[3px] border-foreground rounded-3xl pointer-events-none" />
+      <div className="absolute inset-4 border-[3px] border-[#FFFAF2] rounded-3xl pointer-events-none bg-[#FFFAF2]" />
 
       <div className="container mx-auto px-8">
         {/* Section title */}
-        <motion.h2
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="font-script text-7xl md:text-8xl text-secondary text-center mb-12"
-        >
-          Shop
-        </motion.h2>
+        <div className="text-center mb-12" style={{ background: 'red', padding: '20px' }}>
+          <h2
+            className="text-6xl md:text-7xl lg:text-8xl font-bold"
+            style={{ 
+              color: '#D4A8AC',
+              fontFamily: 'Sacramento, cursive, serif',
+              display: 'block',
+              visibility: 'visible',
+              opacity: '1',
+              position: 'relative',
+              zIndex: '999'
+            }}
+          >
+            Shop
+          </h2>
+          <p style={{ color: 'white', fontSize: '16px' }}>TEST: If you can see this, the section is working</p>
+        </div>
 
         {/* Product slideshow */}
         <div className="relative max-w-6xl mx-auto">

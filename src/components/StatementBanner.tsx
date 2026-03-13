@@ -17,15 +17,15 @@ const StatementBanner = () => {
         >
           {/* Line 1 */}
           <div className="flex items-center gap-4 flex-wrap justify-center">
-            <span className="font-heading text-4xl md:text-6xl lg:text-7xl text-primary-foreground">everything</span>
+            <span className="font-heading text-4xl md:text-6xl lg:text-7xl" style={{ color: '#FFFAF2' }}>everything</span>
           </div>
           {/* Line 2 */}
           <div className="flex items-center gap-4 flex-wrap justify-center">
-            <span className="font-heading text-4xl md:text-6xl lg:text-7xl text-primary-foreground">looped with</span>
+            <span className="font-heading text-4xl md:text-6xl lg:text-7xl" style={{ color: '#FFFAF2' }}>looped with</span>
           </div>
           {/* Line 3 */}
-          <span className="font-heading text-4xl md:text-6xl lg:text-7xl text-primary-foreground">
-            dher sara <span className="text-golden">pyar</span>
+          <span className="font-heading text-4xl md:text-6xl lg:text-7xl" style={{ color: '#FFFAF2' }}>
+            dher sara <span style={{ color: '#2C2C2E' }}>pyar</span>
           </span>
         </motion.div>
       </div>

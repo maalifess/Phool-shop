@@ -7,37 +7,37 @@
 @layer base {
   :root {
     --background: 35 85% 94%;
-    --foreground: 355 25% 35%;
+    --foreground: 30 25% 35%;
 
-    --card: 35 85% 96%;
-    --card-foreground: 355 25% 35%;
+    --card: #FFFAF2;
+    --card-foreground: 30 25% 35%;
 
     --popover: 35 85% 96%;
-    --popover-foreground: 355 25% 35%;
+    --popover-foreground: 30 25% 35%;
 
-    --primary: 355 25% 35%;
+    --primary: 30 25% 35%;
     --primary-foreground: 35 85% 94%;
 
     --secondary: 355 35% 65%;
-    --secondary-foreground: 35 85% 94%;
+    --secondary-foreground: 30 25% 35%;
 
     --muted: 35 25% 85%;
-    --muted-foreground: 355 20% 40%;
+    --muted-foreground: 30 20% 40%;
 
     --accent: 25 40% 80%;
-    --accent-foreground: 355 25% 35%;
+    --accent-foreground: 30 25% 35%;
 
     --destructive: 355 40% 60%;
     --destructive-foreground: 35 85% 94%;
 
-    --border: 355 25% 40%;
-    --input: 355 25% 40%;
-    --ring: 355 25% 35%;
+    --border: 30 25% 35%;
+    --input: 30 25% 35%;
+    --ring: 30 25% 35%;
 
     --radius: 2rem;
 
     --cream: 35 85% 94%;
-    --deep-brown: 355 25% 35%;
+    --deep-brown: 30 25% 35%;
     --rosy: 355 35% 65%;
     --blush: 25 40% 80%;
     --golden: 80 35% 80%;
@@ -53,11 +53,11 @@
   }
 
   * {
-    @apply border-border;
+    @apply border-[#8E6E58];
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-[#F0C4CB] text-foreground;
     font-family: var(--font-body);
   }
 
@@ -143,7 +143,7 @@
   }
 
   .dotted-line {
-    background-image: radial-gradient(circle, hsl(var(--golden)) 3px, transparent 3px);
+    background-image: radial-gradient(circle, #2C2C2E 3px, transparent 3px);
     background-size: 20px 20px;
     background-repeat: repeat-x;
     height: 10px;
@@ -157,6 +157,26 @@
   .polka-dots-sm {
     background-image: radial-gradient(circle, hsl(var(--deep-brown) / 0.2) 1px, transparent 1px);
     background-size: 8px 8px;
+  }
+
+  .shop-heading-color {
+    color: #D4A8AC !important;
+  }
+
+  #shop h2 {
+    color: #D4A8AC !important;
+  }
+
+  #shop .font-script {
+    color: #D4A8AC !important;
+  }
+
+  [data-shop-heading="true"] {
+    color: #D4A8AC !important;
+  }
+
+  section[data-shop-heading="true"] h2 {
+    color: #D4A8AC !important;
   }
 }
 

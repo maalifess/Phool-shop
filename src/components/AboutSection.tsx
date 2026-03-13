@@ -21,9 +21,9 @@ const AboutSection = () => {
     return () => clearInterval(interval);
   }, [totalStickers]);
   return (
-    <section id="about" className="bg-background py-20 relative">
+    <section id="about" className="bg-[#FFFAF2] py-20 relative">
       {/* Border frame */}
-      <div className="absolute inset-4 border-[3px] border-foreground rounded-3xl pointer-events-none" />
+      <div className="absolute inset-4 border-[3px] border-foreground rounded-3xl pointer-events-none bg-[#F7D9E0]" />
 
       <div className="container mx-auto px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
