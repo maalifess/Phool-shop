@@ -1,4 +1,6 @@
 import { supabase } from './supabaseClient';
+import { defaultProducts } from './products';
+
 
 export type Product = {
   id: number;
@@ -65,46 +67,43 @@ export async function loadProducts(): Promise<Product[]> {
   if (productsInFlight) return productsInFlight;
 
   productsInFlight = (async () => {
-    // Try multiple possible table names for maximum resilience
     const tablesToTry = ['products', 'Products', 'product'];
-    let data: any[] | null = null;
-    let finalError: any = null;
+    let allData: any[] = [];
+    let seenIds = new Set<number>();
 
-    console.log('📦 Attempting to load products from Supabase...');
+    console.log('📦 Scanning all potential tables for products...');
 
     for (const table of tablesToTry) {
       try {
-        console.log(`🔍 Trying table: "${table}"`);
         const { data: tableData, error: tableError } = await trySelectAllProductsFrom(table);
 
-        if (tableError) {
-          console.warn(`⚠️ Table "${table}" error:`, tableError.message);
-          finalError = tableError;
-          continue;
+        if (!tableError && tableData && tableData.length > 0) {
+          console.log(`✅ Found ${tableData.length} records in "${table}"`);
+          for (const item of tableData) {
+            if (!seenIds.has(item.id)) {
+              allData.push({ ...item, _source: table });
+              seenIds.add(item.id);
+            }
+          }
         }
-
-        if (tableData) {
-          console.log(`✅ Successfully loaded ${tableData.length} records from "${table}"`);
-          data = tableData;
-          finalError = null; // Clear error if we found a working table
-          break;
-        }
-      } catch (err: any) {
-        console.error(`❌ Unexpected error querying "${table}":`, err.message);
-        finalError = err;
+      } catch (err) {
+        // Silently skip failed tables during merge
       }
     }
 
-    if (finalError || !data) {
-      if (finalError) {
-        console.error('❌ Failed to load products from any table:', finalError);
-      } else {
-        console.warn('⚠️ No products found in any table.');
-      }
-      return productsCache?.data ?? [];
+    // FALLBACK: If Supabase is empty, use the local default products
+    if (allData.length === 0) {
+      console.log('ℹ️ Supabase is empty. Falling back to local default products.');
+      const localProducts = defaultProducts.map(p => ({
+        ...p,
+        in_stock: p.inStock, // Map inStock to in_stock
+        _source: 'local_fallback'
+      }));
+      productsCache = { ts: Date.now(), data: localProducts as unknown as Product[] };
+      return localProducts as unknown as Product[];
     }
 
-    const next = data.map((p: any) => {
+    const next = allData.map((p: any) => {
       // Normalize images: handle JSON strings or arrays
       let images: string[] = [];
       if (Array.isArray(p.images)) {
