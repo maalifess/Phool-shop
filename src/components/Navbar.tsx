@@ -25,13 +25,12 @@ const Navbar = () => {
             >
               {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
-            
+
             {/* Desktop navigation */}
             <div className="hidden md:flex gap-2">
               <Link to="/catalog" className="pill-btn-primary text-xs">SHOP</Link>
               <Link to="/custom-orders" className="pill-btn-primary text-xs">CUSTOM</Link>
               <Link to="/fundraisers" className="pill-btn-primary text-xs">FUNDRAISERS</Link>
-              <Link to="/track-order" className="pill-btn-outline text-xs">TRACK</Link>
             </div>
           </div>
 
@@ -75,33 +74,26 @@ const Navbar = () => {
             className="md:hidden mt-4 pt-4 border-t border-foreground"
           >
             <div className="flex flex-col gap-2">
-              <Link 
-                to="/catalog" 
+              <Link
+                to="/catalog"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="pill-btn-primary text-xs text-left w-full"
               >
                 SHOP
               </Link>
-              <Link 
-                to="/custom-orders" 
+              <Link
+                to="/custom-orders"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="pill-btn-primary text-xs text-left w-full"
               >
                 CUSTOM
               </Link>
-              <Link 
-                to="/fundraisers" 
+              <Link
+                to="/fundraisers"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="pill-btn-primary text-xs text-left w-full"
               >
                 FUNDRAISERS
-              </Link>
-              <Link 
-                to="/track-order" 
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="pill-btn-outline text-xs text-left w-full"
-              >
-                TRACK
               </Link>
             </div>
           </motion.div>
