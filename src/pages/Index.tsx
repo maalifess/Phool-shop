@@ -4,7 +4,7 @@ import MarqueeBanner from "@/components/MarqueeBanner";
 import ShopSection from "@/components/ShopSection";
 import StatementBanner from "@/components/StatementBanner";
 import AboutSection from "@/components/AboutSection";
-import ServicesSection from "@/components/ServicesSection";
+import ServicesWrapper from "@/components/ServicesWrapper";
 import Footer from "@/components/Footer";
 
 const Index = () => {
@@ -16,7 +16,7 @@ const Index = () => {
       <ShopSection />
       <StatementBanner />
       <AboutSection />
-      <ServicesSection />
+      <ServicesWrapper />
       <MarqueeBanner />
       <Footer />
     </div>

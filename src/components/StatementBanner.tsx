@@ -1,6 +1,4 @@
 import { motion } from "framer-motion";
-import couchIllustration from "@/assets/couch-illustration.png";
-import cabinetIllustration from "@/assets/cabinet-illustration.png";
 
 const StatementBanner = () => {
   return (
@@ -19,18 +17,15 @@ const StatementBanner = () => {
         >
           {/* Line 1 */}
           <div className="flex items-center gap-4 flex-wrap justify-center">
-            <span className="font-heading text-4xl md:text-6xl lg:text-7xl text-primary-foreground uppercase">YOUR</span>
-            <img src={couchIllustration} alt="" className="h-16 md:h-24 animate-wiggle" />
-            <span className="font-heading text-4xl md:text-6xl lg:text-7xl text-primary-foreground uppercase">SPACE</span>
+            <span className="font-heading text-4xl md:text-6xl lg:text-7xl text-primary-foreground">everything</span>
           </div>
           {/* Line 2 */}
           <div className="flex items-center gap-4 flex-wrap justify-center">
-            <img src={cabinetIllustration} alt="" className="h-16 md:h-24 animate-wiggle" />
-            <span className="font-heading text-4xl md:text-6xl lg:text-7xl text-primary-foreground uppercase">ISN'T BORING,</span>
+            <span className="font-heading text-4xl md:text-6xl lg:text-7xl text-primary-foreground">looped with</span>
           </div>
           {/* Line 3 */}
-          <span className="font-heading text-4xl md:text-6xl lg:text-7xl text-primary-foreground uppercase">
-            IT'S JUST NOT <span className="text-golden">PHOOL</span>
+          <span className="font-heading text-4xl md:text-6xl lg:text-7xl text-primary-foreground">
+            dher sara <span className="text-golden">pyar</span>
           </span>
         </motion.div>
       </div>

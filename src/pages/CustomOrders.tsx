@@ -7,10 +7,6 @@ import { send } from "@emailjs/browser";
 import { addOrderToGoogleSheet } from "@/services/googleSheets";
 import { createOrder } from "@/lib/supabaseOrders";
 
-// Import sticker images
-import sticker1 from '@/assets/stickers/1.png';
-import sticker2 from '@/assets/stickers/2.png';
-
 const CustomOrders = () => {
   const [submitted, setSubmitted] = useState(false);
   const [customOrderId, setCustomOrderId] = useState("");
@@ -148,9 +144,7 @@ const CustomOrders = () => {
     return (
       <Layout>
         <div className="relative">
-          <PageHero scriptTitle="request a" title="CUSTOM ORDER" subtitle="Tell us what you'd like made, and we'll curate it" />
-          <img src={sticker1} alt="" className="pointer-events-none absolute left-4 top-10 w-20 md:w-28 opacity-90 -rotate-6" />
-          <img src={sticker2} alt="" className="pointer-events-none absolute right-4 top-16 w-20 md:w-28 opacity-90 rotate-6" />
+          <PageHero scriptTitle="sirf aapke liye" />
         </div>
 
         <section className="container mx-auto px-4 py-16 max-w-2xl">
@@ -187,9 +181,7 @@ const CustomOrders = () => {
   return (
     <Layout>
       <div className="relative">
-        <PageHero scriptTitle="request a" title="CUSTOM ORDER" subtitle="Tell us what you'd like made, and we'll curate it" />
-        <img src={sticker1} alt="" className="pointer-events-none absolute left-4 top-10 w-20 md:w-28 opacity-90 -rotate-6" />
-        <img src={sticker2} alt="" className="pointer-events-none absolute right-4 top-16 w-20 md:w-28 opacity-90 rotate-6" />
+        <PageHero scriptTitle="sirf aapke liye" />
       </div>
 
       <section className="container mx-auto px-4 py-16 max-w-2xl">

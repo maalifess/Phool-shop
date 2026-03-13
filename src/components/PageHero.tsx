@@ -4,36 +4,49 @@ interface PageHeroProps {
   title: string;
   subtitle?: string;
   scriptTitle?: string;
+  scriptSubtitle?: string;
 }
 
-const PageHero = ({ title, subtitle, scriptTitle }: PageHeroProps) => (
-  <section className="relative bg-seashell section-border-bottom overflow-hidden py-20 md:py-28">
-    <div className="polka-dots absolute inset-0 opacity-30" />
+const PageHero = ({ title, subtitle, scriptTitle, scriptSubtitle }: PageHeroProps) => (
+  <section className="relative bg-seashell section-border-bottom overflow-hidden py-12 md:py-16">
+    <div className="polka-dots-sm absolute inset-0 opacity-20" />
     <div className="container mx-auto px-4 relative z-10 text-center">
-      {scriptTitle && (
-        <motion.p
-          initial={{ opacity: 0, y: -20 }}
+      <div className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-4">
+        {scriptTitle && (
+          <motion.span
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="font-script text-3xl md:text-5xl text-secondary"
+          >
+            {scriptTitle}
+          </motion.span>
+        )}
+        <motion.h1
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="font-script text-5xl md:text-6xl text-secondary mb-2"
+          transition={{ duration: 0.7, delay: 0.15 }}
+          className="font-heading text-3xl md:text-5xl lg:text-6xl text-foreground uppercase"
         >
-          {scriptTitle}
-        </motion.p>
-      )}
-      <motion.h1
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 0.15 }}
-        className="font-heading text-4xl md:text-6xl lg:text-7xl text-foreground uppercase"
-      >
-        {title}
-      </motion.h1>
+          {title}
+        </motion.h1>
+        {scriptSubtitle && (
+          <motion.span
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="font-script text-3xl md:text-5xl text-secondary"
+          >
+            {scriptSubtitle}
+          </motion.span>
+        )}
+      </div>
       {subtitle && (
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto font-body"
+          className="mt-6 text-lg text-muted-foreground max-w-xl mx-auto font-body"
         >
           {subtitle}
         </motion.p>

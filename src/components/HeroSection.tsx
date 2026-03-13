@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import heroVan from "@/assets/hero-van.png";
 
 const HeroSection = () => {
   return (
@@ -8,24 +7,26 @@ const HeroSection = () => {
       <div className="absolute inset-4 border-[3px] border-foreground rounded-3xl pointer-events-none" />
 
       <div className="container mx-auto px-8 py-16 flex flex-col lg:flex-row items-center justify-between relative z-10">
-        {/* Left text */}
-        <div className="flex-1">
+        {/* Centered text */}
+        <div className="flex-1 flex flex-col items-center justify-center text-center">
           <motion.h2
-            initial={{ opacity: 0, x: -60 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, x: -60, rotate: -10 }}
+            animate={{ opacity: 1, x: 0, rotate: -10 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="font-script text-7xl md:text-8xl lg:text-9xl text-secondary leading-none"
+            className="font-script text-6xl md:text-7xl lg:text-8xl text-secondary leading-none mb-4"
           >
-            Welcome to
+            خوش آمدید
           </motion.h2>
-          <motion.h1
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
-            className="font-heading text-5xl md:text-7xl lg:text-8xl text-foreground uppercase leading-tight mt-4"
-          >
-            PHOOL<br />SHOP
-          </motion.h1>
+          <div className="lg:translate-x-8">
+            <motion.h1
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+              className="font-heading text-5xl md:text-7xl lg:text-8xl text-foreground leading-tight"
+            >
+              Phool Shop
+            </motion.h1>
+          </div>
         </div>
 
         {/* Right illustration */}
@@ -35,11 +36,9 @@ const HeroSection = () => {
           transition={{ duration: 1, delay: 0.5, type: "spring" }}
           className="flex-1 flex justify-center lg:justify-end mt-8 lg:mt-0"
         >
-          <img
-            src={heroVan}
-            alt="Phool Shop delivery van with crochet goods"
-            className="w-80 md:w-96 lg:w-[28rem] animate-float"
-          />
+          <div className="w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 border-4 border-foreground rounded-full flex items-center justify-center bg-card text-5xl md:text-7xl lg:text-8xl">
+            🌸
+          </div>
         </motion.div>
       </div>
     </section>

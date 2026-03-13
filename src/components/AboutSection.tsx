@@ -1,6 +1,4 @@
 import { motion } from "framer-motion";
-import aboutPhoto from "@/assets/about-photo.jpg";
-import tvDecoration from "@/assets/tv-decoration.png";
 
 const AboutSection = () => {
   return (
@@ -9,15 +7,15 @@ const AboutSection = () => {
       <div className="absolute inset-4 border-[3px] border-foreground rounded-3xl pointer-events-none" />
 
       {/* TV decoration top-right */}
-      <motion.img
-        src={tvDecoration}
-        alt=""
-        className="absolute top-8 right-8 w-24 md:w-36 z-10"
+      <motion.div
+        className="absolute top-8 right-8 w-16 md:w-24 z-10 text-4xl md:text-6xl"
         initial={{ opacity: 0, rotate: 15 }}
         whileInView={{ opacity: 1, rotate: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6, delay: 0.3 }}
-      />
+      >
+        📺
+      </motion.div>
 
       <div className="container mx-auto px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -28,7 +26,7 @@ const AboutSection = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="font-script text-7xl md:text-8xl text-secondary mb-8">About</h2>
+            <h2 className="font-script text-5xl md:text-6xl lg:text-7xl text-secondary mb-8">the phool shop story book</h2>
 
             <p className="font-heading text-lg text-foreground mb-4">
               Phool Shop isn't your typical crochet store.
@@ -53,12 +51,8 @@ const AboutSection = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="flex justify-center"
           >
-            <div className="retro-card rounded-[2rem] overflow-hidden rotate-2 hover:rotate-0 transition-transform duration-500">
-              <img
-                src={aboutPhoto}
-                alt="The Phool Shop team"
-                className="w-full max-w-md object-cover"
-              />
+            <div className="retro-card rounded-[2rem] overflow-hidden rotate-2 hover:rotate-0 transition-transform duration-500 flex items-center justify-center h-64">
+              <span className="text-8xl">🌸</span>
             </div>
           </motion.div>
         </div>

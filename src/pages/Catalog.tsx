@@ -10,10 +10,6 @@ import type { Product } from "@/lib/supabaseProducts";
 import type { Card as SupabaseCard } from "@/lib/supabaseTypes";
 import { Input } from "@/components/ui/input";
 
-// Import sticker images
-import sticker1 from '@/assets/stickers/1.png';
-import sticker2 from '@/assets/stickers/2.png';
-
 const Catalog = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const urlSearch = searchParams.get("search") || "";
@@ -90,9 +86,7 @@ const Catalog = () => {
   return (
     <Layout>
       <div className="relative">
-        <PageHero scriptTitle="browse our" title="SHOP" subtitle="Handcrafted crochet creations, made with love" />
-        <img src={sticker1} alt="" className="pointer-events-none absolute left-4 top-10 w-20 md:w-28 opacity-90 -rotate-6" />
-        <img src={sticker2} alt="" className="pointer-events-none absolute right-4 top-16 w-20 md:w-28 opacity-90 rotate-6" />
+        <PageHero scriptTitle="the" title="phool shop" scriptSubtitle="collection" />
       </div>
 
       <section className="container mx-auto px-4 py-12">
@@ -136,6 +130,27 @@ const Catalog = () => {
             <option value="price-asc">Price: Low → High</option>
             <option value="price-desc">Price: High → Low</option>
           </select>
+        </div>
+
+        {/* Product Categories Section */}
+        <div className="mb-16">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-12">
+            <div className="retro-card bg-card p-6 text-center cursor-pointer hover:scale-105 transition-transform">
+              <h3 className="font-heading text-sm uppercase">phool</h3>
+            </div>
+            <div className="retro-card bg-card p-6 text-center cursor-pointer hover:scale-105 transition-transform">
+              <h3 className="font-heading text-sm uppercase">pre made bouquets</h3>
+            </div>
+            <div className="retro-card bg-card p-6 text-center cursor-pointer hover:scale-105 transition-transform">
+              <h3 className="font-heading text-sm uppercase">plushies</h3>
+            </div>
+            <div className="retro-card bg-card p-6 text-center cursor-pointer hover:scale-105 transition-transform">
+              <h3 className="font-heading text-sm uppercase">keychains</h3>
+            </div>
+            <div className="retro-card bg-card p-6 text-center cursor-pointer hover:scale-105 transition-transform md:col-span-2">
+              <h3 className="font-heading text-sm uppercase">ready to deliver</h3>
+            </div>
+          </div>
         </div>
 
         {loading ? (

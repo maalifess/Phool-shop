@@ -130,7 +130,7 @@
 
   .marquee-track {
     display: flex;
-    animation: marquee 20s linear infinite;
+    animation: marquee 15s linear infinite;
     width: max-content;
   }
 
@@ -152,6 +152,11 @@
   .polka-dots {
     background-image: radial-gradient(circle, hsl(var(--deep-brown) / 0.3) 2px, transparent 2px);
     background-size: 16px 16px;
+  }
+
+  .polka-dots-sm {
+    background-image: radial-gradient(circle, hsl(var(--deep-brown) / 0.2) 1px, transparent 1px);
+    background-size: 8px 8px;
   }
 }
 

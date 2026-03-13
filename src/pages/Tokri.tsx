@@ -25,8 +25,8 @@ const Tokri = () => {
         {items.length === 0 ? (
           <div className="text-center py-20">
             <ShoppingCart className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-            <p className="font-script text-4xl text-secondary">Your tokri is empty</p>
-            <p className="text-muted-foreground mt-2">Browse our collection and add something lovely</p>
+            <p className="font-script text-4xl text-secondary">still empty :(</p>
+            <p className="text-muted-foreground mt-2">browse the phool shop collection and treat yourself, or your loved ones &lt;3</p>
             <Link to="/catalog" className="pill-btn-primary text-xs mt-6 inline-block">Browse Shop</Link>
           </div>
         ) : (
