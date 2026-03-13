@@ -1,25 +1,79 @@
 import { motion } from "framer-motion";
-import { useState } from "react";
-
-const products = Array(9).fill(null);
+import { useEffect, useState } from "react";
+import { loadProducts } from "@/lib/supabaseProducts";
+import { loadCards } from "@/lib/supabaseCards";
+import type { Product } from "@/lib/supabaseProducts";
+import type { Card as SupabaseCard } from "@/lib/supabaseTypes";
 
 const ShopSection = () => {
+  const [products, setProducts] = useState<Array<{image: string, name: string, type: 'product' | 'card'}>>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const itemsToShow = 3;
+
+  useEffect(() => {
+    const loadItems = async () => {
+      try {
+        const [productsData, cardsData] = await Promise.all([loadProducts(), loadCards()]);
+        
+        // Combine products and cards
+        const productItems = productsData.slice(0, 6).map(p => ({
+          image: p.images[0] || '',
+          name: p.name,
+          type: 'product' as const
+        }));
+        
+        const cardItems = cardsData.slice(0, 6).map(c => ({
+          image: c.images[0] || '',
+          name: c.name,
+          type: 'card' as const
+        }));
+        
+        // Interleave for variety
+        const allItems = [];
+        for (let i = 0; i < Math.max(productItems.length, cardItems.length); i++) {
+          if (i < productItems.length) allItems.push(productItems[i]);
+          if (i < cardItems.length) allItems.push(cardItems[i]);
+        }
+        
+        setProducts(allItems.slice(0, 9)); // Take 9 items for carousel
+      } catch (error) {
+        console.error('Failed to load items for carousel:', error);
+      }
+    };
+    
+    loadItems();
+  }, []);
+
+  // Auto-slide every 3 seconds
+  useEffect(() => {
+    if (products.length === 0) return;
+    
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % products.length);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [products.length]);
 
   const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 3) % products.length);
+    if (products.length === 0) return;
+    setCurrentIndex((prev) => (prev + 1) % products.length);
   };
 
   const prevSlide = () => {
-    setCurrentIndex((prev) => (prev - 3 + products.length) % products.length);
+    if (products.length === 0) return;
+    setCurrentIndex((prev) => (prev - 1 + products.length) % products.length);
   };
 
   const getVisibleProducts = () => {
-    return [
-      products[currentIndex],
-      products[(currentIndex + 1) % products.length],
-      products[(currentIndex + 2) % products.length]
-    ];
+    if (products.length === 0) return [null, null, null];
+    
+    const visible = [];
+    for (let i = 0; i < itemsToShow; i++) {
+      const index = (currentIndex + i) % products.length;
+      visible.push(products[index]);
+    }
+    return visible;
   };
 
   return (
@@ -48,12 +102,31 @@ const ShopSection = () => {
                 initial={{ opacity: 0, x: 100 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="aspect-[4/3] overflow-hidden rounded-3xl border-[3px] border-foreground bg-muted flex items-center justify-center cursor-pointer hover:scale-105 transition-transform"
+                className="aspect-[4/3] overflow-hidden rounded-3xl border-[3px] border-foreground bg-muted flex items-center justify-center cursor-pointer hover:scale-105 transition-transform relative group"
               >
-                <div className="text-center">
-                  <div className="text-4xl md:text-6xl mb-4">🌸</div>
-                  <div className="w-20 md:w-32 h-2 bg-golden rounded-full mx-auto"></div>
-                </div>
+                {product ? (
+                  <>
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                        (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full flex items-center justify-center"><div class="text-center"><div class="text-4xl md:text-6xl mb-4">🌸</div><div class="w-20 md:w-32 h-2 bg-golden rounded-full mx-auto"></div></div></div>';
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="absolute bottom-4 left-4 right-4">
+                        <h3 className="font-heading text-white text-sm md:text-base truncate">{product.name}</h3>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center">
+                    <div className="text-4xl md:text-6xl mb-4">🌸</div>
+                    <div className="w-20 md:w-32 h-2 bg-golden rounded-full mx-auto"></div>
+                  </div>
+                )}
               </motion.div>
             ))}
           </div>
@@ -74,12 +147,12 @@ const ShopSection = () => {
 
           {/* Mobile swipe indicators */}
           <div className="flex md:hidden justify-center gap-2 mt-6">
-            {Array.from({ length: 3 }).map((_, index) => (
+            {Array.from({ length: Math.min(3, products.length) }).map((_, index) => (
               <button
                 key={index}
-                onClick={() => setCurrentIndex(index * 3)}
+                onClick={() => setCurrentIndex(index)}
                 className={`w-2 h-2 rounded-full transition-colors ${
-                  Math.floor(currentIndex / 3) === index ? "bg-foreground" : "bg-muted"
+                  currentIndex === index ? "bg-foreground" : "bg-muted"
                 }`}
               />
             ))}
@@ -87,12 +160,12 @@ const ShopSection = () => {
 
           {/* Desktop indicators */}
           <div className="hidden md:flex justify-center gap-2 mt-6">
-            {Array.from({ length: 3 }).map((_, index) => (
+            {Array.from({ length: Math.min(3, products.length) }).map((_, index) => (
               <button
                 key={index}
-                onClick={() => setCurrentIndex(index * 3)}
+                onClick={() => setCurrentIndex(index)}
                 className={`w-2 h-2 rounded-full transition-colors ${
-                  Math.floor(currentIndex / 3) === index ? "bg-foreground" : "bg-muted"
+                  currentIndex === index ? "bg-foreground" : "bg-muted"
                 }`}
               />
             ))}

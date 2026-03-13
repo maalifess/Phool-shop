@@ -40,6 +40,17 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
     } catch (e) {
       console.error("Failed to persist cart", e);
+      // If localStorage is full, try to clear some space
+      if (e instanceof Error && e.name === 'QuotaExceededError') {
+        console.warn("localStorage quota exceeded, attempting to clear old data...");
+        try {
+          // Clear cart data as last resort
+          localStorage.removeItem(STORAGE_KEY);
+          console.warn("Cart data cleared due to storage quota");
+        } catch (clearError) {
+          console.error("Failed to clear cart data:", clearError);
+        }
+      }
     }
   }, [items]);
 

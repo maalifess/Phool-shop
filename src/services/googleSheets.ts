@@ -54,7 +54,7 @@ export const addOrderToGoogleSheet = async (orderData: OrderData): Promise<boole
     console.log('💾 Data saved to localStorage as backup');
 
     // Try to send to Google Sheets if script URL is configured
-    if (!GOOGLE_SHEETS_API_URL || GOOGLE_SHEETS_API_URL.includes('YOUR_SCRIPT_ID')) {
+    if (!GOOGLE_SHEETS_API_URL || GOOGLE_SHEETS_API_URL.includes('YOUR_PRODUCTION_SCRIPT_ID')) {
       console.error('❌ GOOGLE SHEETS NOT CONFIGURED: VITE_GOOGLE_SHEETS_URL is missing or contains placeholder value');
       console.error('📊 Order saved to localStorage only. To fix: set VITE_GOOGLE_SHEETS_URL in .env and rebuild');
       return true; // Still return success since localStorage backup worked

@@ -1,21 +1,29 @@
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 
 const AboutSection = () => {
+  const [currentSticker, setCurrentSticker] = useState(1);
+  const [isAnimating, setIsAnimating] = useState(true);
+
+  // Total stickers available
+  const totalStickers = 26;
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsAnimating(false); // Start fade out
+      
+      setTimeout(() => {
+        setCurrentSticker((prev) => (prev % totalStickers) + 1); // Next sticker
+        setIsAnimating(true); // Start fade in
+      }, 300); // 300ms fade transition
+    }, 5000); // Change every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [totalStickers]);
   return (
     <section id="about" className="bg-background py-20 relative">
       {/* Border frame */}
       <div className="absolute inset-4 border-[3px] border-foreground rounded-3xl pointer-events-none" />
-
-      {/* TV decoration top-right */}
-      <motion.div
-        className="absolute top-8 right-8 w-16 md:w-24 z-10 text-4xl md:text-6xl"
-        initial={{ opacity: 0, rotate: 15 }}
-        whileInView={{ opacity: 1, rotate: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6, delay: 0.3 }}
-      >
-        📺
-      </motion.div>
 
       <div className="container mx-auto px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -52,7 +60,33 @@ const AboutSection = () => {
             className="flex justify-center"
           >
             <div className="retro-card rounded-[2rem] overflow-hidden rotate-2 hover:rotate-0 transition-transform duration-500 flex items-center justify-center h-64">
-              <span className="text-8xl">🌸</span>
+              {/* Animated sticker display */}
+              <motion.div
+                key={currentSticker}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ 
+                  opacity: isAnimating ? 1 : 0,
+                  scale: isAnimating ? 1 : 0.8,
+                  rotate: isAnimating ? [-2, 2, -1, 1, 0] : 0
+                }}
+                transition={{ 
+                  opacity: { duration: 0.3 },
+                  scale: { duration: 0.3 },
+                  rotate: { duration: 4, repeat: isAnimating ? Infinity : 0, repeatType: "reverse", ease: "easeInOut" }
+                }}
+                className="w-full h-full flex items-center justify-center p-4"
+              >
+                <img
+                  src={`/src/assets/stickers/${currentSticker}.png`}
+                  alt={`Sticker ${currentSticker}`}
+                  className="w-full h-full object-contain"
+                  onError={(e) => {
+                    // Fallback if image doesn't load
+                    (e.target as HTMLImageElement).style.display = 'none';
+                    (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full flex items-center justify-center text-8xl">🌸</div>';
+                  }}
+                />
+              </motion.div>
             </div>
           </motion.div>
         </div>
