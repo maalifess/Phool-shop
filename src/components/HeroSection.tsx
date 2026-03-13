@@ -32,12 +32,24 @@ const HeroSection = () => {
         {/* Right illustration */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8, rotate: -5 }}
-          animate={{ opacity: 1, scale: 1, rotate: 0 }}
-          transition={{ duration: 1, delay: 0.5, type: "spring" }}
-          className="flex-1 flex justify-center lg:justify-end mt-8 lg:mt-0"
+          animate={{
+            opacity: 1,
+            scale: 1,
+            rotate: [-3, 3, -3]
+          }}
+          transition={{
+            opacity: { duration: 1, delay: 0.5 },
+            scale: { duration: 1, delay: 0.5, type: "spring" },
+            rotate: {
+              repeat: Infinity,
+              duration: 3,
+              ease: "easeInOut"
+            }
+          }}
+          className="flex-1 flex justify-center lg:justify-end mt-8 lg:mt-0 lg:-translate-x-12"
         >
-          <div className="w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 border-4 border-foreground rounded-full flex items-center justify-center bg-card text-5xl md:text-7xl lg:text-8xl">
-            🌸
+          <div className="w-48 h-48 md:w-64 md:h-64 lg:w-[450px] lg:h-[450px] flex items-center justify-center overflow-hidden">
+            <img src="/assets/branding/girl.png" alt="Sticker" className="w-full h-full object-contain" />
           </div>
         </motion.div>
       </div>

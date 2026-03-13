@@ -25,21 +25,20 @@ const Navbar = () => {
             >
               {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
-            
+
             {/* Desktop navigation */}
             <div className="hidden md:flex gap-2">
               <Link to="/catalog" className="pill-btn-primary text-xs">SHOP</Link>
               <Link to="/custom-orders" className="pill-btn-primary text-xs">CUSTOM</Link>
               <Link to="/fundraisers" className="pill-btn-primary text-xs">FUNDRAISERS</Link>
-              <Link to="/track-order" className="pill-btn-outline text-xs">TRACK</Link>
             </div>
           </div>
 
           {/* Center logo - positioned absolutely on desktop */}
           <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 md:block hidden">
             <Link to="/" className="flex-shrink-0">
-              <div className="h-12 w-12 rounded-full border-2 border-foreground flex items-center justify-center bg-card">
-                <span className="font-heading text-sm text-foreground">PHOOL</span>
+              <div className="h-24 w-24 flex items-center justify-center">
+                <img src="/assets/branding/phool.png" alt="Home" className="w-full h-full object-contain" />
               </div>
             </Link>
           </div>
@@ -47,8 +46,8 @@ const Navbar = () => {
           {/* Mobile logo - positioned normally on mobile */}
           <div className="md:hidden">
             <Link to="/" className="flex-shrink-0">
-              <div className="h-10 w-10 rounded-full border-2 border-foreground flex items-center justify-center bg-card">
-                <span className="font-heading text-xs text-foreground">PHOOL</span>
+              <div className="h-16 w-16 flex items-center justify-center">
+                <img src="/assets/branding/phool.png" alt="Home" className="w-full h-full object-contain" />
               </div>
             </Link>
           </div>
@@ -75,33 +74,26 @@ const Navbar = () => {
             className="md:hidden mt-4 pt-4 border-t border-foreground"
           >
             <div className="flex flex-col gap-2">
-              <Link 
-                to="/catalog" 
+              <Link
+                to="/catalog"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="pill-btn-primary text-xs text-left w-full"
               >
                 SHOP
               </Link>
-              <Link 
-                to="/custom-orders" 
+              <Link
+                to="/custom-orders"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="pill-btn-primary text-xs text-left w-full"
               >
                 CUSTOM
               </Link>
-              <Link 
-                to="/fundraisers" 
+              <Link
+                to="/fundraisers"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="pill-btn-primary text-xs text-left w-full"
               >
                 FUNDRAISERS
-              </Link>
-              <Link 
-                to="/track-order" 
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="pill-btn-outline text-xs text-left w-full"
-              >
-                TRACK
               </Link>
             </div>
           </motion.div>

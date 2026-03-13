@@ -9,7 +9,11 @@
   },
   "rewrites": [
     {
-      "source": "/((?!api/).*)",
+      "source": "/assets/(.*)",
+      "destination": "/assets/$1"
+    },
+    {
+      "source": "/((?!api/|assets/|static/|favicon.ico|robots.txt).*)",
       "destination": "/index.html"
     }
   ],
