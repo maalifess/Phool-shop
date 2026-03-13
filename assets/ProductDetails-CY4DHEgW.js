@@ -1,4 +1,4 @@
-import{c as xe,d as ue,r as i,g as he,j as e,L,X as J}from"./index-C0sgaHh4.js";import{L as R}from"./Layout-DzPHvGh-.js";import{B as A,C as pe,c as ge}from"./button-qUwg6IdT.js";import{a as fe,l as ye}from"./supabaseProducts-ClzIH28T.js";import{a as je,l as ve}from"./supabaseCards-CMqRtlvJ.js";import{l as K,c as be}from"./supabaseReviews-B-kCSKUg.js";import{m as l}from"./Footer-DCxqzl0F.js";import{C as Ne}from"./check-DYUxHztT.js";import{C as we}from"./copy-BJWm5JFs.js";import"./supabaseClient-BbVA-8VA.js";/**
+import{c as xe,d as ue,r as i,g as he,j as e,L,X as J}from"./index-5b7Kllds.js";import{L as R}from"./Layout-DNmy_qXC.js";import{B as A,C as pe,c as ge}from"./button-CWkKbRSz.js";import{a as fe,l as ye}from"./supabaseProducts-D3h0Wm2P.js";import{a as je,l as ve}from"./supabaseCards-CMqRtlvJ.js";import{l as K,c as be}from"./supabaseReviews-B-kCSKUg.js";import{m as l}from"./Footer-Co_uMqou.js";import{C as Ne}from"./check-DGmrd9eX.js";import{C as we}from"./copy-DXSuYn7Q.js";import"./supabaseClient-BbVA-8VA.js";/**
  * @license lucide-react v0.462.0 - ISC
  *
  * This source code is licensed under the ISC license.
