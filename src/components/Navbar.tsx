@@ -37,7 +37,7 @@ const Navbar = () => {
           {/* Center logo - positioned absolutely on desktop */}
           <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 md:block hidden">
             <Link to="/" className="flex-shrink-0">
-              <div className="h-16 w-16 flex items-center justify-center">
+              <div className="h-24 w-24 flex items-center justify-center">
                 <img src="/assets/branding/phool.png" alt="Home" className="w-full h-full object-contain" />
               </div>
             </Link>
@@ -46,7 +46,7 @@ const Navbar = () => {
           {/* Mobile logo - positioned normally on mobile */}
           <div className="md:hidden">
             <Link to="/" className="flex-shrink-0">
-              <div className="h-12 w-12 flex items-center justify-center">
+              <div className="h-16 w-16 flex items-center justify-center">
                 <img src="/assets/branding/phool.png" alt="Home" className="w-full h-full object-contain" />
               </div>
             </Link>
