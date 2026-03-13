@@ -6,43 +6,43 @@
 
 @layer base {
   :root {
-    --background: 30 33% 95%;
-    --foreground: 15 30% 16%;
+    --background: 35 85% 94%;
+    --foreground: 355 25% 35%;
 
-    --card: 20 50% 97%;
-    --card-foreground: 15 30% 16%;
+    --card: 35 85% 96%;
+    --card-foreground: 355 25% 35%;
 
-    --popover: 20 50% 97%;
-    --popover-foreground: 15 30% 16%;
+    --popover: 35 85% 96%;
+    --popover-foreground: 355 25% 35%;
 
-    --primary: 15 30% 16%;
-    --primary-foreground: 30 33% 95%;
+    --primary: 355 25% 35%;
+    --primary-foreground: 35 85% 94%;
 
-    --secondary: 0 25% 65%;
-    --secondary-foreground: 30 33% 95%;
+    --secondary: 355 35% 65%;
+    --secondary-foreground: 35 85% 94%;
 
-    --muted: 20 20% 90%;
-    --muted-foreground: 15 15% 45%;
+    --muted: 35 25% 85%;
+    --muted-foreground: 355 20% 40%;
 
-    --accent: 10 50% 90%;
-    --accent-foreground: 15 30% 16%;
+    --accent: 25 40% 80%;
+    --accent-foreground: 355 25% 35%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 355 40% 60%;
+    --destructive-foreground: 35 85% 94%;
 
-    --border: 20 20% 82%;
-    --input: 20 20% 82%;
-    --ring: 15 30% 16%;
+    --border: 355 25% 40%;
+    --input: 355 25% 40%;
+    --ring: 355 25% 35%;
 
     --radius: 2rem;
 
-    --cream: 30 33% 95%;
-    --deep-brown: 15 30% 16%;
-    --rosy: 0 25% 65%;
-    --blush: 10 50% 90%;
-    --golden: 42 90% 60%;
-    --golden-light: 42 90% 75%;
-    --seashell: 20 100% 97%;
+    --cream: 35 85% 94%;
+    --deep-brown: 355 25% 35%;
+    --rosy: 355 35% 65%;
+    --blush: 25 40% 80%;
+    --golden: 80 35% 80%;
+    --golden-light: 80 25% 88%;
+    --seashell: 35 85% 96%;
 
     --shadow-retro: 4px 4px 0px hsl(var(--deep-brown));
     --shadow-retro-sm: 2px 2px 0px hsl(var(--deep-brown));
