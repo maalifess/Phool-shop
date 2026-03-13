@@ -14,10 +14,12 @@ const DeliveryServicesSection = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="font-script text-5xl md:text-6xl text-secondary mb-6">Fundraisers</h2>
+            <h2 className="font-script text-5xl md:text-6xl text-secondary mb-6">fundraisers</h2>
 
             <p className="font-body text-base text-muted-foreground mb-8 leading-relaxed max-w-lg mx-auto">
-              Support your cause with handmade crochet creations. Perfect for school fundraisers, community events, and charitable organizations.
+              Participate or organize fundraisers with us, giving donors a yaadgaar to remember their kindness and support<br />
+              Lets work together in making a better place for everyone, reach out or shop now !!<br />
+              a little goes a long way &lt;3
             </p>
 
             <a href="/fundraisers" className="pill-btn-primary text-sm">LEARN MORE</a>

@@ -49,7 +49,10 @@ const ShopSection = () => {
     if (products.length === 0) return;
     
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % products.length);
+      setCurrentIndex((prev) => {
+        if (products.length === 0) return 0;
+        return (prev + 1) % products.length;
+      });
     }, 3000);
 
     return () => clearInterval(interval);
@@ -83,23 +86,20 @@ const ShopSection = () => {
 
       <div className="container mx-auto px-8">
         {/* Section title */}
-        <div className="text-center mb-12" style={{ background: 'red', padding: '20px' }}>
-          <h2
-            className="text-6xl md:text-7xl lg:text-8xl font-bold"
-            style={{ 
-              color: '#D4A8AC',
-              fontFamily: 'Sacramento, cursive, serif',
-              display: 'block',
-              visibility: 'visible',
-              opacity: '1',
-              position: 'relative',
-              zIndex: '999'
-            }}
-          >
-            Shop
-          </h2>
-          <p style={{ color: 'white', fontSize: '16px' }}>TEST: If you can see this, the section is working</p>
-        </div>
+        <h2
+          className="text-6xl md:text-7xl lg:text-8xl font-bold text-center mb-12"
+          style={{ 
+            color: '#D4A8AC',
+            fontFamily: 'Sacramento, cursive, serif',
+            display: 'block',
+            visibility: 'visible',
+            opacity: '1',
+            position: 'relative',
+            zIndex: '999'
+          }}
+        >
+          Shop
+        </h2>
 
         {/* Product slideshow */}
         <div className="relative max-w-6xl mx-auto">
@@ -110,18 +110,15 @@ const ShopSection = () => {
                 initial={{ opacity: 0, x: 100 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="aspect-[4/3] overflow-hidden rounded-3xl border-[3px] border-foreground bg-muted flex items-center justify-center cursor-pointer hover:scale-105 transition-transform relative group"
+                className="aspect-[4/3] overflow-hidden rounded-3xl border-[3px] border-foreground flex items-center justify-center cursor-pointer hover:scale-105 transition-transform relative group"
+                style={{ backgroundColor: '#F7D9E0' }}
               >
-                {product ? (
+                {product && product.image ? (
                   <>
                     <img
                       src={product.image}
                       alt={product.name}
                       className="w-full h-full object-cover"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = 'none';
-                        (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full flex items-center justify-center"><div class="text-center"><div class="text-4xl md:text-6xl mb-4">🌸</div><div class="w-20 md:w-32 h-2 bg-golden rounded-full mx-auto"></div></div></div>';
-                      }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       <div className="absolute bottom-4 left-4 right-4">
@@ -132,7 +129,7 @@ const ShopSection = () => {
                 ) : (
                   <div className="text-center">
                     <div className="text-4xl md:text-6xl mb-4">🌸</div>
-                    <div className="w-20 md:w-32 h-2 bg-golden rounded-full mx-auto"></div>
+                    <div className="w-20 md:w-32 h-2 rounded-full mx-auto" style={{ backgroundColor: '#D4A8AC' }}></div>
                   </div>
                 )}
               </motion.div>

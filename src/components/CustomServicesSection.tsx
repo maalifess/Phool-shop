@@ -17,7 +17,8 @@ const CustomServicesSection = () => {
             <h2 className="font-script text-5xl md:text-6xl text-secondary mb-6">sirf aapke liye</h2>
 
             <p className="font-body text-base text-muted-foreground mb-8 leading-relaxed max-w-lg mx-auto">
-              Create unique handmade pieces tailored to your vision. From personalized crochet designs to custom color combinations, bring your ideas to life.
+              You bring the idea, I'll bring the hook!<br />
+              Let's work together to create something truly one of a kind, Handmade, slow, and intentional art, sirf aapke liye &lt;3
             </p>
 
             <a href="/custom-orders" className="pill-btn-primary text-sm">START YOUR ORDER</a>
