@@ -12,16 +12,22 @@ console.log('🔍 DEBUG - Anon key starts with eyJ:', supabaseAnonKey?.startsWit
 console.log('🔍 DEBUG - Publishable key starts with sb:', supabasePublishableKey?.startsWith('sb') || false);
 
 // Create Supabase client with proper configuration
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+const clientConfig: any = {
   auth: {
     persistSession: false,
     autoRefreshToken: false,
     detectSessionInUrl: false
-  },
-  db: {
-    schema: 'public'
   }
-});
+};
+
+// Add publishable key if available
+if (supabasePublishableKey) {
+  clientConfig.db = {
+    schema: 'public'
+  };
+}
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, clientConfig);
 
 // Test the connection
 if (supabaseUrl && supabaseAnonKey) {
