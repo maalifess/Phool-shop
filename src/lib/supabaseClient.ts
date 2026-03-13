@@ -2,49 +2,35 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_556UgFYK4KS95tgTe7wQrg_bHA6pk51';
 
-console.log('🔍 DEBUG - Supabase URL:', supabaseUrl ? 'SET' : 'MISSING');
-console.log('🔍 DEBUG - Supabase Anon Key:', supabaseAnonKey ? 'SET' : 'MISSING');
-console.log('🔍 DEBUG - Supabase Publishable Key:', supabasePublishableKey ? 'SET' : 'MISSING');
-console.log('🔍 DEBUG - URL contains localhost:', supabaseUrl?.includes('localhost') || false);
-console.log('🔍 DEBUG - Anon key starts with eyJ:', supabaseAnonKey?.startsWith('eyJ') || false);
-console.log('🔍 DEBUG - Publishable key starts with sb:', supabasePublishableKey?.startsWith('sb') || false);
+// Log initialization state
+console.log('🌐 Supabase URL:', supabaseUrl ? 'SET' : 'MISSING');
+console.log('🔑 Supabase Publishable Key:', supabasePublishableKey ? 'SET' : 'MISSING');
 
-// Create Supabase client with proper configuration
-const clientConfig: any = {
+export const supabase = createClient(supabaseUrl || '', supabasePublishableKey || supabaseAnonKey || '', {
   auth: {
-    persistSession: false,
-    autoRefreshToken: false,
-    detectSessionInUrl: false
-  }
-};
-
-// Add publishable key if available
-if (supabasePublishableKey) {
-  clientConfig.db = {
+    persistSession: typeof window !== 'undefined',
+    autoRefreshToken: true,
+    detectSessionInUrl: true
+  },
+  db: {
     schema: 'public'
-  };
-}
+  }
+});
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, clientConfig);
 
-// Test the connection
+// Immediate test connection
 if (supabaseUrl && supabaseAnonKey) {
-  console.log('🧪 TESTING - Supabase client initialized');
-  
-  // Test a simple query
-  supabase.from('products').select('count').then(result => {
-    if (result.error) {
-      console.error('❌ TEST FAILED - Supabase connection error:', result.error);
-      console.error('🔍 ERROR DETAILS:', {
-        message: result.error.message,
-        details: result.error.details,
-        hint: result.error.hint,
-        code: result.error.code
-      });
+  supabase.from('products').select('id').limit(1).then(({ data, error }) => {
+    if (error) {
+      console.error('❌ Supabase Test Connection Failed:', error.message);
+      console.error('Details:', error.details);
+      console.error('Hint:', error.hint);
+      console.error('Code:', error.code);
     } else {
-      console.log('✅ TEST PASSED - Supabase connection working!');
+      console.log('✅ Supabase Test Connection Successful! Found', data?.length, 'products');
     }
   });
 }
+
