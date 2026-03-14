@@ -1,5 +1,4 @@
 import { supabase } from './supabaseClient';
-import { defaultProducts } from './products';
 
 
 export type Product = {
@@ -72,7 +71,7 @@ export async function loadProducts(): Promise<Product[]> {
   console.log('📦 Gathering products from Supabase only (all caches cleared)...');
 
   // 1. Skip Hardcoded Defaults - only load from Supabase
-  console.log(`📚 Skipped ${defaultProducts.length} products from Hardcoded Defaults (cache cleared)`);
+  console.log('📚 Skipped hardcoded default products (cache cleared)');
 
   // 2. Skip LocalStorage completely - only use Supabase
   console.log('🏠 Skipped LocalStorage products (cache cleared)');
