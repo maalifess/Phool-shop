@@ -3,26 +3,137 @@ import { motion } from "framer-motion";
 const CustomServicesSection = () => {
   return (
     <div className="w-full lg:w-1/2 bg-[#fcf2e3] py-20 relative min-h-[500px] flex items-center justify-center">
+      {/* Decorative border frame */}
       <div className="absolute inset-4 border-[3px] border-[#6e4248] rounded-3xl pointer-events-none bg-[#cfd9b6] z-0" />
 
       <div className="container mx-auto px-8 relative z-10 flex flex-col items-center justify-center h-full">
         <div className="text-center w-full flex flex-col items-center justify-center">
-          {/* Text content */}
+          {/* Main content with cute animations */}
           <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 30, rotate: -1 }}
+            whileInView={{ opacity: 1, y: 0, rotate: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            transition={{ 
+              duration: 1.2, 
+              ease: [0.25, 0.1, 0.25, 1]
+            }}
             className="flex flex-col items-center justify-center relative z-20"
+            whileHover={{ scale: 1.01, transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] } }}
           >
-            <h2 className="font-script text-5xl md:text-6xl text-foreground mb-6" style={{ color: '#6e4248', position: 'relative', zIndex: 30 }}>sirf aapke liye</h2>
+            {/* Animated heading */}
+            <motion.h2 
+              className="font-script text-5xl md:text-6xl text-foreground mb-6" 
+              style={{ color: '#6e4248', position: 'relative', zIndex: 30 }}
+              animate={{
+                y: [0, -2, 0],
+              }}
+              transition={{
+                duration: 6,
+                repeat: Infinity,
+                repeatType: "reverse",
+                ease: [0.4, 0, 0.2, 1]
+              }}
+            >
+              <motion.span
+                animate={{
+                  scale: [1, 1.02, 1],
+                }}
+                transition={{
+                  duration: 5,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  ease: [0.4, 0, 0.2, 1]
+                }}
+              >
+                sirf aapke liye
+              </motion.span>
+            </motion.h2>
 
-            <p className="font-body text-base text-foreground mb-8 leading-relaxed max-w-lg mx-auto" style={{ color: '#6e4248', position: 'relative', zIndex: 30 }}>
-              You bring the idea, I'll bring the hook!<br />
-              Let's work together to create something truly one of a kind, Handmade, slow, and intentional art, sirf aapke liye &lt;3
-            </p>
+            {/* Animated paragraph */}
+            <motion.p 
+              className="font-body text-base text-foreground mb-8 leading-relaxed max-w-lg mx-auto" 
+              style={{ color: '#6e4248', position: 'relative', zIndex: 30 }}
+              initial={{ opacity: 0, x: -15 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+            >
+              <motion.span
+                animate={{
+                  opacity: [0.85, 1, 0.85],
+                }}
+                transition={{
+                  duration: 5,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  ease: [0.4, 0, 0.2, 1]
+                }}
+              >
+                You bring the idea, I'll bring the hook!<br />
+                Let's work together to create something truly one of a kind, Handmade, slow, and intentional art, 
+              </motion.span>
+              <motion.span
+                className="inline-block"
+                animate={{
+                  scale: [1, 1.03, 1],
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  ease: [0.4, 0, 0.2, 1]
+                }}
+                style={{ color: '#6e4248' }}
+              >
+                {" "}sirf aapke liye {" "}
+              </motion.span>
+              <motion.span
+                animate={{
+                  scale: [1, 1.1, 1],
+                  display: ['inline-block', 'inline-block', 'inline-block']
+                }}
+                transition={{
+                  duration: 3.5,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  ease: [0.4, 0, 0.2, 1]
+                }}
+                style={{ color: '#c5878c' }}
+              >
+                ♥
+              </motion.span>
+            </motion.p>
 
-            <a href="/custom-orders" className="pill-btn-primary text-sm relative z-30" style={{ color: '#fcf2e3', backgroundColor: '#6e4248' }}>START YOUR ORDER</a>
+            {/* Animated button */}
+            <motion.a 
+              href="/custom-orders" 
+              className="pill-btn-primary text-sm relative z-30" 
+              style={{ color: '#fcf2e3', backgroundColor: '#6e4248' }}
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1, delay: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+              whileHover={{ 
+                scale: 1.03, 
+                backgroundColor: '#c5878c',
+                transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
+              }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <motion.span
+                animate={{
+                  x: [0, 1, 0],
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  ease: [0.4, 0, 0.2, 1]
+                }}
+              >
+                START YOUR ORDER
+              </motion.span>
+            </motion.a>
           </motion.div>
         </div>
       </div>

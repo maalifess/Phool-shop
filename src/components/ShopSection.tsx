@@ -126,12 +126,13 @@ const ShopSection = () => {
                       loading="lazy"
                       onError={(e) => {
                         // Fallback to flower emoji if image fails to load
-                        (e.target as HTMLImageElement).style.display = 'none';
-                        const parent = (e.target as HTMLImageElement).parentElement;
+                        const img = e.target as HTMLImageElement;
+                        img.style.display = 'none';
+                        const parent = img.parentElement;
                         if (parent) {
                           parent.innerHTML = `
                             <div class="text-center">
-                              <img src="${getRandomSticker()}" alt="Sticker" class="w-16 h-16 md:w-24 md:h-24 object-contain mx-auto mb-4" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\\'text-4xl md:text-6xl mb-4\\'>🌸</div>';">
+                              <div class="text-4xl md:text-6xl mb-4">🌸</div>
                               <div class="w-20 md:w-32 h-2 rounded-full mx-auto" style="background-color: #c5878c"></div>
                             </div>
                           `;
@@ -146,15 +147,7 @@ const ShopSection = () => {
                   </>
                 ) : (
                   <div className="text-center">
-                    <img 
-                      src={getRandomSticker()} 
-                      alt="Sticker" 
-                      className="w-16 h-16 md:w-24 md:h-24 object-contain mx-auto mb-4"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = 'none';
-                        (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="text-4xl md:text-6xl mb-4">🌸</div>';
-                      }}
-                    />
+                    <div className="text-4xl md:text-6xl mb-4">🌸</div>
                     <div className="w-20 md:w-32 h-2 rounded-full mx-auto" style={{ backgroundColor: '#c5878c' }}></div>
                   </div>
                 )}

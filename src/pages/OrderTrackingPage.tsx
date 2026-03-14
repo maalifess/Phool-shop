@@ -250,30 +250,62 @@ const OrderTrackingPage = () => {
                             {/* Order Status Timeline */}
                             <div>
                               <h4 className="font-medium mb-3">Order Status</h4>
-                              <div className="flex items-center justify-between">
-                                {statusSteps.map((step, i) => {
-                                  const currentStatusIndex = statusSteps.findIndex(s => s.key === order.status);
-                                  const isActive = i <= currentStatusIndex && currentStatusIndex !== -1;
-                                  const Icon = step.icon;
-                                  return (
-                                    <div key={step.key} className="flex flex-col items-center flex-1">
-                                      <div
-                                        className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${isActive
-                                            ? "bg-primary text-white"
-                                            : "bg-muted text-muted-foreground"
-                                          }`}
-                                      >
-                                        <Icon className="h-4 w-4" />
+                              <div className="md:flex md:items-center md:justify-between md:space-x-2">
+                                <div className="md:hidden space-y-3">
+                                  {statusSteps.map((step, i) => {
+                                    const currentStatusIndex = statusSteps.findIndex(s => s.key === order.status);
+                                    const isActive = i <= currentStatusIndex && currentStatusIndex !== -1;
+                                    const Icon = step.icon;
+                                    return (
+                                      <div key={step.key} className="flex items-center space-x-3">
+                                        <div
+                                          className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${isActive
+                                              ? "bg-primary text-white"
+                                              : "bg-muted text-muted-foreground"
+                                            }`}
+                                        >
+                                          <Icon className="h-4 w-4" />
+                                        </div>
+                                        <div className="flex-1">
+                                          <span
+                                            className={`text-sm font-medium ${isActive ? "text-primary" : "text-muted-foreground"
+                                              }`}
+                                          >
+                                            {step.label}
+                                          </span>
+                                          {isActive && i === currentStatusIndex && (
+                                            <div className="text-xs text-muted-foreground mt-1">Current status</div>
+                                          )}
+                                        </div>
                                       </div>
-                                      <span
-                                        className={`mt-2 text-xs font-medium text-center ${isActive ? "text-primary" : "text-muted-foreground"
-                                          }`}
-                                      >
-                                        {step.label}
-                                      </span>
-                                    </div>
-                                  );
-                                })}
+                                    );
+                                  })}
+                                </div>
+                                <div className="hidden md:flex md:items-center md:justify-between md:flex-1">
+                                  {statusSteps.map((step, i) => {
+                                    const currentStatusIndex = statusSteps.findIndex(s => s.key === order.status);
+                                    const isActive = i <= currentStatusIndex && currentStatusIndex !== -1;
+                                    const Icon = step.icon;
+                                    return (
+                                      <div key={step.key} className="flex flex-col items-center flex-1">
+                                        <div
+                                          className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${isActive
+                                              ? "bg-primary text-white"
+                                              : "bg-muted text-muted-foreground"
+                                            }`}
+                                        >
+                                          <Icon className="h-4 w-4" />
+                                        </div>
+                                        <span
+                                          className={`mt-2 text-xs font-medium text-center ${isActive ? "text-primary" : "text-muted-foreground"
+                                            }`}
+                                        >
+                                          {step.label}
+                                        </span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
                               </div>
                             </div>
 

@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
+import { motion } from "framer-motion";
 import { CartProvider } from "@/lib/cart";
 
 const Index = lazy(() => import("./pages/Index"));
@@ -36,8 +37,28 @@ const queryClient = new QueryClient({
 });
 
 const LoadingFallback = () => (
-  <div style={{ position: 'fixed', inset: 0, background: '#FFF5EE', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', color: '#442f2a' }}>
-    Loading...
+  <div style={{ position: 'fixed', inset: 0, background: '#fcf2e3', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div className="text-center">
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+        className="mb-8"
+      >
+        <img 
+          src="/assets/branding/phool.png" 
+          alt="Phool Shop" 
+          className="w-56 h-56 object-contain mx-auto"
+        />
+      </motion.div>
+      <motion.div
+        animate={{ opacity: [0.5, 1, 0.5] }}
+        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+        className="font-script text-2xl"
+        style={{ color: '#6e4248' }}
+      >
+        Loading...
+      </motion.div>
+    </div>
   </div>
 );
 

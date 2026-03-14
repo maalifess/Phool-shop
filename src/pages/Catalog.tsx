@@ -171,21 +171,6 @@ const Catalog = () => {
         {/* Product Categories Section */}
         <div className="mb-16">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-12">
-            <div className="retro-card bg-card p-6 text-center cursor-pointer hover:scale-105 transition-transform">
-              <h3 className="font-heading text-sm uppercase">phool</h3>
-            </div>
-            <div className="retro-card bg-card p-6 text-center cursor-pointer hover:scale-105 transition-transform">
-              <h3 className="font-heading text-sm uppercase">pre made bouquets</h3>
-            </div>
-            <div className="retro-card bg-card p-6 text-center cursor-pointer hover:scale-105 transition-transform">
-              <h3 className="font-heading text-sm uppercase">plushies</h3>
-            </div>
-            <div className="retro-card bg-card p-6 text-center cursor-pointer hover:scale-105 transition-transform">
-              <h3 className="font-heading text-sm uppercase">keychains</h3>
-            </div>
-            <div className="retro-card bg-card p-6 text-center cursor-pointer hover:scale-105 transition-transform md:col-span-2">
-              <h3 className="font-heading text-sm uppercase">ready to deliver</h3>
-            </div>
           </div>
         </div>
 
@@ -286,7 +271,7 @@ const Catalog = () => {
         {/* End of items message */}
         {!loading && !hasMore && (
           <div className="text-center mt-8 text-muted-foreground">
-            <p className="font-heading">You've seen all our beautiful flowers! 🌸</p>
+            <p className="font-heading"></p>
           </div>
         )}
       </section>

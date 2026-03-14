@@ -18,7 +18,7 @@ import { OrderStatusBadge } from "@/components/OrderStatusBadge";
 
 type AdminSection = "add_products" | "add_cards" | "add_fundraiser" | "order_management" | "review_management";
 
-type OrderStatus = "Under Process" | "Dispatched" | "Completed" | "Cancelled";
+type OrderStatus = "Under Process" | "Confirmed" | "In Progress" | "Ready" | "Dispatched" | "Completed" | "Delivered" | "Cancelled";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -220,8 +220,16 @@ const AdminDashboard = () => {
     switch (status) {
       case "Completed":
         return "bg-emerald-500/15 text-emerald-700 border-emerald-500/30";
+      case "Delivered":
+        return "bg-green-500/15 text-green-700 border-green-500/30";
       case "Dispatched":
         return "bg-sky-500/15 text-sky-700 border-sky-500/30";
+      case "Ready":
+        return "bg-purple-500/15 text-purple-700 border-purple-500/30";
+      case "In Progress":
+        return "bg-indigo-500/15 text-indigo-700 border-indigo-500/30";
+      case "Confirmed":
+        return "bg-blue-500/15 text-blue-700 border-blue-500/30";
       case "Cancelled":
         return "bg-rose-500/15 text-rose-700 border-rose-500/30";
       case "Under Process":
@@ -251,9 +259,13 @@ const AdminDashboard = () => {
   const orderCountByStatus = useMemo(() => {
     const init: Record<OrderStatus, number> = {
       "Under Process": 0,
-      Dispatched: 0,
-      Completed: 0,
-      Cancelled: 0,
+      "Confirmed": 0,
+      "In Progress": 0,
+      "Ready": 0,
+      "Dispatched": 0,
+      "Completed": 0,
+      "Delivered": 0,
+      "Cancelled": 0,
     };
     for (const o of orders) {
       const s = (o.status || "Under Process") as OrderStatus;
@@ -273,7 +285,16 @@ const AdminDashboard = () => {
         return sortDirection === "desc" ? tb - ta : ta - tb;
       });
     } else if (sortKey === "status") {
-      const statusOrder: Record<OrderStatus, number> = { "Under Process": 0, Dispatched: 1, Completed: 2, Cancelled: 3 };
+      const statusOrder: Record<OrderStatus, number> = { 
+        "Under Process": 0, 
+        "Confirmed": 1, 
+        "In Progress": 2, 
+        "Ready": 3, 
+        "Dispatched": 4, 
+        "Completed": 5, 
+        "Delivered": 6, 
+        "Cancelled": 7 
+      };
       sorted.sort((a, b) => {
         const sa = statusOrder[(a.status || "Under Process") as OrderStatus];
         const sb = statusOrder[(b.status || "Under Process") as OrderStatus];
@@ -850,9 +871,9 @@ const AdminDashboard = () => {
                             <Button variant="outline" onClick={resetSorting}>Reset</Button>
                           </div>
                         </div>
-                        <div className="flex gap-4">
+                        <div className="flex flex-wrap gap-2 md:gap-4">
                           {Object.entries(orderCountByStatus).map(([status, count]) => (
-                            <Badge key={status} className={statusBadgeClass(status as OrderStatus)}>
+                            <Badge key={status} className={`${statusBadgeClass(status as OrderStatus)} text-xs md:text-sm whitespace-nowrap`}>
                               {status}: {count}
                             </Badge>
                           ))}
@@ -900,8 +921,12 @@ const AdminDashboard = () => {
                                       </SelectTrigger>
                                       <SelectContent>
                                         <SelectItem value="Under Process">Under Process</SelectItem>
+                                        <SelectItem value="Confirmed">Confirmed</SelectItem>
+                                        <SelectItem value="In Progress">In Progress</SelectItem>
+                                        <SelectItem value="Ready">Ready</SelectItem>
                                         <SelectItem value="Dispatched">Dispatched</SelectItem>
                                         <SelectItem value="Completed">Completed</SelectItem>
+                                        <SelectItem value="Delivered">Delivered</SelectItem>
                                         <SelectItem value="Cancelled">Cancelled</SelectItem>
                                       </SelectContent>
                                     </Select>

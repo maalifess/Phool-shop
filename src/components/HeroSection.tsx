@@ -11,10 +11,31 @@ const HeroSection = () => {
         <div className="flex-1 flex flex-col items-center justify-center text-center">
           <div className="flex flex-col items-center justify-center">
             <motion.div
-              initial={{ opacity: 0, x: -60 }}
+              initial={{ opacity: 0, x: -40 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
+              animate={{
+                opacity: 1,
+                x: 0,
+                scale: [1, 1.01, 1],
+                y: [0, -1, 0],
+              }}
+              transition={{ 
+                duration: 1.2, 
+                ease: [0.25, 0.1, 0.25, 1],
+                scale: {
+                  duration: 6,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  ease: [0.4, 0, 0.2, 1]
+                },
+                y: {
+                  duration: 6,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  ease: [0.4, 0, 0.2, 1]
+                }
+              }}
               className="font-script text-6xl md:text-7xl lg:text-8xl text-secondary leading-none mb-4"
             >
               خوش آمدید
@@ -22,9 +43,29 @@ const HeroSection = () => {
           </div>
           <div className="lg:translate-x-8">
             <motion.h1
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{
+                opacity: 1,
+                scale: [1, 1.02, 1],
+                y: [0, -1.5, 0],
+              }}
+              transition={{ 
+                duration: 1.2, 
+                delay: 0.3, 
+                ease: [0.25, 0.1, 0.25, 1],
+                scale: {
+                  duration: 7,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  ease: [0.4, 0, 0.2, 1]
+                },
+                y: {
+                  duration: 7,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  ease: [0.4, 0, 0.2, 1]
+                }
+              }}
               className="font-heading text-5xl md:text-7xl lg:text-8xl text-[#6e4248] leading-tight"
             >
               Phool Shop
