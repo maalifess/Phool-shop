@@ -8,14 +8,16 @@ type CacheEntry<T> = {
   data: T;
 };
 
-const CARDS_TTL_MS = 5 * 60_000; // 5 minutes instead of 1 minute
+const CARDS_TTL_MS = 0; // Disable cache completely
 let cardsCache: CacheEntry<Card[]> | null = null;
 let cardsInFlight: Promise<Card[]> | null = null;
 
 export async function loadCards(): Promise<Card[]> {
-  const now = Date.now();
-  if (cardsCache && now - cardsCache.ts < CARDS_TTL_MS) return cardsCache.data;
-  if (cardsInFlight) return cardsInFlight;
+  // Clear all caches immediately
+  cardsCache = null;
+  cardsInFlight = null;
+  
+  console.log('📦 Loading cards from Supabase (cache cleared)...');
 
   cardsInFlight = (async () => {
     const { data, error } = await supabase
@@ -25,10 +27,11 @@ export async function loadCards(): Promise<Card[]> {
     
     if (error) {
       console.error('Error loading cards:', error);
-      return cardsCache?.data ?? [];
+      return [];
     }
 
     const next = (data || []) as Card[];
+    console.log(`✨ Total cards loaded: ${next.length}`);
     cardsCache = { ts: Date.now(), data: next };
     return next;
   })();
