@@ -60,7 +60,7 @@ async function tryDeleteProductFrom(table: string, id: number) {
   return await supabase.from(table).delete().eq('id', id);
 }
 
-/** Fetch all products from Supabase (public read) */
+/** Fetch all products from Supabase + LocalStorage + Default (merging everything) */
 export async function loadProducts(): Promise<Product[]> {
   const now = Date.now();
   if (productsCache && now - productsCache.ts < PRODUCTS_TTL_MS) return productsCache.data;
@@ -68,61 +68,67 @@ export async function loadProducts(): Promise<Product[]> {
 
   productsInFlight = (async () => {
     const tablesToTry = ['products', 'Products', 'product'];
-    let allData: any[] = [];
-    let seenIds = new Set<number>();
+    const allProductsMap = new Map<number, Product>();
 
-    console.log('📦 Scanning all potential tables for products...');
+    console.log('📦 Gathering products from all sources...');
 
+    // 1. Load Hardcoded Defaults
+    defaultProducts.forEach(p => {
+      allProductsMap.set(p.id, {
+        ...p,
+        in_stock: p.inStock,
+        _source: 'default'
+      } as unknown as Product);
+    });
+    console.log(`📚 Loaded ${defaultProducts.length} products from Hardcoded Defaults`);
+
+
+    // 2. Load LocalStorage (for products added 'before' we switched to Supabase)
+    try {
+      const localRaw = localStorage.getItem('phool_products_v1');
+      if (localRaw) {
+        const localParsed = JSON.parse(localRaw) as any[];
+        localParsed.forEach(p => {
+          allProductsMap.set(p.id, {
+            ...p,
+            in_stock: p.inStock ?? p.in_stock ?? true,
+            _source: 'local_storage'
+          } as unknown as Product);
+        });
+        console.log(`🏠 Loaded ${localParsed.length} products from LocalStorage`);
+      }
+    } catch (e) {
+      console.warn('⚠️ Could not load products from LocalStorage', e);
+    }
+
+    // 3. Load Supabase (Real-time DB)
     for (const table of tablesToTry) {
       try {
         const { data: tableData, error: tableError } = await trySelectAllProductsFrom(table);
-
         if (!tableError && tableData && tableData.length > 0) {
-          console.log(`✅ Found ${tableData.length} records in "${table}"`);
-          for (const item of tableData) {
-            if (!seenIds.has(item.id)) {
-              allData.push({ ...item, _source: table });
-              seenIds.add(item.id);
-            }
-          }
+          console.log(`☁️ Found ${tableData.length} records in Supabase table "${table}"`);
+          tableData.forEach(p => {
+            // Supabase data takes priority over local data for the same ID
+            const normalizedImages = Array.isArray(p.images)
+              ? p.images
+              : (() => { try { return JSON.parse(p.images || '[]'); } catch { return []; } })();
+
+            allProductsMap.set(p.id, {
+              ...p,
+              images: normalizedImages,
+              in_stock: p.in_stock ?? true,
+              price: Number(p.price) || 0,
+              _source: `supabase_${table}`
+            } as Product);
+          });
         }
       } catch (err) {
-        // Silently skip failed tables during merge
+        // Skip failed tables
       }
     }
 
-    // FALLBACK: If Supabase is empty, use the local default products
-    if (allData.length === 0) {
-      console.log('ℹ️ Supabase is empty. Falling back to local default products.');
-      const localProducts = defaultProducts.map(p => ({
-        ...p,
-        in_stock: p.inStock, // Map inStock to in_stock
-        _source: 'local_fallback'
-      }));
-      productsCache = { ts: Date.now(), data: localProducts as unknown as Product[] };
-      return localProducts as unknown as Product[];
-    }
-
-    const next = allData.map((p: any) => {
-      // Normalize images: handle JSON strings or arrays
-      let images: string[] = [];
-      if (Array.isArray(p.images)) {
-        images = p.images;
-      } else if (typeof p.images === 'string') {
-        try {
-          images = JSON.parse(p.images || '[]');
-        } catch {
-          images = p.images.split(',').map((s: string) => s.trim()).filter(Boolean);
-        }
-      }
-
-      return {
-        ...p,
-        images,
-        in_stock: p.in_stock ?? true,
-        price: Number(p.price) || 0
-      } as Product;
-    });
+    const next = Array.from(allProductsMap.values());
+    console.log(`✨ Total unified products: ${next.length}`);
 
     productsCache = { ts: Date.now(), data: next };
     return next;
