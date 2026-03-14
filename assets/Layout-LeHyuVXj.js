@@ -1,0 +1,1 @@
+import{j as s}from"./index-D3Rf7Br8.js";import{N as o,F as e}from"./Footer-CS5Mzf6_.js";const m=({children:a})=>s.jsxs("div",{className:"min-h-screen bg-background flex flex-col",children:[s.jsx(o,{}),s.jsx("main",{className:"flex-1",children:a}),s.jsx(e,{})]});export{m as L};
