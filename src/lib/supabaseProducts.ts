@@ -75,6 +75,14 @@ export async function loadProducts(): Promise<Product[]> {
     // 1. Skip Hardcoded Defaults - only load from Supabase
     console.log(`📚 Skipped ${defaultProducts.length} products from Hardcoded Defaults (cache cleared)`);
 
+    // 2. Clear LocalStorage to remove any cached products
+    try {
+      localStorage.removeItem('phool_products_v1');
+      console.log('🗑️ Cleared LocalStorage products cache');
+    } catch (e) {
+      console.warn('⚠️ Could not clear LocalStorage', e);
+    }
+
 
     // 2. Load LocalStorage (for products added 'before' we switched to Supabase)
     try {
