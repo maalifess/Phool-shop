@@ -25,7 +25,7 @@ const StatementBanner = () => {
           </div>
           {/* Line 3 */}
           <span className="font-heading text-4xl md:text-6xl lg:text-7xl" style={{ color: '#FFFAF2' }}>
-            dher sara <span style={{ color: '#2C2C2E' }}>pyar</span>
+            dher sara <span style={{ color: '#cfd9b6' }}>pyar</span>
           </span>
         </motion.div>
       </div>

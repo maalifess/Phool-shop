@@ -80,16 +80,16 @@ const ShopSection = () => {
   };
 
   return (
-    <section id="shop" className="bg-[#8E6E58] py-20 relative" style={{ color: '#D4A8AC' }}>
+    <section id="shop" className="bg-[#fcf2e3] py-20 relative" style={{ color: '#6e4248' }}>
       {/* Border frame */}
-      <div className="absolute inset-4 border-[3px] border-[#FFFAF2] rounded-3xl pointer-events-none bg-[#FFFAF2]" />
+      <div className="absolute inset-4 border-[3px] border-[#6e4248] rounded-3xl pointer-events-none bg-[#fcf2e3]" />
 
       <div className="container mx-auto px-8">
         {/* Section title */}
         <h2
           className="text-6xl md:text-7xl lg:text-8xl font-bold text-center mb-12"
           style={{ 
-            color: '#D4A8AC',
+            color: '#6e4248',
             fontFamily: 'Sacramento, cursive, serif',
             display: 'block',
             visibility: 'visible',
@@ -110,7 +110,7 @@ const ShopSection = () => {
                 initial={{ opacity: 0, x: 100 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="aspect-[4/3] overflow-hidden rounded-3xl border-[3px] border-foreground flex items-center justify-center cursor-pointer hover:scale-105 transition-transform relative group"
+                className="aspect-[4/3] overflow-hidden rounded-3xl border-[3px] border-[#6e4248] flex items-center justify-center cursor-pointer hover:scale-105 transition-transform relative group"
                 style={{ backgroundColor: '#F7D9E0' }}
               >
                 {product && product.image ? (
@@ -129,7 +129,7 @@ const ShopSection = () => {
                 ) : (
                   <div className="text-center">
                     <div className="text-4xl md:text-6xl mb-4">🌸</div>
-                    <div className="w-20 md:w-32 h-2 rounded-full mx-auto" style={{ backgroundColor: '#D4A8AC' }}></div>
+                    <div className="w-20 md:w-32 h-2 rounded-full mx-auto" style={{ backgroundColor: '#c5878c' }}></div>
                   </div>
                 )}
               </motion.div>
@@ -139,13 +139,13 @@ const ShopSection = () => {
           {/* Navigation buttons - visible on md+ */}
           <button
             onClick={prevSlide}
-            className="hidden md:flex absolute left-2 md:left-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-foreground text-background border-2 border-foreground hover:bg-transparent hover:text-foreground transition-colors items-center justify-center font-heading text-xl"
+            className="hidden md:flex absolute left-2 md:left-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-foreground text-background border-2 border-[#6e4248] hover:bg-transparent hover:text-foreground transition-colors items-center justify-center font-heading text-xl"
           >
             ‹
           </button>
           <button
             onClick={nextSlide}
-            className="hidden md:flex absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-foreground text-background border-2 border-foreground hover:bg-transparent hover:text-foreground transition-colors items-center justify-center font-heading text-xl"
+            className="hidden md:flex absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-foreground text-background border-2 border-[#6e4248] hover:bg-transparent hover:text-foreground transition-colors items-center justify-center font-heading text-xl"
           >
             ›
           </button>

@@ -13,7 +13,7 @@ const Navbar = () => {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ type: "spring", stiffness: 100, damping: 20 }}
-      className="sticky top-0 z-50 bg-[#FFFAF2] border-b-[3px] border-foreground"
+      className="sticky top-0 z-50 bg-[#fcf2e3] border-b-[3px] border-[#6e4248]"
     >
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between relative">
@@ -21,16 +21,16 @@ const Navbar = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg border border-foreground hover:bg-golden transition-colors"
+              className="md:hidden p-2 rounded-lg border border-[#6e4248] hover:bg-golden transition-colors"
             >
               {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
 
             {/* Desktop navigation */}
             <div className="hidden md:flex gap-2">
-              <Link to="/catalog" className="pill-btn-primary text-xs">SHOP</Link>
-              <Link to="/custom-orders" className="pill-btn-primary text-xs">CUSTOM</Link>
-              <Link to="/fundraisers" className="pill-btn-primary text-xs">FUNDRAISERS</Link>
+              <Link to="/catalog" className="pill-btn-primary text-xs" style={{ color: '#fcf2e3' }}>SHOP</Link>
+              <Link to="/custom-orders" className="pill-btn-primary text-xs" style={{ color: '#fcf2e3' }}>CUSTOM</Link>
+              <Link to="/fundraisers" className="pill-btn-primary text-xs" style={{ color: '#fcf2e3' }}>FUNDRAISERS</Link>
             </div>
           </div>
 
@@ -57,7 +57,7 @@ const Navbar = () => {
             <Link to="/tokri" className="pill-btn-outline p-2 md:p-3 relative">
               <ShoppingCart className="w-4 h-4" />
               {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 md:w-5 md:h-5 bg-golden text-foreground text-[8px] md:text-[10px] font-heading rounded-full flex items-center justify-center border border-foreground">
+                <span className="absolute -top-1 -right-1 w-4 h-4 md:w-5 md:h-5 bg-golden text-foreground text-[8px] md:text-[10px] font-heading rounded-full flex items-center justify-center border border-[#6e4248]">
                   {totalItems}
                 </span>
               )}
@@ -71,13 +71,14 @@ const Navbar = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden mt-4 pt-4 border-t border-foreground"
+            className="md:hidden mt-4 pt-4 border-t border-[#6e4248]"
           >
             <div className="flex flex-col gap-2">
               <Link
                 to="/catalog"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="pill-btn-primary text-xs text-left w-full"
+                style={{ color: '#fcf2e3' }}
               >
                 SHOP
               </Link>
@@ -85,6 +86,7 @@ const Navbar = () => {
                 to="/custom-orders"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="pill-btn-primary text-xs text-left w-full"
+                style={{ color: '#fcf2e3' }}
               >
                 CUSTOM
               </Link>
@@ -92,6 +94,7 @@ const Navbar = () => {
                 to="/fundraisers"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="pill-btn-primary text-xs text-left w-full"
+                style={{ color: '#fcf2e3' }}
               >
                 FUNDRAISERS
               </Link>

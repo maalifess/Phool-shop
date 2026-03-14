@@ -3,8 +3,9 @@ import HeroSection from "@/components/HeroSection";
 import MarqueeBanner from "@/components/MarqueeBanner";
 import ShopSection from "@/components/ShopSection";
 import StatementBanner from "@/components/StatementBanner";
+import CustomServicesSection from "@/components/CustomServicesSection";
+import DeliveryServicesSection from "@/components/DeliveryServicesSection";
 import AboutSection from "@/components/AboutSection";
-import ServicesWrapper from "@/components/ServicesWrapper";
 import Footer from "@/components/Footer";
 
 const Index = () => {
@@ -14,13 +15,16 @@ const Index = () => {
       <HeroSection />
       <MarqueeBanner />
       <ShopSection />
+      <div className="flex flex-col lg:flex-row w-full">
+        <CustomServicesSection />
+        <DeliveryServicesSection />
+      </div>
       <StatementBanner />
       <AboutSection />
-      <ServicesWrapper />
-      <MarqueeBanner />
       <Footer />
     </div>
   );
 };
 
 export default Index;
+

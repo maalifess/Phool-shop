@@ -37,12 +37,13 @@
     --radius: 2rem;
 
     --cream: 35 85% 94%;
-    --deep-brown: 30 25% 35%;
+    --deep-brown: 345 25% 35%; /* Resolves to #6e4248 */
     --rosy: 355 35% 65%;
     --blush: 25 40% 80%;
     --golden: 80 35% 80%;
     --golden-light: 80 25% 88%;
     --seashell: 35 85% 96%;
+    --green: #cfd9b6;
 
     --shadow-retro: 4px 4px 0px hsl(var(--deep-brown));
     --shadow-retro-sm: 2px 2px 0px hsl(var(--deep-brown));
@@ -143,7 +144,7 @@
   }
 
   .dotted-line {
-    background-image: radial-gradient(circle, #2C2C2E 3px, transparent 3px);
+    background-image: radial-gradient(circle, var(--green) 3px, transparent 3px);
     background-size: 20px 20px;
     background-repeat: repeat-x;
     height: 10px;
@@ -160,23 +161,23 @@
   }
 
   .shop-heading-color {
-    color: #D4A8AC !important;
+    color: #c5878c !important;
   }
 
   #shop h2 {
-    color: #D4A8AC !important;
+    color: #c5878c !important;
   }
 
   #shop .font-script {
-    color: #D4A8AC !important;
+    color: #c5878c !important;
   }
 
   [data-shop-heading="true"] {
-    color: #D4A8AC !important;
+    color: #c5878c !important;
   }
 
   section[data-shop-heading="true"] h2 {
-    color: #D4A8AC !important;
+    color: #c5878c !important;
   }
 }
 

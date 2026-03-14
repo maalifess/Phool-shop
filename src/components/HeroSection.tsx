@@ -2,27 +2,30 @@ import { motion } from "framer-motion";
 
 const HeroSection = () => {
   return (
-    <section className="relative bg-[#D4A8AC] overflow-hidden min-h-[80vh] flex items-center">
+    <section className="relative bg-[#c5878c] overflow-hidden min-h-[80vh] flex items-center">
       {/* Border frame */}
-      <div className="absolute inset-4 border-[3px] border-foreground rounded-3xl pointer-events-none bg-[#FFFAF2]" />
+      <div className="absolute inset-4 border-[3px] border-[#6e4248] rounded-3xl pointer-events-none bg-[#fcf2e3]" />
 
       <div className="container mx-auto px-8 py-16 flex flex-col lg:flex-row items-center justify-between relative z-10">
         {/* Centered text */}
         <div className="flex-1 flex flex-col items-center justify-center text-center">
-          <motion.h2
-            initial={{ opacity: 0, x: -60, rotate: -10 }}
-            animate={{ opacity: 1, x: 0, rotate: -10 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="font-script text-6xl md:text-7xl lg:text-8xl text-secondary leading-none mb-4"
-          >
-            خوش آمدید
-          </motion.h2>
+          <div className="flex flex-col items-center justify-center">
+            <motion.div
+              initial={{ opacity: 0, x: -60 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="font-script text-6xl md:text-7xl lg:text-8xl text-secondary leading-none mb-4"
+            >
+              خوش آمدید
+            </motion.div>
+          </div>
           <div className="lg:translate-x-8">
             <motion.h1
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
-              className="font-heading text-5xl md:text-7xl lg:text-8xl text-foreground leading-tight"
+              className="font-heading text-5xl md:text-7xl lg:text-8xl text-[#6e4248] leading-tight"
             >
               Phool Shop
             </motion.h1>

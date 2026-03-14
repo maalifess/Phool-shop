@@ -21,9 +21,9 @@ const AboutSection = () => {
     return () => clearInterval(interval);
   }, [totalStickers]);
   return (
-    <section id="about" className="bg-[#FFFAF2] py-20 relative">
+    <section id="about" className="bg-[#fcf2e3] py-20 relative">
       {/* Border frame */}
-      <div className="absolute inset-4 border-[3px] border-foreground rounded-3xl pointer-events-none bg-[#F7D9E0]" />
+      <div className="absolute inset-4 border-[3px] border-[#6e4248] rounded-3xl pointer-events-none bg-[#fcf2e3]" />
 
       <div className="container mx-auto px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -34,21 +34,21 @@ const AboutSection = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="font-script text-5xl md:text-6xl lg:text-7xl text-secondary mb-8">the phool shop story book</h2>
+            <h2 className="font-script text-5xl md:text-6xl lg:text-7xl text-foreground mb-8">the phool shop story book</h2>
 
             <p className="font-heading text-lg text-foreground mb-4">
               Phool Shop isn't your typical crochet store.
             </p>
 
-            <p className="font-body text-base text-muted-foreground mb-4 leading-relaxed">
+            <p className="font-body text-base text-foreground mb-4 leading-relaxed">
               It's a club, a living space where stories, handmade creations, and people come together.
             </p>
 
-            <p className="font-body text-base text-muted-foreground mb-8 leading-relaxed">
+            <p className="font-body text-base text-foreground mb-8 leading-relaxed">
               Born from a love of craft and creativity, Phool Shop celebrates the beauty of handmade art and the joy of sharing. Here, crochet isn't just a hobby — it's a way of life.
             </p>
 
-            <a href="#" className="pill-btn-primary text-sm">DISCOVER MORE</a>
+            <a href="#" className="pill-btn-primary text-sm" style={{ color: '#fcf2e3' }}>DISCOVER MORE</a>
           </motion.div>
 
           {/* Right photo */}
