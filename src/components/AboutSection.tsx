@@ -34,7 +34,7 @@ const AboutSection = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="font-script text-5xl md:text-6xl lg:text-7xl text-foreground mb-8">the phool shop story book</h2>
+            <h2 className="font-script text-5xl md:text-6xl lg:text-7xl text-foreground mb-8">dher sara pyar</h2>
 
             <p className="font-heading text-lg text-foreground mb-4">
               Phool Shop isn't your typical crochet store.
@@ -77,7 +77,7 @@ const AboutSection = () => {
                 className="w-full h-full flex items-center justify-center p-4"
               >
                 <img
-                  src={`/src/assets/stickers/${currentSticker}.png`}
+                  src={`/assets/stickers/${currentSticker}.png`}
                   alt={`Sticker ${currentSticker}`}
                   className="w-full h-full object-contain"
                   onError={(e) => {

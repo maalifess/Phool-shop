@@ -101,6 +101,9 @@ const ProductDetails = () => {
 
   const foundProduct = product;
 
+  // Get a random sticker for placeholder
+  const getRandomSticker = () => `/assets/stickers/${Math.floor(Math.random() * 26) + 1}.png`;
+
   // Load custom message limit
   useEffect(() => {
     try {
@@ -313,8 +316,16 @@ const ProductDetails = () => {
                           decoding="async"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-8xl">
-                          {img}
+                        <div className="w-full h-full flex items-center justify-center">
+                          <img 
+                            src={getRandomSticker()} 
+                            alt="Sticker" 
+                            className="w-32 h-32 object-contain"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = 'none';
+                              (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="text-8xl">{img}</div>';
+                            }}
+                          />
                         </div>
                       );
                     })()}

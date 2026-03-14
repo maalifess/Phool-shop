@@ -26,6 +26,9 @@ const Catalog = () => {
   const [searchText, setSearchText] = useState(urlSearch);
   const ITEMS_PER_PAGE = 12;
 
+  // Get a random sticker for placeholder
+  const getRandomSticker = () => `/assets/stickers/${Math.floor(Math.random() * 26) + 1}.png`;
+
   useEffect(() => {
     setSearchText(urlSearch);
   }, [urlSearch]);
@@ -241,7 +244,17 @@ const Catalog = () => {
                             loading="lazy"
                           />
                         ) : (
-                          <div className="w-full h-full grid place-items-center text-5xl">🌸</div>
+                          <div className="w-full h-full grid place-items-center">
+                            <img 
+                              src={getRandomSticker()} 
+                              alt="Sticker" 
+                              className="w-16 h-16 object-contain"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = 'none';
+                                (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="text-5xl">🌸</div>';
+                              }}
+                            />
+                          </div>
                         )}
                       </div>
                       <div className="p-5">
