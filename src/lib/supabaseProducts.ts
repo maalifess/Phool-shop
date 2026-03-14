@@ -95,6 +95,15 @@ export async function loadProducts(): Promise<Product[]> {
             price: Number(p.price) || 0,
             _source: `supabase_${table}`
           } as Product);
+          
+          // Debug: Log image URLs for each product
+          console.log(`🖼️ Product "${p.name}" (${p.id}) images:`, normalizedImages);
+          
+          // Add fallback placeholder if no images
+          if (!normalizedImages || normalizedImages.length === 0) {
+            normalizedImages.push(`https://picsum.photos/seed/phool-${p.id}/400/400.jpg`);
+            console.log(`🖼️ Added placeholder image for product "${p.name}"`);
+          }
         });
       } else if (tableError) {
         console.error(`❌ Error loading from ${table}:`, tableError);

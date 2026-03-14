@@ -119,6 +119,19 @@ const ShopSection = () => {
                       src={product.image}
                       alt={product.name}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        // Fallback to flower emoji if image fails to load
+                        (e.target as HTMLImageElement).style.display = 'none';
+                        const parent = (e.target as HTMLImageElement).parentElement;
+                        if (parent) {
+                          parent.innerHTML = `
+                            <div class="text-center">
+                              <div class="text-4xl md:text-6xl mb-4">🌸</div>
+                              <div class="w-20 md:w-32 h-2 rounded-full mx-auto" style="background-color: #c5878c"></div>
+                            </div>
+                          `;
+                        }
+                      }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       <div className="absolute bottom-4 left-4 right-4">
