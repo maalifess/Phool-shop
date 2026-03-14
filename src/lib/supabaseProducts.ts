@@ -65,10 +65,10 @@ export async function loadProducts(): Promise<Product[]> {
   productsCache = null;
   productsInFlight = null;
   
-  const tablesToTry = ['products', 'Products', 'product'];
+  const tablesToTry = ['products']; // Only use lowercase products table
   const allProductsMap = new Map<number, Product>();
 
-  console.log('📦 Gathering products from Supabase only (all caches cleared)...');
+  console.log('📦 Gathering products from products table only (all caches cleared)...');
 
   // 1. Skip Hardcoded Defaults - only load from Supabase
   console.log('📚 Skipped hardcoded default products (cache cleared)');
@@ -76,7 +76,7 @@ export async function loadProducts(): Promise<Product[]> {
   // 2. Skip LocalStorage completely - only use Supabase
   console.log('🏠 Skipped LocalStorage products (cache cleared)');
 
-  // 3. Load Supabase (Real-time DB)
+  // 3. Load Supabase (Real-time DB) - only from products table
   for (const table of tablesToTry) {
     try {
       const { data: tableData, error: tableError } = await trySelectAllProductsFrom(table);
@@ -96,9 +96,11 @@ export async function loadProducts(): Promise<Product[]> {
             _source: `supabase_${table}`
           } as Product);
         });
+      } else if (tableError) {
+        console.error(`❌ Error loading from ${table}:`, tableError);
       }
     } catch (err) {
-      // Skip failed tables
+      console.error(`❌ Exception loading from ${table}:`, err);
     }
   }
 
@@ -120,16 +122,11 @@ export async function loadProductById(id: number): Promise<Product | null> {
     if (cached) return cached;
   }
 
-  const tablesToTry = ['products', 'Products'];
-  let data: any = null;
-  let error: any = null;
-
-  for (const table of tablesToTry) {
-    const res = await trySelectProductByIdFrom(table, id);
-    data = res.data;
-    error = res.error;
-    if (!error) break;
-  }
+  // Only try the products table
+  const table = 'products';
+  const res = await trySelectProductByIdFrom(table, id);
+  const data = res.data;
+  const error = res.error;
 
   if (error) {
     console.error('Failed to load product from Supabase', {
@@ -163,16 +160,10 @@ export async function loadProductById(id: number): Promise<Product | null> {
 
 /** Create a new product (admin only) */
 export async function createProduct(product: Omit<Product, 'id' | 'created_at'>): Promise<Product | null> {
-  const tablesToTry = ['products', 'Products'];
-  let data: any = null;
-  let error: any = null;
-
-  for (const table of tablesToTry) {
-    const res = await tryInsertProductInto(table, product);
-    data = res.data;
-    error = res.error;
-    if (!error) break;
-  }
+  const table = 'products'; // Only use products table
+  const res = await tryInsertProductInto(table, product);
+  const data = res.data;
+  const error = res.error;
 
   if (error) {
     console.error('Failed to create product', {
@@ -188,16 +179,10 @@ export async function createProduct(product: Omit<Product, 'id' | 'created_at'>)
 
 /** Update a product (admin only) */
 export async function updateProduct(id: number, updates: Partial<Product>): Promise<Product | null> {
-  const tablesToTry = ['products', 'Products'];
-  let data: any = null;
-  let error: any = null;
-
-  for (const table of tablesToTry) {
-    const res = await tryUpdateProductIn(table, id, updates);
-    data = res.data;
-    error = res.error;
-    if (!error) break;
-  }
+  const table = 'products'; // Only use products table
+  const res = await tryUpdateProductIn(table, id, updates);
+  const data = res.data;
+  const error = res.error;
 
   if (error) {
     console.error('Failed to update product', {
@@ -213,14 +198,9 @@ export async function updateProduct(id: number, updates: Partial<Product>): Prom
 
 /** Delete a product (admin only) */
 export async function deleteProduct(id: number): Promise<boolean> {
-  const tablesToTry = ['products', 'Products'];
-  let error: any = null;
-
-  for (const table of tablesToTry) {
-    const res = await tryDeleteProductFrom(table, id);
-    error = res.error;
-    if (!error) break;
-  }
+  const table = 'products'; // Only use products table
+  const res = await tryDeleteProductFrom(table, id);
+  const error = res.error;
   if (error) {
     console.error('Failed to delete product', {
       code: (error as any)?.code,
