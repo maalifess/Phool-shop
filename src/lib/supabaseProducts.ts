@@ -62,84 +62,52 @@ async function tryDeleteProductFrom(table: string, id: number) {
 
 /** Fetch all products from Supabase + LocalStorage + Default (merging everything) */
 export async function loadProducts(): Promise<Product[]> {
-  const now = Date.now();
-  if (productsCache && now - productsCache.ts < PRODUCTS_TTL_MS) return productsCache.data;
-  if (productsInFlight) return productsInFlight;
+  // Clear all caches immediately
+  productsCache = null;
+  productsInFlight = null;
+  
+  const tablesToTry = ['products', 'Products', 'product'];
+  const allProductsMap = new Map<number, Product>();
 
-  productsInFlight = (async () => {
-    const tablesToTry = ['products', 'Products', 'product'];
-    const allProductsMap = new Map<number, Product>();
+  console.log('📦 Gathering products from Supabase only (all caches cleared)...');
 
-    console.log('📦 Gathering products from Supabase only (defaults disabled)...');
+  // 1. Skip Hardcoded Defaults - only load from Supabase
+  console.log(`📚 Skipped ${defaultProducts.length} products from Hardcoded Defaults (cache cleared)`);
 
-    // 1. Skip Hardcoded Defaults - only load from Supabase
-    console.log(`📚 Skipped ${defaultProducts.length} products from Hardcoded Defaults (cache cleared)`);
+  // 2. Skip LocalStorage completely - only use Supabase
+  console.log('🏠 Skipped LocalStorage products (cache cleared)');
 
-    // 2. Clear LocalStorage to remove any cached products
+  // 3. Load Supabase (Real-time DB)
+  for (const table of tablesToTry) {
     try {
-      localStorage.removeItem('phool_products_v1');
-      console.log('🗑️ Cleared LocalStorage products cache');
-    } catch (e) {
-      console.warn('⚠️ Could not clear LocalStorage', e);
-    }
+      const { data: tableData, error: tableError } = await trySelectAllProductsFrom(table);
+      if (!tableError && tableData && tableData.length > 0) {
+        console.log(`☁️ Found ${tableData.length} records in Supabase table "${table}"`);
+        tableData.forEach(p => {
+          // Supabase data takes priority over local data for the same ID
+          const normalizedImages = Array.isArray(p.images)
+            ? p.images
+            : (() => { try { return JSON.parse(p.images || '[]'); } catch { return []; } })();
 
-
-    // 2. Load LocalStorage (for products added 'before' we switched to Supabase)
-    try {
-      const localRaw = localStorage.getItem('phool_products_v1');
-      if (localRaw) {
-        const localParsed = JSON.parse(localRaw) as any[];
-        localParsed.forEach(p => {
           allProductsMap.set(p.id, {
             ...p,
-            in_stock: p.inStock ?? p.in_stock ?? true,
-            _source: 'local_storage'
-          } as unknown as Product);
+            images: normalizedImages,
+            in_stock: p.in_stock ?? true,
+            price: Number(p.price) || 0,
+            _source: `supabase_${table}`
+          } as Product);
         });
-        console.log(`🏠 Loaded ${localParsed.length} products from LocalStorage`);
       }
-    } catch (e) {
-      console.warn('⚠️ Could not load products from LocalStorage', e);
+    } catch (err) {
+      // Skip failed tables
     }
-
-    // 3. Load Supabase (Real-time DB)
-    for (const table of tablesToTry) {
-      try {
-        const { data: tableData, error: tableError } = await trySelectAllProductsFrom(table);
-        if (!tableError && tableData && tableData.length > 0) {
-          console.log(`☁️ Found ${tableData.length} records in Supabase table "${table}"`);
-          tableData.forEach(p => {
-            // Supabase data takes priority over local data for the same ID
-            const normalizedImages = Array.isArray(p.images)
-              ? p.images
-              : (() => { try { return JSON.parse(p.images || '[]'); } catch { return []; } })();
-
-            allProductsMap.set(p.id, {
-              ...p,
-              images: normalizedImages,
-              in_stock: p.in_stock ?? true,
-              price: Number(p.price) || 0,
-              _source: `supabase_${table}`
-            } as Product);
-          });
-        }
-      } catch (err) {
-        // Skip failed tables
-      }
-    }
-
-    const next = Array.from(allProductsMap.values());
-    console.log(`✨ Total unified products: ${next.length}`);
-
-    productsCache = { ts: Date.now(), data: next };
-    return next;
-  })();
-
-  try {
-    return await productsInFlight;
-  } finally {
-    productsInFlight = null;
   }
+
+  const next = Array.from(allProductsMap.values());
+  console.log(`✨ Total unified products: ${next.length}`);
+
+  productsCache = { ts: Date.now(), data: next };
+  return next;
 }
 
 
