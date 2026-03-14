@@ -8,6 +8,16 @@ type CacheEntry<T> = {
   data: T;
 };
 
+type CardCatalog = {
+  id: number;
+  name: string;
+  price: number;
+  category: string;
+  images: string[];
+  in_stock: boolean;
+  is_custom?: boolean;
+};
+
 const CARDS_TTL_MS = 0; // Disable cache completely
 let cardsCache: CacheEntry<Card[]> | null = null;
 let cardsInFlight: Promise<Card[]> | null = null;
@@ -121,4 +131,53 @@ export async function deleteCard(id: number): Promise<boolean> {
   }
   
   return true;
+}
+
+/** Ultra-fast cards loading for catalog - only essential fields */
+export async function loadCardsFast(): Promise<CardCatalog[]> {
+  try {
+    console.log('⚡ Loading ALL cards FAST (catalog mode)...');
+    
+    const { data, error } = await supabase
+      .from('cards')
+      .select('id, name, price, category, images, in_stock')
+      .order('created_at', { ascending: false });
+
+    console.log(`⚡ Loaded ${data?.length || 0} cards FAST`);
+
+    if (error) {
+      console.error('❌ Error in fast cards load:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('💥 Error in loadCardsFast:', error);
+    return [];
+  }
+}
+
+/** Paginated cards loading */
+export async function loadCardsPaginated(limit: number = 20, offset: number = 0): Promise<CardCatalog[]> {
+  try {
+    console.log(`⚡ Loading paginated cards FAST (limit: ${limit}, offset: ${offset})...`);
+    
+    const { data, error } = await supabase
+      .from('cards')
+      .select('id, name, price, category, images, in_stock')
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    console.log(`⚡ Loaded ${data?.length || 0} cards FAST (paginated)`);
+
+    if (error) {
+      console.error('❌ Error in paginated cards load:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('💥 Error in loadCardsPaginated:', error);
+    return [];
+  }
 }

@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { loadProducts } from "@/lib/supabaseProducts";
-import { loadCards } from "@/lib/supabaseCards";
+import { loadProductsFast, optimizeImageUrl } from "@/lib/supabaseProducts";
+import { loadCardsFast } from "@/lib/supabaseCards";
 import type { Product } from "@/lib/supabaseProducts";
 import type { Card as SupabaseCard } from "@/lib/supabaseTypes";
 
@@ -13,7 +13,8 @@ const ShopSection = () => {
   useEffect(() => {
     const loadItems = async () => {
       try {
-        const [productsData, cardsData] = await Promise.all([loadProducts(), loadCards()]);
+        console.log('⚡ Loading ShopSection items FAST...');
+        const [productsData, cardsData] = await Promise.all([loadProductsFast(), loadCardsFast()]);
         
         // Combine products and cards
         const productItems = productsData.slice(0, 6).map(p => ({
@@ -116,9 +117,10 @@ const ShopSection = () => {
                 {product && product.image ? (
                   <>
                     <img
-                      src={product.image}
+                      src={optimizeImageUrl(product.image, 300, 70)}
                       alt={product.name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover shimmer-loading"
+                      loading="lazy"
                       onError={(e) => {
                         // Fallback to flower emoji if image fails to load
                         (e.target as HTMLImageElement).style.display = 'none';

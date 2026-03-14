@@ -23,9 +23,14 @@ const OrderTrackingPage = lazy(() => import("./pages/OrderTrackingPage"));
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 60000,
-      gcTime: 300000,
+      staleTime: 5 * 60 * 1000, // 5 minutes for product data
+      gcTime: 10 * 60 * 1000, // 10 minutes garbage collection
+      retry: 2,
       refetchOnWindowFocus: false,
+      refetchOnReconnect: true,
+    },
+    mutations: {
+      retry: 1,
     },
   },
 });

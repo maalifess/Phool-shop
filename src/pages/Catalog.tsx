@@ -4,9 +4,10 @@ import Layout from "@/components/Layout";
 import PageHero from "@/components/PageHero";
 import { Link, useSearchParams } from "react-router-dom";
 import { Search } from "lucide-react";
-import { loadProducts } from "@/lib/supabaseProducts";
-import { loadCards } from "@/lib/supabaseCards";
+import { loadProducts, loadProductsFast, loadProductsPaginated, optimizeImageUrl } from "@/lib/supabaseProducts";
+import { loadCards, loadCardsFast, loadCardsPaginated } from "@/lib/supabaseCards";
 import type { Product } from "@/lib/supabaseProducts";
+import type { ProductCatalog } from "@/lib/supabaseProducts";
 import type { Card as SupabaseCard } from "@/lib/supabaseTypes";
 import { Input } from "@/components/ui/input";
 
@@ -16,10 +17,14 @@ const Catalog = () => {
 
   const [activeCategory, setActiveCategory] = useState("All");
   const [sort, setSort] = useState("default");
-  const [products, setProducts] = useState<Product[]>([]);
-  const [cards, setCards] = useState<SupabaseCard[]>([]);
+  const [products, setProducts] = useState<ProductCatalog[]>([]);
+  const [cards, setCards] = useState<ProductCatalog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
   const [searchText, setSearchText] = useState(urlSearch);
+  const ITEMS_PER_PAGE = 12;
 
   useEffect(() => {
     setSearchText(urlSearch);
@@ -42,15 +47,44 @@ const Catalog = () => {
     return ["All", ...Array.from(cats)];
   }, [products, cards]);
 
+  // Initial load - only first page
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const [p, c] = await Promise.all([loadProducts(), loadCards()]);
+      setCurrentPage(0);
+      setProducts([]);
+      setCards([]);
+      console.log('⚡ Loading catalog page - FIRST PAGE ONLY...');
+      const [p, c] = await Promise.all([
+        loadProductsPaginated(ITEMS_PER_PAGE, 0),
+        loadCardsPaginated(ITEMS_PER_PAGE, 0)
+      ]);
       setProducts(p);
       setCards(c);
+      setHasMore(p.length === ITEMS_PER_PAGE || c.length === ITEMS_PER_PAGE);
       setLoading(false);
     })();
   }, []);
+
+  // Load more function
+  const loadMore = async () => {
+    if (loadingMore || !hasMore) return;
+    
+    setLoadingMore(true);
+    const nextPage = currentPage + 1;
+    console.log(`⚡ Loading MORE items - page ${nextPage}...`);
+    
+    const [p, c] = await Promise.all([
+      loadProductsPaginated(ITEMS_PER_PAGE, nextPage * ITEMS_PER_PAGE),
+      loadCardsPaginated(ITEMS_PER_PAGE, nextPage * ITEMS_PER_PAGE)
+    ]);
+    
+    setProducts(prev => [...prev, ...p]);
+    setCards(prev => [...prev, ...c]);
+    setCurrentPage(nextPage);
+    setHasMore(p.length === ITEMS_PER_PAGE || c.length === ITEMS_PER_PAGE);
+    setLoadingMore(false);
+  };
 
   const filteredItems = useMemo(() => {
     const combined = [
@@ -61,8 +95,7 @@ const Catalog = () => {
     let filtered = combined.filter(item => {
       const matchesSearch = !searchText || 
         item.name.toLowerCase().includes(searchText.toLowerCase()) ||
-        item.category.toLowerCase().includes(searchText.toLowerCase()) ||
-        (item.description && item.description.toLowerCase().includes(searchText.toLowerCase()));
+        item.category.toLowerCase().includes(searchText.toLowerCase());
       
       const matchesCategory = activeCategory === "All" || item.category.includes(activeCategory);
       
@@ -202,9 +235,9 @@ const Catalog = () => {
                       <div className="aspect-square overflow-hidden bg-blush">
                         {isImageUrl(img) ? (
                           <img
-                            src={img}
+                            src={optimizeImageUrl(img, 400, 75)}
                             alt={item.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 shimmer-loading"
                             loading="lazy"
                           />
                         ) : (
@@ -221,6 +254,26 @@ const Catalog = () => {
                 </motion.div>
               );
             })}
+          </div>
+        )}
+
+        {/* Load More Button */}
+        {!loading && hasMore && (
+          <div className="text-center mt-8">
+            <button
+              onClick={loadMore}
+              disabled={loadingMore}
+              className="pill-btn-primary text-sm px-8 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loadingMore ? 'Loading...' : 'Load More Flowers 🌸'}
+            </button>
+          </div>
+        )}
+
+        {/* End of items message */}
+        {!loading && !hasMore && (
+          <div className="text-center mt-8 text-muted-foreground">
+            <p className="font-heading">You've seen all our beautiful flowers! 🌸</p>
           </div>
         )}
       </section>

@@ -4,9 +4,9 @@ import { motion } from "framer-motion";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { loadProductById, loadProducts } from "@/lib/supabaseProducts";
+import { loadProductWithReviews, loadProducts, loadProductById, loadProductFast, loadCardFast, optimizeImageUrl } from "@/lib/supabaseProducts";
 import { loadCardById, loadCards } from "@/lib/supabaseCards";
-import type { Product } from "@/lib/supabaseProducts";
+import type { Product, ProductWithReviews } from "@/lib/supabaseProducts";
 import type { Card as SupabaseCard } from "@/lib/supabaseTypes";
 import { useCart } from "@/lib/cart";
 import { loadApprovedReviews, createReview } from "@/lib/supabaseReviews";
@@ -109,53 +109,62 @@ const ProductDetails = () => {
     } catch (e) { }
   }, []);
 
-  // Load only the requested product/card (fast) 
+  // Ultra-fast: Load product only essential fields
   useEffect(() => {
     (async () => {
       setLoading(true);
+      console.log(`⚡ Starting ULTRA-FAST load for ID: ${pid}`);
+      
       if (!Number.isFinite(pid)) {
+        console.log('❌ Invalid product ID');
         setProduct(null);
         setLoading(false);
         return;
       }
 
-      const [p, c] = await Promise.all([
-        loadProductById(pid),
-        loadCardById(pid),
-      ]);
-      setProduct(p ?? c);
+      try {
+        // Use ultra-fast functions (only essential fields)
+        console.log('⚡ Loading product and card FAST...');
+        const [p, c] = await Promise.all([
+          loadProductFast(pid),
+          loadCardFast(pid),
+        ]);
+        
+        const foundProduct = p ?? c;
+        if (foundProduct) {
+          console.log(`⚡ Successfully loaded product: ${foundProduct.name}`);
+          setProduct(foundProduct);
+        } else {
+          console.log('❌ No product or card found');
+          setProduct(null);
+        }
+      } catch (error) {
+        console.error('💥 Error loading product:', error);
+        setProduct(null);
+      }
+      
       setLoading(false);
     })();
   }, [pid]);
 
-  // Load reviews for this product
+  // Load reviews separately (delayed for performance)
   useEffect(() => {
     if (!foundProduct) return;
-    (async () => {
-      const productReviews = await loadApprovedReviews(foundProduct.id);
-      setReviews(productReviews);
-    })();
-  }, [foundProduct?.id]);
-
-  // Load related products (same category, excluding current)
-  useEffect(() => {
-    if (!foundProduct) return;
-    (async () => {
-      const [allProds, allCards] = await Promise.all([loadProducts(), loadCards()]);
-      const currentCats = foundProduct.category.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
-      const related: (Product | SupabaseCard)[] = [];
-      for (const p of allProds) {
-        if (p.id === foundProduct.id) continue;
-        const pCats = p.category.split(',').map(s => s.trim().toLowerCase());
-        if (pCats.some(c => currentCats.includes(c))) related.push(p);
+    
+    // Load reviews after main content loads
+    const timeoutId = setTimeout(async () => {
+      try {
+        console.log('📡 Loading reviews...');
+        const productReviews = await loadApprovedReviews(foundProduct.id);
+        console.log(`✅ Loaded ${productReviews.length} reviews`);
+        setReviews(productReviews);
+      } catch (error) {
+        console.error('⚠️ Error loading reviews:', error);
+        setReviews([]);
       }
-      for (const c of allCards) {
-        if (c.id === foundProduct.id) continue;
-        const cCats = c.category.split(',').map(s => s.trim().toLowerCase());
-        if (cCats.some(cat => currentCats.includes(cat))) related.push(c);
-      }
-      setRelatedProducts(related.slice(0, 4));
-    })();
+    }, 300); // Load reviews after 300ms
+    
+    return () => clearTimeout(timeoutId);
   }, [foundProduct?.id]);
 
   // Social sharing helpers
@@ -229,7 +238,30 @@ const ProductDetails = () => {
   if (loading) {
     return (
       <Layout>
-        <div className="container py-24 text-center text-muted-foreground">Loading product...</div>
+        <div className="min-h-screen bg-neutral-50 py-12">
+          <div className="container max-w-6xl mx-auto px-6 py-12">
+            {/* Skeleton loading */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+              {/* Image skeleton */}
+              <div className="relative">
+                <div className="bg-white rounded-3xl p-8 shadow-sm">
+                  <div className="relative aspect-square overflow-hidden rounded-2xl bg-gray-200 animate-pulse" />
+                </div>
+              </div>
+              
+              {/* Content skeleton */}
+              <div className="space-y-8">
+                <div className="space-y-4">
+                  <div className="h-8 bg-gray-200 rounded animate-pulse w-3/4" />
+                  <div className="h-6 bg-gray-200 rounded animate-pulse w-1/2" />
+                  <div className="h-4 bg-gray-200 rounded animate-pulse w-1/4" />
+                </div>
+                <div className="h-32 bg-gray-200 rounded animate-pulse" />
+                <div className="h-12 bg-gray-200 rounded-full animate-pulse w-1/3" />
+              </div>
+            </div>
+          </div>
+        </div>
       </Layout>
     );
   }
@@ -274,10 +306,10 @@ const ProductDetails = () => {
                       const img = images[index];
                       return isImageUrl(img) ? (
                         <img
-                          src={img}
+                          src={optimizeImageUrl(img, 800, 85)}
                           alt={foundProduct.name}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                          loading="lazy"
+                          loading="eager"
                           decoding="async"
                         />
                       ) : (
@@ -302,6 +334,31 @@ const ProductDetails = () => {
                   )}
                 </div>
 
+                {/* Image Progress Indicators */}
+                {(() => {
+                  const images = typeof foundProduct.images === 'string' ? JSON.parse(foundProduct.images || '[]') : foundProduct.images;
+                  if (images.length <= 1) return null;
+
+                  return (
+                    <div className="mt-4 flex items-center justify-center gap-2">
+                      {images.map((_, i) => (
+                        <button
+                          key={i}
+                          onClick={() => { setIndex(i); setAuto(false); }}
+                          className={`h-2 rounded-full transition-all duration-300 ${i === index ? "w-8 bg-primary" : "bg-gray-300 hover:bg-gray-400"}`}
+                          aria-label={`Go to image ${i + 1}`}
+                        />
+                      ))}
+                      <button
+                        onClick={() => setAuto(!auto)}
+                        className={`ml-4 px-3 py-1 text-xs rounded-full transition-colors ${auto ? "bg-primary text-white" : "bg-gray-200 text-gray-600"}`}
+                      >
+                        {auto ? "⏸ Pause" : "▶ Play"}
+                      </button>
+                    </div>
+                  );
+                })()}
+
                 {/* Image Thumbnails */}
                 {(() => {
                   const images = typeof foundProduct.images === 'string' ? JSON.parse(foundProduct.images || '[]') : foundProduct.images;
@@ -318,7 +375,7 @@ const ProductDetails = () => {
                           aria-label={`Show image ${i + 1}`}
                         >
                           {isImageUrl(img) ? (
-                            <img src={img} alt={foundProduct.name} className="w-16 h-16 object-cover" loading="lazy" decoding="async" />
+                            <img src={optimizeImageUrl(img, 64, 70)} alt={foundProduct.name} className="w-16 h-16 object-cover" loading="lazy" decoding="async" />
                           ) : (
                             <div className="w-16 h-16 flex items-center justify-center text-2xl bg-gray-100">
                               {img}
