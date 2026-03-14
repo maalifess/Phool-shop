@@ -39,6 +39,3 @@ if (supabase && supabaseUrl) {
     }
   });
 }
-
-
-
