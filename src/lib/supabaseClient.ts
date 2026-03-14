@@ -8,17 +8,35 @@ const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || 
 console.log('🌐 Supabase URL:', supabaseUrl ? 'SET' : 'MISSING');
 console.log('🔑 Supabase Publishable Key:', supabasePublishableKey ? 'SET' : 'MISSING');
 
-export const supabase = createClient(supabaseUrl || '', supabasePublishableKey || supabaseAnonKey || '', {
+const clientConfig: any = {
   auth: {
-    persistSession: typeof window !== 'undefined',
-    autoRefreshToken: true,
-    detectSessionInUrl: true
+    persistSession: false,
+    autoRefreshToken: false,
+    detectSessionInUrl: false
   },
   db: {
     schema: 'public'
+  },
+  global: {
+    headers: {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    }
   }
-});
+};
 
+export const supabase = createClient(supabaseUrl || '', supabasePublishableKey || supabaseAnonKey || '', clientConfig);
+
+// Add cache-busting helper
+export const fetchFreshProducts = () => {
+  const timestamp = Date.now();
+  return supabase
+    .from('products')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .eq('cache_bust', timestamp); // This forces a fresh query
+};
 
 // Immediate test connection
 if (supabaseUrl && supabaseAnonKey) {

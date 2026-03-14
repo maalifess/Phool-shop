@@ -19,7 +19,7 @@ type CacheEntry<T> = {
   data: T;
 };
 
-const PRODUCTS_TTL_MS = 5 * 60_000; // 5 minutes instead of 1 minute
+const PRODUCTS_TTL_MS = 0; // Disable cache completely
 const PRODUCTS_TIMEOUT_MS = 10_000; // 10 second timeout for Supabase queries
 let productsCache: CacheEntry<Product[]> | null = null;
 let productsInFlight: Promise<Product[]> | null = null;
@@ -70,17 +70,10 @@ export async function loadProducts(): Promise<Product[]> {
     const tablesToTry = ['products', 'Products', 'product'];
     const allProductsMap = new Map<number, Product>();
 
-    console.log('📦 Gathering products from all sources...');
+    console.log('📦 Gathering products from Supabase only (defaults disabled)...');
 
-    // 1. Load Hardcoded Defaults
-    defaultProducts.forEach(p => {
-      allProductsMap.set(p.id, {
-        ...p,
-        in_stock: p.inStock,
-        _source: 'default'
-      } as unknown as Product);
-    });
-    console.log(`📚 Loaded ${defaultProducts.length} products from Hardcoded Defaults`);
+    // 1. Skip Hardcoded Defaults - only load from Supabase
+    console.log(`📚 Skipped ${defaultProducts.length} products from Hardcoded Defaults (cache cleared)`);
 
 
     // 2. Load LocalStorage (for products added 'before' we switched to Supabase)
