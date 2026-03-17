@@ -33,6 +33,22 @@ const Catalog = () => {
     setSearchText(urlSearch);
   }, [urlSearch]);
 
+  // Debounce searchParams update
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      // Only update URL if searchText is different from current urlSearch
+      if (searchText !== urlSearch) {
+        if (searchText) {
+          setSearchParams({ search: searchText }, { replace: true });
+        } else {
+          setSearchParams({}, { replace: true });
+        }
+      }
+    }, 300);
+
+    return () => clearTimeout(handler);
+  }, [searchText, setSearchParams, urlSearch]);
+
   const isImageUrl = (v?: string) => {
     if (!v || v.trim() === "") return false;
     return v.startsWith("data:image/") || v.startsWith("http://") || v.startsWith("https://");
@@ -95,7 +111,7 @@ const Catalog = () => {
       ...cards.map(c => ({ ...c, kind: 'card' as const }))
     ];
 
-    let filtered = combined.filter(item => {
+    const filtered = combined.filter(item => {
       const matchesSearch = !searchText || 
         item.name.toLowerCase().includes(searchText.toLowerCase()) ||
         item.category.toLowerCase().includes(searchText.toLowerCase());
@@ -133,10 +149,7 @@ const Catalog = () => {
               placeholder="Search products..."
               value={searchText}
               onChange={(e) => {
-                const v = e.target.value;
-                setSearchText(v);
-                if (v) setSearchParams({ search: v });
-                else setSearchParams({});
+                setSearchText(e.target.value);
               }}
               className="pl-10 rounded-full border-2 border-foreground bg-card"
             />

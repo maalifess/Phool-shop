@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import Layout from "@/components/Layout";
@@ -216,7 +216,9 @@ const ProductDetails = () => {
     setTimeout(() => setShowConfetti(false), 3000);
   };
 
-  const avgRating = reviews.length ? Math.round((reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) * 10) / 10 : 0;
+  const avgRating = useMemo(() => {
+    return reviews.length ? Math.round((reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) * 10) / 10 : 0;
+  }, [reviews]);
 
   const submitReview = async (e: React.FormEvent) => {
     e.preventDefault();
