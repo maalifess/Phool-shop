@@ -60,7 +60,7 @@ const Fundraisers = () => {
 
   return (
     <Layout>
-      <PageHero scriptTitle="our" title="FUNDRAISERS" subtitle="Crocheting kindness into the world, one stitch at a time" />
+      <PageHero scriptTitle="our" title="FUNDRAISERS" />
 
       <section className="container mx-auto px-4 py-16">
         {normalized.length === 0 ? (

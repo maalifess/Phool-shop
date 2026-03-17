@@ -1,28 +1,6 @@
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
 
 const AboutSection = () => {
-  const [currentSticker, setCurrentSticker] = useState(1);
-  const [isAnimating, setIsAnimating] = useState(true);
-  const totalStickers = 26;
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIsAnimating(false);
-      
-      setTimeout(() => {
-        const nextSticker = (currentSticker % totalStickers) + 1;
-        setCurrentSticker(nextSticker);
-        
-        setTimeout(() => {
-          setIsAnimating(true);
-        }, 100);
-      }, 600);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [currentSticker, totalStickers]);
-
   return (
     <section id="about" style={{ backgroundColor: '#fcf2e3', padding: '60px 0', position: 'relative' }}>
       {/* Decorative border frame */}
@@ -39,19 +17,18 @@ const AboutSection = () => {
       }} />
 
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px', position: 'relative', zIndex: 1 }}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-40 items-center min-h-auto">
+        <div className="flex flex-col items-center justify-center min-h-auto text-center">
           
-          {/* Left Content */}
+          {/* Content */}
           <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            style={{ fontFamily: "'Nunito', sans-serif" }}
-            className="text-center md:text-left"
+            style={{ fontFamily: "'Nunito', sans-serif", maxWidth: '800px' }}
           >
             <h2 style={{ 
               fontFamily: "'Sacramento', cursive", 
-              fontSize: 'clamp(2rem, 4vw, 3rem)', 
+              fontSize: 'clamp(2.5rem, 5vw, 4rem)', 
               color: '#6e4248', 
               marginBottom: '1.5rem',
               lineHeight: '1.2',
@@ -63,46 +40,67 @@ const AboutSection = () => {
             <div style={{ 
               display: 'flex', 
               flexDirection: 'column', 
-              gap: '0.75rem', 
-              marginBottom: '1.5rem'
+              gap: '1rem', 
+              marginBottom: '2rem'
             }}>
               <p style={{ 
                 fontFamily: "'Fredoka One', cursive", 
-                fontSize: 'clamp(1rem, 2.5vw, 1.125rem)', 
+                fontSize: 'clamp(1.125rem, 3vw, 1.5rem)', 
                 color: '#6e4248',
                 lineHeight: '1.4'
               }}>
-                Phool Shop isn't your typical crochet store.
+                from a burned out college kid wanting to make everyone's day, a little brighter &lt;3
               </p>
               
               <p style={{ 
                 fontFamily: "'Nunito', sans-serif",
-                fontSize: 'clamp(0.875rem, 2vw, 1rem)', 
+                fontSize: 'clamp(1rem, 2.5vw, 1.125rem)', 
                 color: '#6e4248',
                 lineHeight: '1.6'
               }}>
-                It's a club, a living space where stories, handmade creations, and people come together.
+                Phoolshop isn't just a little gift shop, it carries a big piece of my heart, and yours too. To everyone who has ordered, everyone I've made happy, and even those I've occasionally disappointed, thank you for the kindness you've shared. This has been such a lovely journey, and I hope it continues to bloom.
               </p>
               
               <p style={{ 
                 fontFamily: "'Nunito', sans-serif",
-                fontSize: 'clamp(0.875rem, 2vw, 1rem)', 
+                fontSize: 'clamp(1rem, 2.5vw, 1.125rem)', 
                 color: '#6e4248',
                 lineHeight: '1.6'
               }}>
-                Born from a love of craft and creativity, Phool Shop celebrates the beauty of handmade art and the joy of sharing. Here, crochet isn't just a hobby — it's a way of life.
+                My goal isn't just to sell a product. I want to spread kindness and make life just a little bit easier for everyone, every day.
+              </p>
+              
+              <p style={{ 
+                fontFamily: "'Nunito', sans-serif",
+                fontSize: 'clamp(1rem, 2.5vw, 1.125rem)', 
+                color: '#6e4248',
+                lineHeight: '1.6'
+              }}>
+                Thank you for being a part of this pyar bhara project. &lt;3
+              </p>
+
+              <p style={{ 
+                fontFamily: "'Nunito', sans-serif",
+                fontSize: 'clamp(1rem, 2.5vw, 1.125rem)', 
+                color: '#6e4248',
+                lineHeight: '1.6',
+                fontStyle: 'italic'
+              }}>
+                May Allah keep you smiling, always.
               </p>
             </div>
             
             <motion.a 
-              href="#" 
+              href="https://www.instagram.com/phoolshopp/" 
+              target="_blank"
+              rel="noopener noreferrer"
               className="pill-btn-primary"
               style={{ 
                 backgroundColor: '#6e4248', 
                 color: '#fcf2e3', 
-                padding: '12px 24px', 
+                padding: '14px 32px', 
                 borderRadius: '9999px',
-                fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
+                fontSize: 'clamp(0.875rem, 2vw, 1rem)',
                 fontWeight: '600',
                 textDecoration: 'none',
                 display: 'inline-block',
@@ -120,77 +118,9 @@ const AboutSection = () => {
                 boxShadow: '2px 2px 0px #6e4248'
               }}
             >
-              DISCOVER MORE
+              FOLLOW ON INSTAGRAM
             </motion.a>
           </motion.div>
-
-          {/* Right Content - Stickers */}
-          <motion.div
-            initial={{ opacity: 0, x: 40 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="flex justify-center items-center md:order-last order-first"
-          >
-            <div style={{ 
-              position: 'relative', 
-              width: '100%', 
-              maxWidth: 'clamp(300px, 80vw, 500px)', 
-              height: 'clamp(300px, 80vw, 500px)',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center'
-            }}>
-              <motion.div
-                key={currentSticker}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ 
-                  opacity: isAnimating ? 1 : 0,
-                  scale: isAnimating ? 1 : 0.95,
-                }}
-                transition={{ 
-                  opacity: { duration: 0.6, ease: [0.4, 0, 0.2, 1] },
-                  scale: { duration: 0.6, ease: [0.4, 0, 0.2, 1] },
-                }}
-                style={{ 
-                  width: '100%', 
-                  height: '100%', 
-                  display: 'flex', 
-                  justifyContent: 'center', 
-                  alignItems: 'center',
-                  padding: '10px'
-                }}
-              >
-                <motion.img
-                  src={`/assets/stickers/${currentSticker}.png`}
-                  alt={`Sticker ${currentSticker}`}
-                  style={{ 
-                    width: '100%', 
-                    height: '100%', 
-                    objectFit: 'contain',
-                    maxWidth: 'clamp(200px, 60vw, 350px)',
-                    maxHeight: 'clamp(200px, 60vw, 350px)',
-                    filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.1))'
-                  }}
-                  animate={{
-                    rotate: isAnimating ? [0, 2, -2, 1, -1, 0] : 0,
-                    y: isAnimating ? [0, -3, 0] : 0,
-                  }}
-                  transition={{
-                    rotate: { duration: 5, repeat: isAnimating ? Infinity : 0, repeatType: "reverse", ease: [0.4, 0, 0.2, 1] },
-                    y: { duration: 4, repeat: isAnimating ? Infinity : 0, repeatType: "reverse", ease: [0.4, 0, 0.2, 1] },
-                  }}
-                  onError={(e) => {
-                    const img = e.target as HTMLImageElement;
-                    img.style.display = 'none';
-                    if (img.parentElement) {
-                      img.parentElement.innerHTML = '<div style="font-size: 48px; color: #6e4248;">🌸</div>';
-                    }
-                  }}
-                />
-              </motion.div>
-            </div>
-          </motion.div>
-          
         </div>
       </div>
     </section>
