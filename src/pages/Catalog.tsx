@@ -175,16 +175,19 @@ const Catalog = () => {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="retro-card bg-card animate-pulse">
-                <div className="aspect-square bg-blush" />
-                <div className="p-5">
-                  <div className="h-4 w-1/2 bg-muted rounded" />
-                  <div className="mt-3 h-6 w-2/3 bg-muted rounded" />
-                </div>
-              </div>
-            ))}
+          <div className="flex flex-col items-center justify-center py-20">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              className="mb-8"
+            >
+              <img 
+                src="/assets/branding/phool.png" 
+                alt="Loading Phool Shop" 
+                className="w-40 h-40 object-contain"
+              />
+            </motion.div>
+            <p className="font-script text-2xl text-muted-foreground">Loading...</p>
           </div>
         ) : filteredItems.length === 0 ? (
           <div className="text-center py-20">

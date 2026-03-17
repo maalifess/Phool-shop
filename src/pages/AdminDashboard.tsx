@@ -419,7 +419,63 @@ const AdminDashboard = () => {
                                     }}
                                   />
                                   <div className="mt-2">
-                                    <label className="text-sm">Upload images</label>
+                                    <label className="text-sm">Images (drag to reorder)</label>
+                                    <div className="space-y-2">
+                                      {normalizeImages(p.images).map((img, index) => (
+                                        <div key={index} className="flex items-center gap-2 p-2 border border-border/40 rounded">
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              const images = normalizeImages(p.images);
+                                              if (index > 0) {
+                                                const newImages = [...images];
+                                                [newImages[index], newImages[index - 1]] = [newImages[index - 1], newImages[index]];
+                                                updateProduct(p.id, { images: newImages });
+                                              }
+                                            }}
+                                            disabled={index === 0}
+                                            className="p-1 rounded hover:bg-muted disabled:opacity-50"
+                                          >
+                                            ↑
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              const images = normalizeImages(p.images);
+                                              if (index < images.length - 1) {
+                                                const newImages = [...images];
+                                                [newImages[index], newImages[index + 1]] = [newImages[index + 1], newImages[index]];
+                                                updateProduct(p.id, { images: newImages });
+                                              }
+                                            }}
+                                            disabled={index === normalizeImages(p.images).length - 1}
+                                            className="p-1 rounded hover:bg-muted disabled:opacity-50"
+                                          >
+                                            ↓
+                                          </button>
+                                          <img 
+                                            src={img} 
+                                            alt={`Product image ${index + 1}`}
+                                            className="w-12 h-12 object-cover rounded"
+                                          />
+                                          <span className="text-xs text-muted-foreground">#{index + 1}</span>
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              const images = normalizeImages(p.images);
+                                              const newImages = images.filter((_, i) => i !== index);
+                                              updateProduct(p.id, { images: newImages });
+                                            }}
+                                            className="p-1 rounded hover:bg-red-100 text-red-600 ml-auto"
+                                          >
+                                            ×
+                                          </button>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                  <div className="mt-2">
+                                    <label className="text-sm">Upload new images</label>
                                     <input
                                       type="file"
                                       accept="image/*"

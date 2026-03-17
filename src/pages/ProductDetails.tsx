@@ -462,7 +462,7 @@ const ProductDetails = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
               >
-                <p className="text-[#6e4248] leading-relaxed text-lg font-body">
+                <p className="text-[#6e4248] leading-relaxed text-lg font-body whitespace-pre-wrap">
                   {foundProduct.description}
                 </p>
               </motion.div>
