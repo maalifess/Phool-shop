@@ -19,7 +19,7 @@ const Tokri = () => {
 
   return (
     <Layout>
-      <PageHero scriptTitle="your" title="TOKRI" subtitle="Your handpicked crochet treasures" />
+      <PageHero scriptTitle="your" title="TOKRI" />
 
       <section className="container mx-auto px-4 py-12 max-w-4xl">
         {items.length === 0 ? (

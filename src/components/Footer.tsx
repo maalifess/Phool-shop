@@ -26,7 +26,6 @@ const Footer = () => {
           
           <div className="space-y-2 font-body text-base" style={{ color: '#FFFAF2' }}>
             <p>phoolshopstore@gmail.com</p>
-            <p>+92 321 0000000</p>
             <a href="https://www.instagram.com/phoolshopp/" target="_blank" rel="noopener noreferrer" className="underline hover:text-golden transition-colors" style={{ color: '#FFFAF2' }}>@phoolshopp</a>
           </div>
           
