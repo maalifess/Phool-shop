@@ -483,35 +483,15 @@ const Order = () => {
                         <Input
                           placeholder="Enter promo code"
                           value={promoInput}
-
-                      <div className="space-y-2">
-                        <Label htmlFor="address">Shipping Address</Label>
-                        <Textarea id="address" name="address" rows={2} required />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="products">Product(s) You'd Like to Order</Label>
-                        <Textarea
-                          id="products"
-                          name="products"
-                          rows={3}
-                          defaultValue={incomingProductsText}
-                          required
+                          onChange={(e) => setPromoInput(e.target.value)}
+                          className="flex-1"
                         />
+                        <Button type="button" onClick={applyPromo} className="rounded-full">
+                          Apply
+                        </Button>
                       </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="notes">Additional Notes (optional)</Label>
-                        <Textarea id="notes" name="notes" rows={2} />
-                      <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>PKR {subtotal}</span></div>
-                      {promoDiscount > 0 && <div className="flex justify-between text-green-600"><span>Discount ({appliedPromo})</span><span>- PKR {promoDiscount}</span></div>}
-                      {giftWrap && <div className="flex justify-between"><span className="text-muted-foreground">Gift Wrapping</span><span>PKR {GIFT_WRAP_PRICE}</span></div>}
-                      <div className="flex justify-between"><span className="text-muted-foreground">Delivery</span><span className="text-green-600 font-medium">Free</span></div>
-                      <div className="border-t border-border/40 pt-2 flex justify-between font-bold text-foreground text-base">
-                        <span>Total</span><span className="text-primary">PKR {totalAmount}</span>
-                      </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
 
                   <div className="rounded-lg border border-border/60 bg-accent/50 p-4 text-sm text-muted-foreground">
                     <strong>Payment:</strong> Send screenshot of proof of payment to email or phone below. We'll contact you to confirm and arrange delivery. There are no delivery charges — delivery is free.
