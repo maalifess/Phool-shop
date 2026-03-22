@@ -15,6 +15,7 @@ export interface OrderRecord {
   email: string;
   phone: string;
   address: string;
+  instagram: string;
   products: string;
   quantity: string;
   payment_method: string;
@@ -32,6 +33,7 @@ export interface OrderRecord {
   custom_description: string;
   custom_colors: string;
   custom_timeline: string;
+  custom_image: string;
   created_at?: string;
 }
 

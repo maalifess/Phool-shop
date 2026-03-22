@@ -5,12 +5,14 @@ interface OrderData {
   email: string;
   phone: string;
   address?: string;
+  instagram?: string;
   products: string;
   quantity: string;
   notes?: string;
   paymentMethod?: string;
   orderType: 'regular' | 'custom';
   status?: 'Under Process' | 'Dispatched' | 'Completed' | 'Cancelled';
+  custom_image?: string;
   customDetails?: {
     description?: string;
     colors?: string;
@@ -25,7 +27,7 @@ export const addOrderToGoogleSheet = async (orderData: OrderData): Promise<boole
     console.log('🚀 Starting Google Sheets submission...');
     console.log('📋 Order data:', orderData);
     console.log('🔗 API URL:', GOOGLE_SHEETS_API_URL);
-    
+
     const timestamp = new Date().toISOString();
     const rowData = {
       timestamp,
@@ -33,6 +35,7 @@ export const addOrderToGoogleSheet = async (orderData: OrderData): Promise<boole
       name: orderData.name,
       email: orderData.email,
       phone: orderData.phone,
+      instagram: orderData.instagram || '',
       address: orderData.address || '',
       products: orderData.products,
       quantity: orderData.quantity,
@@ -42,6 +45,7 @@ export const addOrderToGoogleSheet = async (orderData: OrderData): Promise<boole
       customDescription: orderData.customDetails?.description || '',
       customColors: orderData.customDetails?.colors || '',
       customTimeline: orderData.customDetails?.timeline || '',
+      customImage: orderData.custom_image || '',
     };
 
     console.log('📤 Row data prepared:', rowData);
@@ -125,6 +129,7 @@ export const saveOrdersToStorage = (orders: any[]) => {
    - Name
    - Email
    - Phone
+   - Instagram
    - Address
    - Products
    - Quantity
@@ -133,6 +138,7 @@ export const saveOrdersToStorage = (orders: any[]) => {
    - Custom Description
    - Custom Colors
    - Custom Timeline
+   - Custom Image
 
 2. Go to Extensions > Apps Script in your Google Sheet
 
@@ -144,7 +150,7 @@ function doPost(e) {
     if (!sheet) {
       SpreadsheetApp.getActiveSpreadsheet().insertSheet('Orders');
       const newSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Orders');
-      newSheet.appendRow(['Timestamp', 'Order Type', 'Name', 'Email', 'Phone', 'Address', 'Products', 'Quantity', 'Payment Method', 'Notes', 'Custom Description', 'Custom Colors', 'Custom Timeline']);
+      newSheet.appendRow(['Timestamp', 'Order Type', 'Name', 'Email', 'Phone', 'Instagram', 'Address', 'Products', 'Quantity', 'Payment Method', 'Notes', 'Custom Description', 'Custom Colors', 'Custom Timeline', 'Custom Image']);
     }
     
     const data = JSON.parse(e.postData.contents);
@@ -155,6 +161,7 @@ function doPost(e) {
       data.name,
       data.email,
       data.phone,
+      data.instagram,
       data.address,
       data.products,
       data.quantity,
@@ -162,7 +169,8 @@ function doPost(e) {
       data.notes,
       data.customDescription,
       data.customColors,
-      data.customTimeline
+      data.customTimeline,
+      data.customImage
     ]);
     
     return ContentService.createTextOutput(JSON.stringify({status: 'success'}))

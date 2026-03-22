@@ -285,15 +285,15 @@ const AdminDashboard = () => {
         return sortDirection === "desc" ? tb - ta : ta - tb;
       });
     } else if (sortKey === "status") {
-      const statusOrder: Record<OrderStatus, number> = { 
-        "Under Process": 0, 
-        "Confirmed": 1, 
-        "In Progress": 2, 
-        "Ready": 3, 
-        "Dispatched": 4, 
-        "Completed": 5, 
-        "Delivered": 6, 
-        "Cancelled": 7 
+      const statusOrder: Record<OrderStatus, number> = {
+        "Under Process": 0,
+        "Confirmed": 1,
+        "In Progress": 2,
+        "Ready": 3,
+        "Dispatched": 4,
+        "Completed": 5,
+        "Delivered": 6,
+        "Cancelled": 7
       };
       sorted.sort((a, b) => {
         const sa = statusOrder[(a.status || "Under Process") as OrderStatus];
@@ -453,8 +453,8 @@ const AdminDashboard = () => {
                                           >
                                             ↓
                                           </button>
-                                          <img 
-                                            src={img} 
+                                          <img
+                                            src={img}
                                             alt={`Product image ${index + 1}`}
                                             className="w-12 h-12 object-cover rounded"
                                           />
@@ -557,10 +557,10 @@ const AdminDashboard = () => {
                               }}
                             />
                           </div>
-                          <Textarea 
-                            placeholder="Card description (optional)" 
-                            value={newCardDescription} 
-                            onChange={(e) => setNewCardDescription(e.target.value)} 
+                          <Textarea
+                            placeholder="Card description (optional)"
+                            value={newCardDescription}
+                            onChange={(e) => setNewCardDescription(e.target.value)}
                             rows={2}
                           />
                         </div>
@@ -991,9 +991,23 @@ const AdminDashboard = () => {
                                 </div>
                                 <div className="mt-2 text-sm space-y-0.5">
                                   <div><span className="font-medium">Products:</span> {o.products}</div>
+                                  {o.instagram && (
+                                    <div className="flex items-center gap-1 text-primary">
+                                      <span className="font-medium">Instagram:</span>
+                                      <a href={`https://instagram.com/${o.instagram.replace('@', '')}`} target="_blank" rel="noreferrer" className="underline italic">
+                                        {o.instagram.startsWith('@') ? o.instagram : `@${o.instagram}`}
+                                      </a>
+                                    </div>
+                                  )}
                                   {o.address && <div><span className="font-medium">Address:</span> {o.address}</div>}
                                   {o.notes && <div><span className="font-medium">Notes:</span> {o.notes}</div>}
                                   {o.custom_description && <div><span className="font-medium">Custom:</span> {o.custom_description}</div>}
+                                  {o.custom_image && (
+                                    <div className="mt-2">
+                                      <span className="font-medium block mb-1">Reference Image:</span>
+                                      <img src={o.custom_image} alt="Reference" className="w-32 h-32 object-cover rounded-lg border border-border/40 shimmer-loading cursor-pointer hover:scale-105 transition-transform" onClick={() => window.open(o.custom_image, '_blank')} />
+                                    </div>
+                                  )}
                                   {typeof o.discount === "number" && Number(o.discount) > 0 && (
                                     <div className="text-green-600"><span className="font-medium">Discount:</span> PKR {o.discount}</div>
                                   )}

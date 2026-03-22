@@ -20,8 +20,6 @@ const PROMO_CODES: Record<string, { discount: number; type: "percent" | "fixed";
   "WELCOME": { discount: 15, type: "percent", label: "15% off (Welcome)" },
 };
 
-const GIFT_WRAP_PRICE = 50;
-
 const generateOrderId = () => {
   const prefix = "PS";
   const ts = Date.now().toString(36).toUpperCase();
@@ -38,8 +36,53 @@ const Order = () => {
   const [promoInput, setPromoInput] = useState("");
   const [appliedPromo, setAppliedPromo] = useState<string | null>(null);
   const [promoError, setPromoError] = useState("");
-  const [giftWrap, setGiftWrap] = useState(false);
-  const [giftMessage, setGiftMessage] = useState("");
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+
+  // Handle image upload with aggressive compression
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Always compress images for email compatibility
+      const compressedImage = await compressImage(file);
+      setUploadedImage(compressedImage);
+    }
+  };
+
+  // Aggressive compression function
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      
+      img.onload = () => {
+        // Calculate new dimensions (max 600px for aggressive compression)
+        let width = img.width;
+        let height = img.height;
+        const maxSize = 600;
+        
+        if (width > height && width > maxSize) {
+          height = (height * maxSize) / width;
+          width = maxSize;
+        } else if (height > maxSize) {
+          width = (width * maxSize) / height;
+          height = maxSize;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Draw and compress aggressively
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        // Convert to base64 with very aggressive quality
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.3);
+        resolve(compressedDataUrl);
+      };
+      
+      img.src = URL.createObjectURL(file);
+    });
+  };
 
   // If arriving from Tokri checkout, location.state.items will contain the cart items
   const stateItems = (location.state as any)?.items as { id: number; name: string; price: number; quantity: number; customText?: string }[] | undefined;
@@ -62,8 +105,7 @@ const Order = () => {
   const promoDiscount = promoData
     ? promoData.type === "percent" ? Math.round(subtotal * promoData.discount / 100) : promoData.discount
     : 0;
-  const giftWrapCost = giftWrap ? GIFT_WRAP_PRICE : 0;
-  const totalAmount = Math.max(0, subtotal - promoDiscount + giftWrapCost);
+  const totalAmount = Math.max(0, subtotal - promoDiscount);
 
   const applyPromo = () => {
     const code = promoInput.trim().toUpperCase();
@@ -101,12 +143,14 @@ const Order = () => {
       name: String(fd.get("name") || ""),
       email: String(fd.get("email") || ""),
       phone: String(fd.get("phone") || ""),
+      instagram: String(fd.get("instagram") || ""),
       quantity: String(fd.get("quantity") || ""),
       address: String(fd.get("address") || ""),
       products: String(fd.get("products") || ""),
-      notes: String(fd.get("notes") || "") + (giftWrap ? `\n[GIFT WRAP] Message: ${giftMessage || "No message"}` : "") + (appliedPromo ? `\n[PROMO: ${appliedPromo} — ${promoData?.label}]` : ""),
+      notes: String(fd.get("notes") || "") + (appliedPromo ? `\n[PROMO: ${appliedPromo} — ${promoData?.label}]` : ""),
       paymentMethod: paymentMethod || "",
       orderType: 'regular' as const,
+      custom_image: uploadedImage || "",
     };
 
     const emailPayload = {
@@ -114,6 +158,7 @@ const Order = () => {
       name: orderData.name,
       email: orderData.email,
       phone: orderData.phone,
+      instagram: orderData.instagram,
       address: orderData.address || "",
       order_summary: incomingItems
         ? incomingItems.map(item => `${item.quantity}x ${item.name} - PKR ${item.price}${item.customText ? ` (Message: ${item.customText})` : ''}`).join('\n')
@@ -122,9 +167,6 @@ const Order = () => {
       subtotal: subtotal,
       discount: promoDiscount > 0 ? `PKR ${promoDiscount} (${appliedPromo})` : 'None',
       promo_code: appliedPromo || 'None',
-      gift_wrap: giftWrap ? 'Yes' : 'No',
-      gift_wrap_cost: giftWrapCost,
-      gift_message: giftMessage || 'No message',
       payment_method: paymentMethod || 'Not selected',
       payment_details: paymentMethod === "jazzcash"
         ? "JazzCash: 0321-000-0000 (Phool Shop)"
@@ -139,7 +181,8 @@ const Order = () => {
       contact_email: import.meta.env.VITE_SHOP_CONTACT_EMAIL || 'orders@example.com',
       contact_phone: import.meta.env.VITE_SHOP_CONTACT_PHONE || '0321-000-0000',
       customer_notes: String(fd.get("notes") || ""),
-      special_instructions: giftWrap ? `Gift wrap requested: ${giftMessage || 'No message'}` : 'No special instructions',
+      special_instructions: 'No special instructions',
+      custom_image: uploadedImage || "",
     };
 
     const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
@@ -155,6 +198,7 @@ const Order = () => {
         email: orderData.email,
         phone: orderData.phone,
         address: orderData.address || "",
+        instagram: orderData.instagram || "",
         products: orderData.products,
         quantity: orderData.quantity,
         payment_method: orderData.paymentMethod || "",
@@ -166,12 +210,13 @@ const Order = () => {
         discount: promoDiscount,
         total: totalAmount,
         promo_code: appliedPromo,
-        gift_wrap: giftWrap,
-        gift_wrap_cost: giftWrapCost,
-        gift_message: giftMessage,
+        gift_wrap: false,
+        gift_wrap_cost: 0,
+        gift_message: "",
         custom_description: "",
         custom_colors: "",
         custom_timeline: "",
+        custom_image: uploadedImage || "",
       });
     } catch (err) {
       console.error("Supabase order save failed:", err);
@@ -186,6 +231,7 @@ const Order = () => {
       name: orderData.name,
       email: orderData.email,
       phone: orderData.phone,
+      instagram: orderData.instagram || '',
       address: orderData.address || '',
       products: orderData.products,
       quantity: orderData.quantity,
@@ -193,6 +239,7 @@ const Order = () => {
       paymentMethod: orderData.paymentMethod || '',
       orderType: 'regular',
       status: 'Under Process',
+      custom_image: uploadedImage || '',
     }).catch((err) => {
       console.error('Google Sheets integration failed:', err);
     });
@@ -354,8 +401,19 @@ const Order = () => {
                       <Input id="phone" name="phone" required />
                     </div>
                     <div className="space-y-2">
+                      <Label htmlFor="instagram">Instagram @ (optional)</Label>
+                      <Input id="instagram" name="instagram" type="text" placeholder="@username" />
+                    </div>
+                  </div>
+
+                  <div className="grid gap-5 sm:grid-cols-2">
+                    <div className="space-y-2">
                       <Label htmlFor="quantity">Quantity</Label>
                       <Input id="quantity" name="quantity" type="number" min="1" defaultValue="1" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="image">Reference Image (optional)</Label>
+                      <Input id="image" name="image" type="file" accept="image/*" onChange={handleImageUpload} />
                     </div>
                   </div>
 
@@ -425,46 +483,26 @@ const Order = () => {
                         <Input
                           placeholder="Enter promo code"
                           value={promoInput}
-                          onChange={(e) => { setPromoInput(e.target.value); setPromoError(""); }}
-                        />
-                        <Button type="button" variant="outline" onClick={applyPromo} className="shrink-0">Apply</Button>
-                      </div>
-                    )}
-                    {promoError && <p className="text-sm text-red-500">{promoError}</p>}
-                  </div>
 
-                  {/* Gift Wrapping */}
-                  <div className="space-y-3 rounded-lg border border-border/40 p-4">
-                    <label className="flex items-center gap-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={giftWrap}
-                        onChange={(e) => setGiftWrap(e.target.checked)}
-                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                      />
-                      <Gift className="h-5 w-5 text-primary" />
-                      <span className="font-medium text-foreground">Add Gift Wrapping</span>
-                      <span className="ml-auto text-sm text-muted-foreground">+ PKR {GIFT_WRAP_PRICE}</span>
-                    </label>
-                    {giftWrap && (
-                      <div className="space-y-2 pl-7">
-                        <Label htmlFor="giftMsg">Gift Message (optional)</Label>
+                      <div className="space-y-2">
+                        <Label htmlFor="address">Shipping Address</Label>
+                        <Textarea id="address" name="address" rows={2} required />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="products">Product(s) You'd Like to Order</Label>
                         <Textarea
-                          id="giftMsg"
-                          value={giftMessage}
-                          onChange={(e) => setGiftMessage(e.target.value)}
-                          rows={2}
-                          placeholder="Write a message for the recipient..."
-                          maxLength={200}
+                          id="products"
+                          name="products"
+                          rows={3}
+                          defaultValue={incomingProductsText}
+                          required
                         />
                       </div>
-                    )}
-                  </div>
 
-                  {/* Order Summary */}
-                  {incomingItems && incomingItems.length > 0 && (
-                    <div className="rounded-lg border border-border/40 bg-accent/30 p-4 space-y-2 text-sm">
-                      <div className="font-semibold text-foreground">Order Summary</div>
+                      <div className="space-y-2">
+                        <Label htmlFor="notes">Additional Notes (optional)</Label>
+                        <Textarea id="notes" name="notes" rows={2} />
                       <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>PKR {subtotal}</span></div>
                       {promoDiscount > 0 && <div className="flex justify-between text-green-600"><span>Discount ({appliedPromo})</span><span>- PKR {promoDiscount}</span></div>}
                       {giftWrap && <div className="flex justify-between"><span className="text-muted-foreground">Gift Wrapping</span><span>PKR {GIFT_WRAP_PRICE}</span></div>}
