@@ -31,6 +31,7 @@ const Order = () => {
   const [submitted, setSubmitted] = useState(false);
   const [orderId, setOrderId] = useState("");
   const [orderIdCopied, setOrderIdCopied] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const location = useLocation();
   const [paymentMethod, setPaymentMethod] = useState<string | undefined>(undefined);
   const [promoInput, setPromoInput] = useState("");
@@ -135,6 +136,7 @@ const Order = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     const form = e.target as HTMLFormElement;
     const fd = new FormData(form);
     const newOrderId = generateOrderId();
@@ -225,6 +227,7 @@ const Order = () => {
     // Show success UI immediately
     setOrderId(newOrderId);
     setSubmitted(true);
+    setIsSubmitting(false);
 
     // Send to Google Sheets in background (non-blocking)
     addOrderToGoogleSheet({
@@ -296,6 +299,50 @@ const Order = () => {
         });
     }
   };
+
+  if (isSubmitting) {
+    return (
+      <Layout>
+        <section className="flex min-h-[60vh] items-center justify-center py-16">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mx-auto max-w-md text-center">
+            <motion.div 
+              initial={{ scale: 0 }} 
+              animate={{ scale: 1 }} 
+              transition={{ type: 'spring', stiffness: 400, damping: 12 }}
+              className="mb-8"
+            >
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              >
+                <img
+                  src="/assets/branding/phool.png"
+                  alt="Loading Phool Shop"
+                  className="w-40 h-40 object-contain mx-auto"
+                />
+              </motion.div>
+            </motion.div>
+            <motion.h2 
+              initial={{ y: 20, opacity: 0 }} 
+              animate={{ y: 0, opacity: 1 }} 
+              transition={{ delay: 0.15 }} 
+              className="mt-6 font-display text-3xl font-bold text-foreground"
+            >
+              Processing Your Order...
+            </motion.h2>
+            <motion.p 
+              initial={{ y: 10, opacity: 0 }} 
+              animate={{ y: 0, opacity: 1 }} 
+              transition={{ delay: 0.25 }} 
+              className="mt-4 text-muted-foreground"
+            >
+              Please wait while we save your order details
+            </motion.p>
+          </motion.div>
+        </section>
+      </Layout>
+    );
+  }
 
   if (submitted) {
     return (
@@ -501,8 +548,8 @@ const Order = () => {
                     </div>
                   </div>
 
-                  <Button type="submit" size="lg" className="w-full rounded-full">
-                    Submit Order
+                  <Button type="submit" size="lg" className="w-full rounded-full" disabled={isSubmitting}>
+                    {isSubmitting ? "Processing..." : "Submit Order"}
                   </Button>
                 </form>
               </CardContent>

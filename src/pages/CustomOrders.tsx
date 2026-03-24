@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import Layout from "@/components/Layout";
 import PageHero from "@/components/PageHero";
 import { CheckCircle2, Upload, MessageSquare, Instagram, Phone, Camera } from "lucide-react";
@@ -11,6 +12,7 @@ const CustomOrders = () => {
   const [submitted, setSubmitted] = useState(false);
   const [customOrderId, setCustomOrderId] = useState("");
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Handle image upload with compression
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,6 +70,7 @@ const CustomOrders = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     const form = e.target as HTMLFormElement;
     const fd = new FormData(form);
 
@@ -199,7 +202,39 @@ const CustomOrders = () => {
 
     setCustomOrderId(orderId);
     setSubmitted(true);
+    setIsSubmitting(false);
   };
+
+  if (isSubmitting) {
+    return (
+      <Layout>
+        <div className="relative">
+          <PageHero scriptTitle="sirf aapke liye" title="CUSTOM ORDERS" />
+        </div>
+
+        <section className="container mx-auto px-4 py-16 max-w-2xl">
+          <div className="retro-card bg-card p-8 text-center shadow-retro border-2 border-foreground">
+            <div className="mb-8">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              >
+                <img
+                  src="/assets/branding/phool.png"
+                  alt="Loading Phool Shop"
+                  className="w-40 h-40 object-contain mx-auto"
+                />
+              </motion.div>
+            </div>
+            <h2 className="font-heading text-2xl text-foreground mb-4">Processing Your Request...</h2>
+            <p className="text-muted-foreground">
+              Please wait while we save your custom order details
+            </p>
+          </div>
+        </section>
+      </Layout>
+    );
+  }
 
   if (submitted) {
     return (
@@ -401,8 +436,8 @@ const CustomOrders = () => {
               />
             </div>
 
-            <button type="submit" className="pill-btn-primary text-xs w-full py-4 shadow-retro hover:shadow-none transition-all">
-              Submit Request
+            <button type="submit" className="pill-btn-primary text-xs w-full py-4 shadow-retro hover:shadow-none transition-all" disabled={isSubmitting}>
+              {isSubmitting ? "Processing..." : "Submit Request"}
             </button>
           </form>
         </div>
