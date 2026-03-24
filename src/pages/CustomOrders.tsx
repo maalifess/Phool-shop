@@ -76,6 +76,7 @@ const CustomOrders = () => {
       email: String(fd.get("email") || ""),
       phone: String(fd.get("phone") || ""),
       instagram: String(fd.get("instagram") || ""),
+      address: String(fd.get("address") || ""),
       products: "Custom Order Request",
       quantity: "1",
       notes: String(fd.get("special_notes") || ""),
@@ -98,7 +99,7 @@ const CustomOrders = () => {
         name: orderData.name,
         email: orderData.email,
         phone: orderData.phone,
-        address: "Custom Request",
+        address: orderData.address,
         instagram: orderData.instagram,
         products: "Custom Order Request",
         quantity: "1",
@@ -134,6 +135,7 @@ const CustomOrders = () => {
       email: orderData.email,
       phone: orderData.phone,
       instagram: orderData.instagram,
+      address: orderData.address,
       order_summary: `Custom Order: ${orderData.customDetails.description}`,
       total_amount: 'To be quoted',
       payment_method: 'To be discussed',
@@ -300,6 +302,17 @@ const CustomOrders = () => {
                   className="w-full rounded-full border-2 border-foreground bg-card px-4 py-3 outline-none focus:bg-white transition-colors"
                 />
               </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-heading mb-2">Shipping Address</label>
+              <textarea
+                name="address"
+                required
+                rows={3}
+                placeholder="Enter your complete shipping address"
+                className="w-full rounded-3xl border-2 border-foreground bg-card px-4 py-3 outline-none resize-none focus:bg-white transition-colors"
+              />
             </div>
 
             <div>
