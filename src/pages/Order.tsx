@@ -321,7 +321,7 @@ const Order = () => {
             )}
 
             <motion.p initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.25 }} className="mt-4 text-muted-foreground">
-              Thank you! Please send a proof of payment screenshot to WhatsApp on 0333-XXXXXXX.
+              Thank you! Please send a proof of payment screenshot to our Instagram <strong>@phoolshopp</strong>.
             </motion.p>
 
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="mt-6 flex justify-center gap-2 text-2xl">
@@ -494,10 +494,10 @@ const Order = () => {
                   </div>
 
                   <div className="rounded-lg border border-border/60 bg-accent/50 p-4 text-sm text-muted-foreground">
-                    <strong>Payment:</strong> Send screenshot of proof of payment to email or phone below. We'll contact you to confirm and arrange delivery. There are no delivery charges — delivery is free.
+                    <strong>Payment:</strong> Send screenshot of proof of payment to our Instagram or email below. We'll contact you to confirm and arrange delivery. There are no delivery charges — delivery is free.
                     <div className="mt-3 space-y-1 text-sm">
-                      <div>Email: <strong>{import.meta.env.VITE_SHOP_CONTACT_EMAIL || 'orders@example.com'}</strong></div>
-                      <div>Phone/WhatsApp: <strong>{import.meta.env.VITE_SHOP_CONTACT_PHONE || '0321-000-0000'}</strong></div>
+                      <div>Instagram: <strong>@phoolshopp</strong></div>
+                      <div>Email: <strong>{import.meta.env.VITE_SHOP_CONTACT_EMAIL || 'phoolshopstore@gmail.com'}</strong></div>
                     </div>
                   </div>
 
