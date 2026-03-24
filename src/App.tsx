@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { motion } from "framer-motion";
 import { CartProvider } from "@/lib/cart";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const Index = lazy(() => import("./pages/Index"));
 const Catalog = lazy(() => import("./pages/Catalog"));
@@ -89,6 +90,7 @@ const App = () => (
         </BrowserRouter>
       </TooltipProvider>
     </CartProvider>
+    <SpeedInsights />
   </QueryClientProvider>
 );
 
