@@ -169,9 +169,9 @@ const Order = () => {
       promo_code: appliedPromo || 'None',
       payment_method: paymentMethod || 'Not selected',
       payment_details: paymentMethod === "jazzcash"
-        ? "JazzCash: 0321-000-0000 (Phool Shop)"
+        ? "JazzCash: 0321-8476467 (Laiba Athar)"
         : paymentMethod === "bank"
-          ? "Bank: Example Bank, IBAN: PK00EXAM00000000000000 (Phool Shop)"
+          ? "Bank: Bank of Punjab, Account number: 5340359690500017, Account Name: Laiba Athar"
           : "Not selected",
       order_type: 'regular',
       status: 'Under Process',
@@ -453,17 +453,17 @@ const Order = () => {
                     {paymentMethod === "jazzcash" && (
                       <div className="mt-2 rounded-md border border-border/40 bg-muted/10 p-3 text-sm">
                         <div className="font-medium">JazzCash Details</div>
-                        <div className="text-sm text-muted-foreground mt-1">Number: <strong>0321-000-0000</strong></div>
-                        <div className="text-sm text-muted-foreground">Account Name: <strong>Phool Shop</strong></div>
+                        <div className="text-sm text-muted-foreground mt-1">Number: <strong>0321-8476467</strong></div>
+                        <div className="text-sm text-muted-foreground">Account Name: <strong>Laiba Athar</strong></div>
                       </div>
                     )}
 
                     {paymentMethod === "bank" && (
                       <div className="mt-2 rounded-md border border-border/40 bg-muted/10 p-3 text-sm">
                         <div className="font-medium">Bank Transfer Details</div>
-                        <div className="text-sm text-muted-foreground mt-1">Bank: <strong>Example Bank</strong></div>
-                        <div className="text-sm text-muted-foreground">IBAN: <strong>PK00EXAM00000000000000</strong></div>
-                        <div className="text-sm text-muted-foreground">Account Name: <strong>Phool Shop</strong></div>
+                        <div className="text-sm text-muted-foreground mt-1">Bank: <strong>Bank of Punjab</strong></div>
+                        <div className="text-sm text-muted-foreground">Account number: <strong>5340359690500017</strong></div>
+                        <div className="text-sm text-muted-foreground">Account Name: <strong>Laiba Athar</strong></div>
                       </div>
                     )}
                   </div>
