@@ -38,6 +38,9 @@ const PRODUCTS_TIMEOUT_MS = 10_000; // 10 second timeout for Supabase queries
 let productsCache: CacheEntry<Product[]> | null = null;
 let productsInFlight: Promise<Product[]> | null = null;
 
+let cachedFastProducts: CacheEntry<ProductCatalog[]> | null = null;
+let fastProductsInFlight: Promise<ProductCatalog[]> | null = null;
+
 async function trySelectAllProductsFrom(table: string) {
   return await supabase
     .from(table)
@@ -79,7 +82,7 @@ export async function loadProducts(): Promise<Product[]> {
   // Clear all caches immediately
   productsCache = null;
   productsInFlight = null;
-  
+
   const tablesToTry = ['products']; // Only use lowercase products table
   const allProductsMap = new Map<number, Product>();
 
@@ -110,10 +113,10 @@ export async function loadProducts(): Promise<Product[]> {
             price: Number(p.price) || 0,
             _source: `supabase_${table}`
           } as Product);
-          
+
           // Debug: Log image URLs for each product
           console.log(`🖼️ Product "${p.name}" (${p.id}) images:`, normalizedImages);
-          
+
           // Add fallback placeholder if no images
           if (!normalizedImages || normalizedImages.length === 0) {
             normalizedImages.push(`https://picsum.photos/seed/phool-${p.id}/400/400.jpg`);
@@ -140,7 +143,7 @@ export async function loadProducts(): Promise<Product[]> {
 export async function loadProductsPaginated(limit: number = 20, offset: number = 0): Promise<ProductCatalog[]> {
   try {
     console.log(`⚡ Loading paginated products FAST (limit: ${limit}, offset: ${offset})...`);
-    
+
     // Only load essential fields + pagination
     const { data, error } = await supabase
       .from('products')
@@ -204,26 +207,45 @@ export async function getProductsCount(): Promise<number> {
 
 /** Ultra-fast catalog loading - only essential fields for list view */
 export async function loadProductsFast(): Promise<ProductCatalog[]> {
-  try {
-    console.log('⚡ Loading ALL products FAST (catalog mode)...');
-    
-    // Only load fields needed for catalog display
-    const { data, error } = await supabase
-      .from('products')
-      .select('id, name, price, category, images, in_stock')
-      .order('created_at', { ascending: false });
+  // Clear expired cache if we wanted to (currently TTL is 0 by default but we want to cache indefinitely for session)
+  // Disable TTL clearing to keep it fast
+  if (cachedFastProducts) {
+    return cachedFastProducts.data;
+  }
 
-    console.log(`⚡ Loaded ${data?.length || 0} products FAST`);
+  if (fastProductsInFlight) {
+    return await fastProductsInFlight;
+  }
 
-    if (error) {
-      console.error('❌ Error in fast products load:', error);
+  fastProductsInFlight = (async () => {
+    try {
+      console.log('⚡ Loading ALL products FAST (catalog mode)...');
+
+      const { data, error } = await supabase
+        .from('products')
+        .select('id, name, price, category, images, in_stock')
+        .order('created_at', { ascending: false });
+
+      console.log(`⚡ Loaded ${data?.length || 0} products FAST`);
+
+      if (error) {
+        console.error('❌ Error in fast products load:', error);
+        return [];
+      }
+
+      const next = data || [];
+      cachedFastProducts = { ts: Date.now(), data: next };
+      return next;
+    } catch (error) {
+      console.error('💥 Error in loadProductsFast:', error);
       return [];
     }
+  })();
 
-    return data || [];
-  } catch (error) {
-    console.error('💥 Error in loadProductsFast:', error);
-    return [];
+  try {
+    return await fastProductsInFlight;
+  } finally {
+    fastProductsInFlight = null;
   }
 }
 
@@ -253,7 +275,7 @@ export async function loadProductFast(id: number): Promise<Product | null> {
 
   try {
     console.log(`⚡ Loading product FAST for ID: ${id}`);
-    
+
     // Only load essential fields for speed
     const { data, error } = await supabase
       .from('products')
@@ -301,7 +323,7 @@ export async function loadCardFast(id: number): Promise<any | null> {
 /** Optimize image URL with Supabase transformations */
 export function optimizeImageUrl(url: string, width: number, quality: number = 80): string {
   if (!url || !url.startsWith('http')) return url;
-  
+
   // Add Supabase transformation parameters
   const separator = url.includes('?') ? '&' : '?';
   return `${url}${separator}width=${width}&quality=${quality}&format=webp`;
@@ -313,7 +335,7 @@ export async function loadProductWithReviews(id: number): Promise<ProductWithRev
 
   try {
     console.log(`🔍 Loading product with reviews for ID: ${id}`);
-    
+
     // First, just load the product (simpler query)
     const { data: product, error: productError } = await supabase
       .from('products')
@@ -355,7 +377,7 @@ export async function loadProductWithReviews(id: number): Promise<ProductWithRev
 
     console.log(`✅ Found product "${product.name}" with ${productWithReviews.reviews.length} reviews`);
     return productWithReviews;
-    
+
   } catch (error) {
     console.error('💥 Error in loadProductWithReviews:', error);
     return null;

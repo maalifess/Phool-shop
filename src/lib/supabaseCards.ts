@@ -22,11 +22,14 @@ const CARDS_TTL_MS = 0; // Disable cache completely
 let cardsCache: CacheEntry<Card[]> | null = null;
 let cardsInFlight: Promise<Card[]> | null = null;
 
+let cachedFastCards: CacheEntry<CardCatalog[]> | null = null;
+let fastCardsInFlight: Promise<CardCatalog[]> | null = null;
+
 export async function loadCards(): Promise<Card[]> {
   // Clear all caches immediately
   cardsCache = null;
   cardsInFlight = null;
-  
+
   console.log('📦 Loading cards from Supabase (cache cleared)...');
 
   cardsInFlight = (async () => {
@@ -34,7 +37,7 @@ export async function loadCards(): Promise<Card[]> {
       .from('cards')
       .select('*')
       .order('created_at', { ascending: false });
-    
+
     if (error) {
       console.error('Error loading cards:', error);
       return [];
@@ -94,12 +97,12 @@ export async function createCard(card: Omit<Card, 'id' | 'created_at'>): Promise
     .insert(card)
     .select()
     .single();
-  
+
   if (error) {
     console.error('Error creating card:', error);
     return null;
   }
-  
+
   return data;
 }
 
@@ -110,12 +113,12 @@ export async function updateCard(id: number, updates: Partial<Card>): Promise<Ca
     .eq('id', id)
     .select()
     .single();
-  
+
   if (error) {
     console.error('Error updating card:', error);
     return null;
   }
-  
+
   return data;
 }
 
@@ -124,36 +127,54 @@ export async function deleteCard(id: number): Promise<boolean> {
     .from('cards')
     .delete()
     .eq('id', id);
-  
+
   if (error) {
     console.error('Error deleting card:', error);
     return false;
   }
-  
+
   return true;
 }
 
 /** Ultra-fast cards loading for catalog - only essential fields */
 export async function loadCardsFast(): Promise<CardCatalog[]> {
-  try {
-    console.log('⚡ Loading ALL cards FAST (catalog mode)...');
-    
-    const { data, error } = await supabase
-      .from('cards')
-      .select('id, name, price, category, images, in_stock')
-      .order('created_at', { ascending: false });
+  if (cachedFastCards) {
+    return cachedFastCards.data;
+  }
 
-    console.log(`⚡ Loaded ${data?.length || 0} cards FAST`);
+  if (fastCardsInFlight) {
+    return await fastCardsInFlight;
+  }
 
-    if (error) {
-      console.error('❌ Error in fast cards load:', error);
+  fastCardsInFlight = (async () => {
+    try {
+      console.log('⚡ Loading ALL cards FAST (catalog mode)...');
+
+      const { data, error } = await supabase
+        .from('cards')
+        .select('id, name, price, category, images, in_stock')
+        .order('created_at', { ascending: false });
+
+      console.log(`⚡ Loaded ${data?.length || 0} cards FAST`);
+
+      if (error) {
+        console.error('❌ Error in fast cards load:', error);
+        return [];
+      }
+
+      const next = data || [];
+      cachedFastCards = { ts: Date.now(), data: next };
+      return next;
+    } catch (error) {
+      console.error('💥 Error in loadCardsFast:', error);
       return [];
     }
+  })();
 
-    return data || [];
-  } catch (error) {
-    console.error('💥 Error in loadCardsFast:', error);
-    return [];
+  try {
+    return await fastCardsInFlight;
+  } finally {
+    fastCardsInFlight = null;
   }
 }
 
@@ -161,7 +182,7 @@ export async function loadCardsFast(): Promise<CardCatalog[]> {
 export async function loadCardsPaginated(limit: number = 20, offset: number = 0): Promise<CardCatalog[]> {
   try {
     console.log(`⚡ Loading paginated cards FAST (limit: ${limit}, offset: ${offset})...`);
-    
+
     const { data, error } = await supabase
       .from('cards')
       .select('id, name, price, category, images, in_stock')

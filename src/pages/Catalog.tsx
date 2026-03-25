@@ -24,7 +24,7 @@ const Catalog = () => {
   const [hasMore, setHasMore] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const [searchText, setSearchText] = useState(urlSearch);
-  const ITEMS_PER_PAGE = 12;
+  const ITEMS_PER_PAGE = 6;
 
   // Get a random sticker for placeholder
   const getRandomSticker = () => `/assets/stickers/${Math.floor(Math.random() * 26) + 1}.png`;
@@ -63,7 +63,7 @@ const Catalog = () => {
         loadCardsPaginated(ITEMS_PER_PAGE, 0)
       ]);
       setProducts(p);
-      setCards(c);
+      setCards(c as ProductCatalog[]);
       setHasMore(p.length === ITEMS_PER_PAGE || c.length === ITEMS_PER_PAGE);
       setLoading(false);
     })();
@@ -72,18 +72,18 @@ const Catalog = () => {
   // Load more function
   const loadMore = async () => {
     if (loadingMore || !hasMore) return;
-    
+
     setLoadingMore(true);
     const nextPage = currentPage + 1;
     console.log(`⚡ Loading MORE items - page ${nextPage}...`);
-    
+
     const [p, c] = await Promise.all([
       loadProductsPaginated(ITEMS_PER_PAGE, nextPage * ITEMS_PER_PAGE),
       loadCardsPaginated(ITEMS_PER_PAGE, nextPage * ITEMS_PER_PAGE)
     ]);
-    
+
     setProducts(prev => [...prev, ...p]);
-    setCards(prev => [...prev, ...c]);
+    setCards(prev => [...prev, ...(c as ProductCatalog[])]);
     setCurrentPage(nextPage);
     setHasMore(p.length === ITEMS_PER_PAGE || c.length === ITEMS_PER_PAGE);
     setLoadingMore(false);
@@ -96,12 +96,12 @@ const Catalog = () => {
     ];
 
     let filtered = combined.filter(item => {
-      const matchesSearch = !searchText || 
+      const matchesSearch = !searchText ||
         item.name.toLowerCase().includes(searchText.toLowerCase()) ||
         item.category.toLowerCase().includes(searchText.toLowerCase());
-      
+
       const matchesCategory = activeCategory === "All" || item.category.includes(activeCategory);
-      
+
       return matchesSearch && matchesCategory;
     });
 
@@ -181,9 +181,9 @@ const Catalog = () => {
               transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
               className="mb-8"
             >
-              <img 
-                src="/assets/branding/phool.png" 
-                alt="Loading Phool Shop" 
+              <img
+                src="/assets/branding/phool.png"
+                alt="Loading Phool Shop"
                 className="w-40 h-40 object-contain"
               />
             </motion.div>
@@ -230,12 +230,13 @@ const Catalog = () => {
                             alt={item.name}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 shimmer-loading"
                             loading="lazy"
+                            decoding="async"
                           />
                         ) : (
                           <div className="w-full h-full grid place-items-center">
-                            <img 
-                              src={getRandomSticker()} 
-                              alt="Sticker" 
+                            <img
+                              src={getRandomSticker()}
+                              alt="Sticker"
                               className="w-16 h-16 object-contain"
                               onError={(e) => {
                                 (e.target as HTMLImageElement).style.display = 'none';
@@ -266,13 +267,13 @@ const Catalog = () => {
               disabled={loadingMore}
               className="pill-btn-primary text-sm px-8 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loadingMore ? 'Loading...' : 'Load More Flowers 🌸'}
+              {loadingMore ? 'Loading...' : 'Load more'}
             </button>
           </div>
         )}
 
         {/* End of items message */}
-        {!loading && !hasMore && (
+        {!loading && !hasMore && filteredItems.length > 0 && (
           <div className="text-center mt-8 text-muted-foreground">
             <p className="font-heading"></p>
           </div>
